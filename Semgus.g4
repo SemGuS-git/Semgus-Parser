@@ -33,12 +33,11 @@ production : '(' production_lhs '(' production_rhs+ ')' ')';
 //
 // Non-terminals for the left-hand-side of productions
 //
-// TODO: parens around nt_relation_def?
-production_lhs : nt_name ':' nt_relation_def ':' nt_term '[' nt_relation ']';
+production_lhs : nt_name ':' '(' nt_relation_def ')' ':' nt_term '[' nt_relation ']';
 
-nt_relation_def : symbol '.' 'Sem' '(' symbol* ')';
+nt_relation_def : symbol '(' symbol* ')';
 
-nt_relation : var_decl_list? '(' symbol '.' 'Sem' symbol* ')'; // TODO: is var_decl_list optional?
+nt_relation : var_decl_list '(' symbol symbol* ')';
 
 //
 // Non-terminals for the right-hand-side of productions
@@ -51,7 +50,8 @@ rhs_expression : '(' op rhs_atom* ')'
 op : symbol;
 
 rhs_atom : nt_name ':' nt_term
-         | symbol; // Leaf
+         | symbol    // Leaf
+         | literal ; // We allow literals as leaf names, too
 
 predicate : var_decl_list formula;
 
@@ -65,12 +65,10 @@ constraint : '(' 'constraint' formula ')';
 //
 formula : '(' formula* ')'
         | symbol
-        | symbol '.' symbol
-        | symbol '.' 'Sem'
         | literal;
 
 literal : intConst
-//        | boolConst
+        | boolConst
         | bVConst
         | enumConst
         | realConst
@@ -80,22 +78,16 @@ literal : intConst
 // Constants and literal definitions
 //
 intConst : INTEGER;
-//TODO: This is causing issues with an example. Do we allow true and false as symbols?
-//boolConst : 'true' | 'false';
+boolConst : 'true' | 'false';
 bVConst : BVCONST;
 enumConst : SYMBOL '::' SYMBOL;
 realConst : REALCONST;
 quotedLit : SINGLEQUOTEDLIT | DOUBLEQUOTEDLIT;
 
-// TODO: As it is, 'Sem' is being picked up as a distinct literal. This goes for how we want to treat
-// xxx.Sem terms - as a "complete" symbol, or as two distinct symbols connected by '.'.
-
 //
 // Lexer rules
 //
-SYMBOL : ([a-z]|[A-Z]|'_'|'+'|'-'|'*'|'&'|'|'|'!'|'~'|'<'|'>'|'='|'/'|'%'|'?'/*|'.'*/|'$'|'^')(([a-z]|[A-Z]|'_'|'+'|'-'|'*'|'&'|'|'|'!'|'~'|'<'|'>'|'='|'/'|'%'|'?'/*|'.'*/|'$'|'^') | ([0-9]))*;
-// TODO: keep '.', or don't split t.sem?
-// TODO: Should (just) numbers be allowed to be symbols? Probably not, but maybe?
+SYMBOL : ([a-z]|[A-Z]|'_'|'+'|'-'|'*'|'&'|'|'|'!'|'~'|'<'|'>'|'='|'/'|'%'|'?'|'.'|'$'|'^')(([a-z]|[A-Z]|'_'|'+'|'-'|'*'|'&'|'|'|'!'|'~'|'<'|'>'|'='|'/'|'%'|'?'|'.'|'$'|'^') | ([0-9]))*;
 
 INTEGER : ('-'?([0-9])+);
 
