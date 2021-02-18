@@ -76,7 +76,12 @@ task checkGuiTree(type: JavaExec) {
         'Semgus',
         'start',
         '-gui',
-        filename
+        findProperty('filename') ?: "" // Required for Gradle configuration to work
     ];
+    doFirst {
+        if (!findProperty('filename')) {
+            throw new InvalidUserDataException("A filename is required. Pass -Pfilename=<filename> to Gradle.");
+        }
+    }
 }
 checkGuiTree.dependsOn(build)
