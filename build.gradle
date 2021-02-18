@@ -23,12 +23,21 @@ test {
     useJUnitPlatform()
 }
 
+/*
+ Handles copying the Semgus grammar file from the root to where Gradle expects it.
+ The Semgus.g4 file is the main artifact of this repository, so no need to bury it.
+*/
 task copyGrammarFile(type: Copy) {
     from file("${projectDir}/Semgus.g4");
     into file("${projectDir}/src/main/antlr/");
 }
 generateGrammarSource.dependsOn(copyGrammarFile);
 
+/*
+ Quick-n-dirty automated testing. Creates tasks for each file in the tests/ directory
+ and automatically calls the ANTLR test rig on them to see any parse errors. Eventually
+ this should be replaced with "real" testing using JUnit or similar.
+*/
 task parseVerificationTests() {
     file('tests').eachFile { testfile ->
         def task = tasks.create(
@@ -52,5 +61,22 @@ task parseVerificationTests() {
         parseVerificationTests.dependsOn(task);
     }
 }
-
 check.dependsOn parseVerificationTests
+
+/*
+ Convenience task for running the ANTLR GUI test rig.
+ Pass a filename with -Pfilename=<filename> on the command line.
+*/
+task checkGuiTree(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    classpath += configurations.antlr
+
+    main = 'org.antlr.v4.gui.TestRig';
+    args = [
+        'Semgus',
+        'start',
+        '-gui',
+        filename
+    ];
+}
+checkGuiTree.dependsOn(build)
