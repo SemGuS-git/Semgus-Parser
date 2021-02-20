@@ -7,7 +7,6 @@
 
 apply plugin: 'java'
 apply plugin: 'antlr'
-apply plugin: 'eclipse'
 
 repositories {
     mavenCentral()
@@ -21,6 +20,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    dependsOn cleanTest
+    testLogging {
+        // The default parser tests print to STDERR on test failure
+        showStandardStreams = true
+    }
 }
 
 /*
@@ -29,39 +33,13 @@ test {
 */
 task copyGrammarFile(type: Copy) {
     from file("${projectDir}/Semgus.g4");
-    into file("${projectDir}/src/main/antlr/");
+    into file("${projectDir}/src/main/antlr/org/semgus/parser/");
 }
 generateGrammarSource.dependsOn(copyGrammarFile);
 
-/*
- Quick-n-dirty automated testing. Creates tasks for each file in the tests/ directory
- and automatically calls the ANTLR test rig on them to see any parse errors. Eventually
- this should be replaced with "real" testing using JUnit or similar.
-*/
-task parseVerificationTests() {
-    file('tests').eachFile { testfile ->
-        def task = tasks.create(
-            [
-                name: "parseTest~${testfile.name}",
-                type: JavaExec
-            ],
-            {
-                classpath = sourceSets.main.runtimeClasspath
-                classpath += configurations.antlr
-
-                main = 'org.antlr.v4.gui.TestRig';
-                args = [
-                    'Semgus',
-                    'start',
-                    testfile.absolutePath
-                ];
-            }
-        )
-        task.dependsOn(assemble);
-        parseVerificationTests.dependsOn(task);
-    }
+generateGrammarSource {
+    arguments += ['-package', 'org.semgus.parser']
 }
-check.dependsOn parseVerificationTests
 
 /*
  Convenience task for running the ANTLR GUI test rig.
@@ -73,7 +51,7 @@ task checkGuiTree(type: JavaExec) {
 
     main = 'org.antlr.v4.gui.TestRig';
     args = [
-        'Semgus',
+        'org.semgus.parser.Semgus',
         'start',
         '-gui',
         findProperty('filename') ?: "" // Required for Gradle configuration to work
