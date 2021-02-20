@@ -8,10 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
+import java.nio.file.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,7 +22,7 @@ public class BasicParseTests {
     /**
      * Root path to look for example files for the tests
      */
-    private static Path resourceRoot = Path.of("src", "test", "resources");
+    private static Path resourceRoot = Paths.get("src", "test", "resources");
 
     /**
      * Path matcher that is configured to match Semgus specification files (*.sem)
@@ -89,7 +86,7 @@ public class BasicParseTests {
      * @throws IOException if there is an error reading the example directory
      */
     public static Stream<Path> getValidExamples() throws IOException {
-        return getSemFiles(Path.of("examples","valid"));
+        return getSemFiles(Paths.get("examples","valid"));
     }
 
     /**
@@ -98,7 +95,7 @@ public class BasicParseTests {
      * @throws IOException if there is an error reading the example directory
      */
     public static Stream<Path> getInvalidExamples() throws IOException {
-        return getSemFiles(Path.of("examples", "invalid"));
+        return getSemFiles(Paths.get("examples", "invalid"));
     }
 
     /**
