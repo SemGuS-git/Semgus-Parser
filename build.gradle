@@ -27,6 +27,10 @@ test {
     }
 }
 
+sourceSets {
+    csharp
+}
+
 /*
  Handles copying the Semgus grammar file from the root to where Gradle expects it.
  The Semgus.g4 file is the main artifact of this repository, so no need to bury it.
@@ -39,6 +43,20 @@ generateGrammarSource.dependsOn(copyGrammarFile);
 
 generateGrammarSource {
     arguments += ['-package', 'org.semgus.parser']
+}
+
+task copyCsharpGrammarFile(type: Copy) {
+    from file("${projectDir}/Semgus.g4")
+    into file("${projectDir}/src/csharp/antlr/")
+}
+generateCsharpGrammarSource.dependsOn(copyCsharpGrammarFile);
+
+generateCsharpGrammarSource {
+    arguments += [
+        '-Dlanguage=CSharp',
+        '-package', 'Semgus.Parser.Internal',
+        '-visitor'
+    ]
 }
 
 /*
