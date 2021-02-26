@@ -1,9 +1,7 @@
 ﻿using Antlr4.Runtime;
 using Semgus.Parser.Internal;
-using System;
 
-namespace Semgus.Parser
-{
+namespace Semgus.Parser {
     public class ExampleLibraryClass
     {
         public static int TryParseGrammar(string filename)
