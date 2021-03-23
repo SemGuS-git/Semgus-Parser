@@ -12,3 +12,6 @@ build
 **/.vs
 **/bin
 **/obj
+
+**/.antlr
+**/.vscode
