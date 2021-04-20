@@ -1,5 +1,4 @@
 using Antlr4.Runtime;
-using Semgus.Parser;
 
 namespace Semgus.Syntax {
     public interface ISyntaxNode {

@@ -2,24 +2,28 @@ using Antlr4.Runtime;
 
 namespace Semgus.Syntax {
     public class VariableDeclaration : ISyntaxNode {
-        public enum SemanticUsage {
-            Input,
-            Output,
-            Auxiliary,
+        public enum Context {
+            SF_Input,
+            SF_Output,
+            NT_Term,
+            NT_Auxiliary,
+            PR_Subterm,
+            PR_Auxiliary,
+            CT_Term,
+            CT_Auxiliary,
         };
 
-        public ParserRuleContext ParserContext { get; }
+        public ParserRuleContext ParserContext { get; set; }
         public string Name { get; }
         public SemgusType Type { get; }
-        public SemanticUsage Usage { get; }
+        public Context DeclarationContext { get; }
 
-        public VariableDeclaration(ParserRuleContext parserContext, string name, SemgusType type, SemanticUsage usage) {
-            ParserContext = parserContext;
+        public VariableDeclaration(string name, SemgusType type, Context declarationContext) {
             Name = name;
             Type = type;
-            Usage = usage;
+            DeclarationContext = declarationContext;
         }
-        
+
         public virtual T Accept<T>(IAstVisitor<T> visitor) => visitor.Visit(this);
     }
 }

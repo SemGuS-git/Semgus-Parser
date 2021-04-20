@@ -7,13 +7,12 @@ namespace Semgus.Syntax {
     /// Its list of productions acts as the specification for the DSL.
     /// </summary>
     public class SynthFun : ISyntaxNode {
-        public ParserRuleContext ParserContext { get; }
+        public ParserRuleContext ParserContext { get; set; }
         public string Name { get; }
         public VariableClosure Closure { get; }
         public IReadOnlyList<Production> Productions { get; }
 
-        public SynthFun(ParserRuleContext parserContext, string name, VariableClosure closure, IReadOnlyList<Production> productions) {
-            ParserContext = parserContext;
+        public SynthFun( string name, VariableClosure closure, IReadOnlyList<Production> productions) {
             Name = name;
             Closure = closure;
             Productions = productions;

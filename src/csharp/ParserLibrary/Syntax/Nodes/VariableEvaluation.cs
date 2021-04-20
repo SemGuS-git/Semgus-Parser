@@ -5,14 +5,15 @@ namespace Semgus.Syntax {
     /// Use of a variable in a formula
     /// </summary>
     public class VariableEvaluation : IFormula {
-        public ParserRuleContext ParserContext { get; }
+        public ParserRuleContext ParserContext { get; set; }
         public VariableDeclaration Variable { get; }
 
-        public VariableEvaluation(ParserRuleContext parserContext, VariableDeclaration variable) {
-            ParserContext = parserContext;
+        public VariableEvaluation(VariableDeclaration variable) {
             Variable = variable;
         }
-        
+
         public virtual T Accept<T>(IAstVisitor<T> visitor) => visitor.Visit(this);
+
+        public string PrintFormula() => Variable.Name;
     }
 }

@@ -14,10 +14,10 @@ namespace Semgus.Syntax {
         private LiteralConverter() { }
         
         public override LiteralBase VisitIntConst([NotNull] SemgusParser.IntConstContext context) =>
-            new Literal<int>(parserContext: context, value: int.Parse(context.GetText()));
+            new Literal<int>( value: int.Parse(context.GetText())) {ParserContext = context};
 
         public override LiteralBase VisitBoolConst([NotNull] SemgusParser.BoolConstContext context) =>
-            new Literal<bool>(parserContext: context, value: bool.Parse(context.GetText()));
+            new Literal<bool>( value: bool.Parse(context.GetText())) {ParserContext = context};
 
         public override LiteralBase VisitBVConst([NotNull] SemgusParser.BVConstContext context) =>
             throw new NotImplementedException();
@@ -26,15 +26,15 @@ namespace Semgus.Syntax {
             throw new NotImplementedException();
             
         public override LiteralBase VisitRealConst([NotNull] SemgusParser.RealConstContext context) =>
-            new Literal<double>(parserContext: context, value: double.Parse(context.GetText()));
+            new Literal<double>( value: double.Parse(context.GetText())) {ParserContext = context};
 
 
         public override LiteralBase VisitQuotedLit([NotNull] SemgusParser.QuotedLitContext context) {
             if (context.DOUBLEQUOTEDLIT() != null) {
-                return new Literal<string>(parserContext: context, value: Regex.Match(context.GetText(), "\"([^\"]*)\"").Captures[0].Value);
+                return new Literal<string>( value: Regex.Match(context.GetText(), "\"([^\"]*)\"").Captures[0].Value) {ParserContext = context};
             }
             if (context.SINGLEQUOTEDLIT() != null) {
-                return new Literal<string>(parserContext: context, value: Regex.Match(context.GetText(), "'([^']*)'").Captures[0].Value);
+                return new Literal<string>( value: Regex.Match(context.GetText(), "'([^']*)'").Captures[0].Value) {ParserContext = context};
             }
 
             throw new ArgumentException();

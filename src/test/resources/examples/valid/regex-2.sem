@@ -1,0 +1,95 @@
+// Regular expressions on input strings of length 2, per Kim et al. 2021.
+// The input is encoded as a sequence of integers s_0, ... s_n.
+
+(synth-fun match_regex ( (s_0 Int) (s_1 Int) (len Int)) ((result Bool)) (
+  Start : (Start.Sem(Term Int Int Int Bool)) : t
+  [() (Start.Sem t s_0 s_1 len result)]
+  (
+    // Evaluate regex on all substrings, return corner element
+    (eval R:r)
+    [
+        ( (X_0_0 Bool) (X_0_1 Bool) (X_0_2 Bool) (X_1_1 Bool) (X_1_2 Bool) (X_2_2 Bool) )
+        (and
+            (= t (Eval r))
+            (R.Sem r s_0 s_1 len X_0_0 X_0_1 X_0_2 X_1_1 X_1_2 X_2_2)
+            (= result X_0_2)
+        )
+    ]
+  )
+)
+(
+  R : (R.Sem(Term Int Int Int Bool Bool Bool Bool Bool Bool)) : t
+  [ ( (k Int) (X_0_0 Bool) (X_0_1 Bool) (X_0_2 Bool) (X_1_1 Bool) (X_1_2 Bool) (X_2_2 Bool) ) (R.Sem t s_0 s_1 k X_0_0 X_0_1 X_0_2 X_1_1 X_1_2 X_2_2) ]
+  (
+    // epsilon: identity matrix (set of empty strings)
+    eps [() (and (= t (Leaf 'eps')) (= X_0_0 true) (= X_0_1 false) (= X_0_2 false) (= X_1_1 true) (= X_1_2 false) (= X_2_2 true) )]
+    
+    // phi: zero matrix (empty set)
+    phi [() (and (= t (Leaf 'phi')) (= X_0_0 false) (= X_0_1 false) (= X_0_2 false) (= X_1_1 false) (= X_1_2 false) (= X_2_2 false) )]
+    
+    // 
+    char [() (and (= t (Leaf 'n.value')) (= X_0_0 false) (= X_0_1 false) (= X_0_2 false) (= X_1_1 false) (= X_1_2 false) (= X_2_2 false))]
+    
+    // Disjunction
+    (or R:t1 R:t2)
+    [ 
+        ( (A_0_0 Bool) (A_0_1 Bool) (A_0_2 Bool) (A_1_1 Bool) (A_1_2 Bool) (A_2_2 Bool) (B_0_0 Bool) (B_0_1 Bool) (B_0_2 Bool) (B_1_1 Bool) (B_1_2 Bool) (B_2_2 Bool) )
+        (and
+            (= t (Or t1 t2))
+            (R.Sem t1 s_0 s_1 k A_0_0 A_0_1 A_0_2 A_1_1 A_1_2 A_2_2)
+            (R.Sem t2 s_0 s_1 k B_0_0 B_0_1 B_0_2 B_1_1 B_1_2 B_2_2)
+            
+            // X = A+B
+            (= X_0_0 (or A_0_0 B_0_0)) (= X_0_1 (or A_0_1 B_0_1)) (= X_0_2 (or A_0_2 B_0_2)) (= X_1_1 (or A_1_1 B_1_1)) (= X_1_2 (or A_1_2 B_1_2)) (= X_2_2 (or A_2_2 B_2_2))
+        )
+    ]
+    
+    // Concatenation
+    (concat R:t1 R:t2)
+    [
+        (
+            (A_0_0 Bool) (A_0_1 Bool) (A_0_2 Bool) (A_1_1 Bool) (A_1_2 Bool) (A_2_2 Bool)
+            (B_0_0 Bool) (B_0_1 Bool) (B_0_2 Bool) (B_1_1 Bool) (B_1_2 Bool) (B_2_2 Bool)
+        )
+        (and
+            (= t (Concat t1 t2))
+            (R.Sem t1 s_0 s_1 k A_0_0 A_0_1 A_0_2 A_1_1 A_1_2 A_2_2)
+            (R.Sem t2 s_0 s_1 k B_0_0 B_0_1 B_0_2 B_1_1 B_1_2 B_2_2)
+            
+            // X = AB
+            (= X_0_0 (or (and A_0_0 B_0_0))) (= X_0_1 (or (and A_0_0 B_0_1) (and A_0_1 B_1_1))) (= X_0_2 (or (and A_0_0 B_0_2) (and A_0_1 B_1_2) (and A_0_2 B_2_2))) (= X_1_1 (or (and A_1_1 B_1_1))) (= X_1_2 (or (and A_1_1 B_1_2) (and A_1_2 B_2_2))) (= X_2_2 (or (and A_2_2 B_2_2)))
+        )
+    ]
+    
+    // Star: base case
+    (star_eps R:t1)
+    [ () (and (= t (Star t1)) (= k 0) (= X_0_0 true) (= X_0_1 false) (= X_0_2 false) (= X_1_1 true) (= X_1_2 false) (= X_2_2 true) )]
+    
+    // Star: inductive case
+    (star R:t1)
+    [
+        (
+            (A_0_0 Bool) (A_0_1 Bool) (A_0_2 Bool) (A_1_1 Bool) (A_1_2 Bool) (A_2_2 Bool) // X
+            (B_0_0 Bool) (B_0_1 Bool) (B_0_2 Bool) (B_1_1 Bool) (B_1_2 Bool) (B_2_2 Bool) // X_{k-1}
+        )
+        (and
+            (= t (Star t1))
+            (R.Sem t1 s_0 s_1    k    A_0_0 A_0_1 A_0_2 A_1_1 A_1_2 A_2_2)
+            (R.Sem t  s_0 s_1 (- k 1) B_0_0 B_0_1 B_0_2 B_1_1 B_1_2 B_2_2)
+            
+            // X = (X X_{k-1}) + X_{k-1}
+            (= X_0_0 (or B_0_0 (and A_0_0 B_0_0))) (= X_0_1 (or B_0_1 (and A_0_0 B_0_1) (and A_0_1 B_1_1))) (= X_0_2 (or B_0_2 (and A_0_0 B_0_2) (and A_0_1 B_1_2) (and A_0_2 B_2_2))) (= X_1_1 (or B_1_1 (and A_1_1 B_1_1))) (= X_1_2 (or B_1_2 (and A_1_1 B_1_2) (and A_1_2 B_2_2))) (= X_2_2 (or B_2_2 (and A_2_2 B_2_2)))
+        )
+    ]
+  )
+)
+)
+
+
+// Specification (will get translated into constraint => realizable + check realizable)
+(constraint 
+    (and
+       // Write examples of the form `(Start.Sem t   1 2 3 4   4  true)`, and remove the line below
+       true
+    )
+)

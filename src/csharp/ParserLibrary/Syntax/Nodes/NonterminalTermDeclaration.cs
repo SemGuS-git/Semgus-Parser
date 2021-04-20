@@ -1,5 +1,3 @@
-using Antlr4.Runtime;
-
 namespace Semgus.Syntax {
     /// <summary>
     /// Declares a variable of type "Term" as a particular nonterminal.
@@ -8,8 +6,8 @@ namespace Semgus.Syntax {
         public const string TYPE_NAME = "Term";
 
         public Nonterminal Nonterminal { get; }
-
-        public NonterminalTermDeclaration(ParserRuleContext parserContext, string name, SemgusType type, Nonterminal nonterminal, SemanticUsage usage) : base(parserContext, name, type, usage) {
+        
+        public NonterminalTermDeclaration(string name, SemgusType type, Nonterminal nonterminal, Context declarationContext) : base(name, type, declarationContext) {
             this.Nonterminal = nonterminal;
         }
         

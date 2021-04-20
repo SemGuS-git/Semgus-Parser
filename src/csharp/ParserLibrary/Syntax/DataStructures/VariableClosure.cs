@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -25,10 +24,6 @@ namespace Semgus.Syntax {
             return false;   
         }
         
-        public IEnumerable<VariableDeclaration> Input() => Variables.Where(v=>v.Usage== VariableDeclaration.SemanticUsage.Input);
-        public IEnumerable<VariableDeclaration> Output() => Variables.Where(v=>v.Usage== VariableDeclaration.SemanticUsage.Output);
-        public IEnumerable<VariableDeclaration> Auxiliary() => Variables.Where(v=>v.Usage== VariableDeclaration.SemanticUsage.Auxiliary);
-
         public string PrintAllResolvableVariables() {
             var s = string.Join(" ",Variables.Select(v=>v.Name));
             if(!(Parent is null)) s += " " + Parent.PrintAllResolvableVariables();

@@ -21,36 +21,32 @@ namespace Semgus.Syntax {
             
             if(context.op() is SemgusParser.OpContext opContext) {
                 return new OpRewriteExpression(
-                    parserContext: context,
                     op: ProcessOperator(opContext),
                     operands: atoms.Select(ProcessAtom).ToList()
-                );
+                ) {ParserContext = context};
             } else {
                 if(atoms.Length != 1) throw new ArgumentException();
                 
                 return new AtomicRewriteExpression (
-                    parserContext: context,
                     atom: ProcessAtom(atoms[0])
-                );
+                ) {ParserContext = context};
             }
         }
         
         private Operator ProcessOperator([NotNull] SemgusParser.OpContext context) {
             return new Operator(
-                parserContext: context,
                 text: context.symbol().GetText()
-            );
+            ) {ParserContext = context};
         }
 
         private IProductionRewriteAtom ProcessAtom([NotNull] SemgusParser.Rhs_atomContext context) {
             if(context.nt_name() is SemgusParser.Nt_nameContext nt_nameContext) {
                 var term = new NonterminalTermDeclaration(
-                    parserContext: context,
                     name: context.nt_term().symbol().GetText(),
                     type: _env.ResolveType(NonterminalTermDeclaration.TYPE_NAME),
                     nonterminal: _env.ResolveNonterminal(nt_nameContext.symbol()),
-                    usage: VariableDeclaration.SemanticUsage.Auxiliary
-                );
+                    declarationContext: VariableDeclaration.Context.PR_Subterm
+                ) {ParserContext = context};
                 
                 _declaredTerms.Add(term.Name,term);
                 
@@ -63,9 +59,8 @@ namespace Semgus.Syntax {
             
             if(context.symbol() is SemgusParser.SymbolContext symbolContext) {
                 return new LeafTerm(
-                    parserContext: context,
                     text: symbolContext.GetText()
-                );
+                ) {ParserContext = context};
             }
             
             throw new NotSupportedException();

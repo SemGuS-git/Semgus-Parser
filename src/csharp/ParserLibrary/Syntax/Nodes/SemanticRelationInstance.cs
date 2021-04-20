@@ -7,18 +7,17 @@ namespace Semgus.Syntax {
     /// This appears as the conclusion of a production CHC.
     /// </summary>
     public class SemanticRelationInstance : ISyntaxNode {
-        public ParserRuleContext ParserContext { get; }
+        public ParserRuleContext ParserContext { get; set; }
         public SemanticRelationDeclaration Relation { get; }
-        public IReadOnlyList<VariableDeclaration> Assignments { get; }
+        public IReadOnlyList<VariableDeclaration> Elements { get; }
 
-        public SemanticRelationInstance(ParserRuleContext parserContext, SemanticRelationDeclaration relation, IReadOnlyList<VariableDeclaration> assignments) {
-            ParserContext = parserContext;
+        public SemanticRelationInstance(SemanticRelationDeclaration relation, IReadOnlyList<VariableDeclaration> elements) {
             Relation = relation;
-            Assignments = assignments;
-            
-            this.Assert(assignments.Count == relation.ElementTypes.Count, $"Semantic relation {relation.Name} must be instantiated with {relation.ElementTypes.Count} elements");
+            Elements = elements;
+
+            this.Assert(elements.Count == relation.ElementTypes.Count, $"Semantic relation {relation.Name} must be instantiated with {relation.ElementTypes.Count} elements");
         }
-        
+
         public virtual T Accept<T>(IAstVisitor<T> visitor) => visitor.Visit(this);
     }
 }

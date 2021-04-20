@@ -6,12 +6,11 @@ namespace Semgus.Syntax {
     /// Root node of the Semgus syntax tree.
     /// </summary>
     public class SemgusProblem : ISyntaxNode {
-        public ParserRuleContext ParserContext { get; }
+        public ParserRuleContext ParserContext { get; set; }
         public SynthFun SynthFun { get; }
         public IReadOnlyList<Constraint> Constraints { get; }
 
-        public SemgusProblem(ParserRuleContext parserContext, SynthFun synthFun, IReadOnlyList<Constraint> constraints) {
-            this.ParserContext = parserContext;
+        public SemgusProblem( SynthFun synthFun, IReadOnlyList<Constraint> constraints) {
             this.SynthFun = synthFun;
             this.Constraints = constraints;
         }

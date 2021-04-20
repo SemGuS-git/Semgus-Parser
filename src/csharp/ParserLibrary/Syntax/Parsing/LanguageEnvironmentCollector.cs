@@ -1,4 +1,3 @@
-using System.Collections.Specialized;
 using System.Linq;
 using Antlr4.Runtime.Misc;
 using Semgus.Parser.Internal;

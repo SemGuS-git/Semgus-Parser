@@ -1,5 +1,3 @@
-using Antlr4.Runtime;
-
 namespace Semgus.Syntax {
     /// <summary>
     /// Unique identifier for a nonterminal
@@ -10,5 +8,7 @@ namespace Semgus.Syntax {
         public Nonterminal(string name) {
             Name = name;
         }
+
+        public override string ToString() => Name;
     }
 }

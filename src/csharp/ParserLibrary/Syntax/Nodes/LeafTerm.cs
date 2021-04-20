@@ -5,14 +5,13 @@ namespace Semgus.Syntax {
     /// Terminal symbol that appears in a production rewrite expression.
     /// </summary>
     public class LeafTerm : IProductionRewriteAtom {
-        public ParserRuleContext ParserContext { get; }
+        public ParserRuleContext ParserContext { get; set; }
         public string Text { get; }
 
-        public LeafTerm(ParserRuleContext parserContext, string text) {
-            ParserContext = parserContext;
+        public LeafTerm(string text) {
             Text = text;
         }
-        
+
         public virtual T Accept<T>(IAstVisitor<T> visitor) => visitor.Visit(this);
     }
 }

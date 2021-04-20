@@ -5,14 +5,13 @@ namespace Semgus.Syntax {
     /// Symbol that appears in a nonterminal rewrite expression with non-leaf arguments
     /// </summary>
     public class Operator : ISyntaxNode {
-        public ParserRuleContext ParserContext { get; }
+        public ParserRuleContext ParserContext { get; set; }
         public string Text { get; }
 
-        public Operator(ParserRuleContext parserContext, string text) {
-            ParserContext = parserContext;
+        public Operator( string text) {
             Text = text;
         }
-        
+
         public virtual T Accept<T>(IAstVisitor<T> visitor) => visitor.Visit(this);
     }
 }

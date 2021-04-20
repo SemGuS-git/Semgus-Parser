@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using Semgus.Parser.Internal;
 using Semgus.Util;
@@ -27,10 +26,9 @@ namespace Semgus.Syntax {
             if (_relations.ContainsKey(name)) throw new Exception();
 
             var rel = new SemanticRelationDeclaration(
-                parserContext: context,
                 name: name,
                 elementTypes: elementTypes
-            );
+            ) {ParserContext = context};
 
             _relations.Add(name, rel);
             return rel;

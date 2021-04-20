@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Semgus.Util;
@@ -8,7 +9,7 @@ namespace Semgus.Syntax {
             var visitor = new Visitor();
             return node.Accept(new Visitor()).ToString();
         }
-        
+
         private class Visitor : IAstVisitor<CodeTextBuilder> {
             private readonly CodeTextBuilder _builder = new CodeTextBuilder();
 
@@ -33,20 +34,9 @@ namespace Semgus.Syntax {
             }
 
             private void PrintVariableClosure(VariableClosure closure) {
+                if (closure.Variables.Count == 0) return;
                 using (_builder.InDelimiters("(", ")")) {
-                    PrintVariableDecGroup("in", closure.Input());
-                    PrintVariableDecGroup("out", closure.Output());
-                    PrintVariableDecGroup("aux", closure.Auxiliary());
-                }
-            }
-
-            private void PrintVariableDecGroup(string label, IEnumerable<VariableDeclaration> vardecs) {
-                var list = vardecs.ToList();
-                if (list.Count == 0) return;
-                using (_builder.InParens()) {
-                    _builder.Write(label);
-                    _builder.Write(" ");
-                    VisitEach(vardecs, " ");
+                    VisitEach(closure.Variables.OrderBy(v => (int)v.DeclarationContext), " ");
                 }
             }
 
@@ -78,7 +68,7 @@ namespace Semgus.Syntax {
 
             public CodeTextBuilder Visit<TValue>(Literal<TValue> node) => _builder.Write(node.Value.ToString());
 
-            public CodeTextBuilder Visit(NonterminalTermDeclaration node) => _builder.Write($"{node.Name}:{node.Nonterminal.Name}");
+            public CodeTextBuilder Visit(NonterminalTermDeclaration node) => _builder.Write($"[{Shorten(node.DeclarationContext)}]{node.Name}:{node.Nonterminal.Name}");
 
             public CodeTextBuilder Visit(VariableEvaluation node) => _builder.Write(node.Variable.Name);
 
@@ -86,7 +76,21 @@ namespace Semgus.Syntax {
 
             public CodeTextBuilder Visit(SemgusProblem node) => VisitEach(Just<ISyntaxNode>(node.SynthFun).Concat(node.Constraints));
 
-            public CodeTextBuilder Visit(VariableDeclaration node) => _builder.Write($"{node.Name}:{node.Type}");
+            public CodeTextBuilder Visit(VariableDeclaration node) => _builder.Write($"[{Shorten(node.DeclarationContext)}]{node.Name}:{node.Type}");
+
+            private static string Shorten(VariableDeclaration.Context declarationContext) {
+                switch (declarationContext) {
+                    case VariableDeclaration.Context.SF_Input: return "sf_in";
+                    case VariableDeclaration.Context.SF_Output: return "sf_out";
+                    case VariableDeclaration.Context.NT_Term: return "nt_term";
+                    case VariableDeclaration.Context.NT_Auxiliary: return "nt_aux";
+                    case VariableDeclaration.Context.PR_Subterm: return "pr_term";
+                    case VariableDeclaration.Context.PR_Auxiliary: return "pr_aux";
+                    case VariableDeclaration.Context.CT_Term: return "ct_term";
+                    case VariableDeclaration.Context.CT_Auxiliary: return "ct_aux";
+                    default: throw new NotImplementedException();
+                }
+            }
 
             public CodeTextBuilder Visit(SynthFun node) {
                 using (_builder.InParens()) {
@@ -110,7 +114,7 @@ namespace Semgus.Syntax {
 
             public CodeTextBuilder Visit(SemanticRelationInstance node) {
                 using (_builder.InParens()) {
-                    _builder.WriteEach(Just(node.Relation.Name).Concat(node.Assignments.Select(v => v.Name)), " ");
+                    _builder.WriteEach(Just(node.Relation.Name).Concat(node.Elements.Select(v => v.Name)), " ");
                 }
                 return _builder;
             }

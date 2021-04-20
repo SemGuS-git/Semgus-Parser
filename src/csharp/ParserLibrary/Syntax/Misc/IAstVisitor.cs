@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace Semgus.Syntax {
     public interface IAstVisitor<T> {
         T Visit(AtomicRewriteExpression node);

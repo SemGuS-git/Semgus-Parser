@@ -21,16 +21,17 @@ namespace Semgus.Syntax {
         /// otherwise, it must resolve to a variable name.
         /// </summary>
         private class SymbolicPlaceholder : IFormula {
-            public ParserRuleContext ParserContext { get; }
+            public ParserRuleContext ParserContext { get; set; }
             public string Identifier { get; }
 
-            public SymbolicPlaceholder(ParserRuleContext parserContext, string identifier) {
-                ParserContext = parserContext;
+            public SymbolicPlaceholder(string identifier) {
+
                 Identifier = identifier;
             }
 
-            // this should never be visited
+            // these should never be called
             public T Accept<T>(IAstVisitor<T> visitor) => throw new InvalidOperationException();
+            public string PrintFormula() => throw new InvalidOperationException();
         }
 
         private readonly LanguageEnvironment _env;
@@ -57,9 +58,9 @@ namespace Semgus.Syntax {
             if (context.symbol() is SemgusParser.SymbolContext symbolContext) {
                 var id = symbolContext.GetText();
                 if (_closure.TryResolve(id, out var variable)) {
-                    return new VariableEvaluation(context, variable);
+                    return new VariableEvaluation(variable) { ParserContext = context };
                 } else {
-                    return new SymbolicPlaceholder(context, id);
+                    return new SymbolicPlaceholder(id) { ParserContext = context };
                 }
             }
 
@@ -86,17 +87,15 @@ namespace Semgus.Syntax {
             if (_env.TryResolveRelation(identifier, out var relation)) {
                 // Try to match the symbol to a semantic relation
                 return new SemanticRelationQuery(
-                    parserContext: context,
                     relation: relation,
                     terms: args
-                );
+                ) { ParserContext = context };
             } else {
                 // If the symbol doesn't refer to a semantic relation, assume it refers to a library function
                 return new LibraryFunctionCall(
-                    parserContext: context,
                     libraryFunction: _env.IncludeLibraryFunction(identifier),
                     arguments: args
-                );
+                ) {ParserContext = context};
             }
         }
     }

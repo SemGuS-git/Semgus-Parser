@@ -5,16 +5,15 @@ namespace Semgus.Syntax {
     // Defines a semantic relation
     // e.g., Start.Sem(Term Int Int Int)
     public class SemanticRelationDeclaration : ISyntaxNode {
-        public ParserRuleContext ParserContext { get; }
+        public ParserRuleContext ParserContext { get; set; }
         public string Name { get; }
         public IReadOnlyList<SemgusType> ElementTypes { get; }
 
-        public SemanticRelationDeclaration(ParserRuleContext parserContext, string name, IReadOnlyList<SemgusType> elementTypes) {
-            ParserContext = parserContext;
+        public SemanticRelationDeclaration(string name, IReadOnlyList<SemgusType> elementTypes) {
             Name = name;
             ElementTypes = elementTypes;
         }
-        
+
         public virtual T Accept<T>(IAstVisitor<T> visitor) => visitor.Visit(this);
     }
 }

@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime.Misc;
-using Semgus.Parser;
 using Semgus.Parser.Internal;
 
 namespace Semgus.Syntax {
@@ -30,10 +28,9 @@ namespace Semgus.Syntax {
 
             return (
                 new SemgusProblem(
-                    parserContext: context,
                     synthFun: sfNode,
                     constraints: constraints
-                ),
+                ) { ParserContext = context },
                 _env
             );
         }
@@ -42,18 +39,18 @@ namespace Semgus.Syntax {
             context.input_args().var_decl_list();
 
             var closure = MakeVariableClosure(
-                DeclareVariables(VariableDeclaration.SemanticUsage.Input, context.input_args().var_decl_list().var_decl()),
-                DeclareVariables(VariableDeclaration.SemanticUsage.Output, context.output_args().var_decl_list().var_decl())
+                DeclareVariables(VariableDeclaration.Context.SF_Input, context.input_args().var_decl_list().var_decl()),
+                DeclareVariables(VariableDeclaration.Context.SF_Output, context.output_args().var_decl_list().var_decl())
             );
 
             _closures.Push(closure);
 
             var sfNode = new SynthFun(
-                parserContext: context,
+
                 name: context.symbol().GetText(),
                 closure: closure,
                 productions: context.productions().production().Select(ProcessProduction).ToList()
-            );
+            ) { ParserContext = context };
 
             _closures.Pop();
 
@@ -63,7 +60,7 @@ namespace Semgus.Syntax {
         private Constraint ProcessConstraint([NotNull] SemgusParser.ConstraintContext context) {
             var closure = MakeVariableClosure(new[]{
                 // Temp: hardcode t:Term into constraint context as auxiliary variable
-                new VariableDeclaration(parserContext: context, name: "t", type: _env.ResolveType(NonterminalTermDeclaration.TYPE_NAME), VariableDeclaration.SemanticUsage.Auxiliary)
+                new VariableDeclaration( name: "t", type: _env.ResolveType(NonterminalTermDeclaration.TYPE_NAME), VariableDeclaration.Context.CT_Term) { ParserContext = context}
             });
             _closures.Push(closure);
 
@@ -72,10 +69,9 @@ namespace Semgus.Syntax {
             _closures.Pop();
 
             return new Constraint(
-                parserContext: context,
                 closure: closure,
                 formula: formula
-            );
+            ) { ParserContext = context };
         }
 
         private Production ProcessProduction([NotNull] SemgusParser.ProductionContext context) {
@@ -88,19 +84,20 @@ namespace Semgus.Syntax {
 
             // TODO: relable aux variables as outputs when implied by their position in the relation
             var closure = MakeVariableClosure(
-                DeclareVariables(VariableDeclaration.SemanticUsage.Auxiliary, cst_rel.var_decl_list().var_decl()).Prepend(MakeProductionTermDeclaration(cst_lhs))
+                DeclareVariables(VariableDeclaration.Context.NT_Auxiliary, cst_rel.var_decl_list().var_decl())
+                  .Prepend(MakeProductionTermDeclaration(cst_lhs))
             );
             _closures.Push(closure);
 
             var relationInstance = MakeRelationInstance(cst_rel);
 
             var node = new Production(
-                parserContext: context,
+
                 nonterminal: nonterminal,
                 closure: closure,
                 relationInstance: relationInstance,
                 productionRules: cst_rhs.Select(ProcessProductionRule).ToList()
-            );
+            ) { ParserContext = context };
 
             _closures.Pop();
 
@@ -116,29 +113,27 @@ namespace Semgus.Syntax {
 
             var closure = MakeVariableClosure(
                 choiceExpressionConverter.DeclaredTerms,
-                DeclareVariables(VariableDeclaration.SemanticUsage.Auxiliary, cst_pred.var_decl_list().var_decl()
+                DeclareVariables(VariableDeclaration.Context.PR_Auxiliary, cst_pred.var_decl_list().var_decl()
             ));
 
             _closures.Push(closure);
 
             var node = new ProductionRule(
-                parserContext: context,
                 rewriteExpression: choiceExpression,
                 closure: closure,
                 predicate: new FormulaConverter(_env, closure).ConvertFormula(cst_pred.formula())
-            );
+            ) { ParserContext = context };
 
             _closures.Pop();
             return node;
         }
 
-        private IEnumerable<VariableDeclaration> DeclareVariables(VariableDeclaration.SemanticUsage usage, IEnumerable<SemgusParser.Var_declContext> contexts) {
+        private IEnumerable<VariableDeclaration> DeclareVariables(VariableDeclaration.Context usage, IEnumerable<SemgusParser.Var_declContext> contexts) {
             return contexts.Select(context => new VariableDeclaration(
-                parserContext: context,
                 name: context.symbol().GetText(),
                 type: _env.ResolveType(context.type()),
-                usage: usage
-            ));
+                declarationContext: usage
+            ) { ParserContext = context });
         }
 
         private VariableClosure MakeVariableClosure(params IEnumerable<VariableDeclaration>[] varLists) {
@@ -151,12 +146,11 @@ namespace Semgus.Syntax {
 
         private NonterminalTermDeclaration MakeProductionTermDeclaration(SemgusParser.Production_lhsContext context) {
             return new NonterminalTermDeclaration(
-                parserContext: context,
                 name: context.nt_term().symbol().GetText(),
                 type: _env.ResolveType(NonterminalTermDeclaration.TYPE_NAME),
                 nonterminal: _env.ResolveNonterminal(context.nt_name().symbol()),
-                usage: VariableDeclaration.SemanticUsage.Input
-            );
+                declarationContext: VariableDeclaration.Context.NT_Term
+            ) { ParserContext = context };
         }
 
         private SemanticRelationInstance MakeRelationInstance([NotNull] SemgusParser.Nt_relationContext context) {
@@ -168,10 +162,9 @@ namespace Semgus.Syntax {
             var variables = symbols.Skip(1).Select(closure.Resolve).ToList();
 
             return new SemanticRelationInstance(
-                parserContext: context,
                 relation: relationDef,
-                assignments: variables
-            );
+                elements: variables
+            ) { ParserContext = context };
         }
     }
 }
