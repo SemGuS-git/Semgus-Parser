@@ -30,7 +30,7 @@ namespace Semgus.Parser.Example {
 
             SemgusLexer lexer = new SemgusLexer(new AntlrFileStream(filename));
             SemgusParser parser = new SemgusParser(new CommonTokenStream(lexer));
-
+            
             var cst = parser.start();
             var normalizer = new SyntaxNormalizer();
             try {
