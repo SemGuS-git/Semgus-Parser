@@ -16,7 +16,8 @@ namespace Semgus.Syntax {
                 return normalizer.Normalize(cst);
             } catch (SemgusSyntaxException e) {
                 using (var file = new StreamReader(filename)) {
-                    throw new FileContextSemgusSyntaxException(e.ParserContext,e.Message,GetFileContextString(e,file));
+                    var exception = new FileContextSemgusSyntaxException(e.ParserContext,e.Message,GetFileContextString(e,file));
+                    throw exception;
                 }
             }
         }

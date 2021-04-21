@@ -92,12 +92,13 @@ namespace Semgus.Syntax {
             var relationInstance = MakeRelationInstance(cst_rel);
 
             var node = new Production(
-
                 nonterminal: nonterminal,
                 closure: closure,
                 relationInstance: relationInstance,
                 productionRules: cst_rhs.Select(ProcessProductionRule).ToList()
             ) { ParserContext = context };
+
+            node.AssertCorrectness();
 
             _closures.Pop();
 
@@ -161,10 +162,14 @@ namespace Semgus.Syntax {
 
             var variables = symbols.Skip(1).Select(closure.Resolve).ToList();
 
-            return new SemanticRelationInstance(
+            var node = new SemanticRelationInstance(
                 relation: relationDef,
                 elements: variables
             ) { ParserContext = context };
+
+            node.AssertCorrectness();
+
+            return node;
         }
     }
 }

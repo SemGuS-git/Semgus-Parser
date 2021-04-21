@@ -15,8 +15,10 @@ namespace Semgus.Syntax {
         public SemanticRelationQuery(SemanticRelationDeclaration relation, IReadOnlyList<IFormula> terms) {
             Relation = relation;
             Terms = terms;
+        }
 
-            this.Assert(terms.Count == relation.ElementTypes.Count, $"Semantic relation {relation.Name} must be queried with {relation.ElementTypes.Count} elements");
+        public void AssertCorrectness() {
+            this.Assert(Terms.Count == Relation.ElementTypes.Count, $"Semantic relation {Relation.Name} must be queried with {Relation.ElementTypes.Count} elements (found {Terms.Count})");
         }
 
         public virtual T Accept<T>(IAstVisitor<T> visitor) => visitor.Visit(this);

@@ -13,15 +13,17 @@ namespace Semgus.Syntax {
         public SemanticRelationInstance RelationInstance { get; } // CHC conclusion
         public IReadOnlyList<ProductionRule> ProductionRules { get; } // CHC premises
 
-        public Production( Nonterminal nonterminal, VariableClosure closure, SemanticRelationInstance relationInstance, IReadOnlyList<ProductionRule> productionRules) {
+        public Production(Nonterminal nonterminal, VariableClosure closure, SemanticRelationInstance relationInstance, IReadOnlyList<ProductionRule> productionRules) {
             this.Nonterminal = nonterminal;
             this.Closure = closure;
             this.RelationInstance = relationInstance;
             this.ProductionRules = productionRules;
-            
-            this.Assert(productionRules.Count>0, "Production must have at least one rule");
         }
-        
+
+        public void AssertCorrectness() {
+            this.Assert(ProductionRules.Count > 0, "Production must have at least one rule");
+        }
+
         public virtual T Accept<T>(IAstVisitor<T> visitor) => visitor.Visit(this);
     }
 }

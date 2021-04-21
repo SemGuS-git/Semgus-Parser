@@ -14,8 +14,10 @@ namespace Semgus.Syntax {
         public SemanticRelationInstance(SemanticRelationDeclaration relation, IReadOnlyList<VariableDeclaration> elements) {
             Relation = relation;
             Elements = elements;
+        }
 
-            this.Assert(elements.Count == relation.ElementTypes.Count, $"Semantic relation {relation.Name} must be instantiated with {relation.ElementTypes.Count} elements");
+        public void AssertCorrectness() {
+            this.Assert(Elements.Count == Relation.ElementTypes.Count, $"Semantic relation {Relation.Name} must be instantiated with {Relation.ElementTypes.Count} elements");
         }
 
         public virtual T Accept<T>(IAstVisitor<T> visitor) => visitor.Visit(this);

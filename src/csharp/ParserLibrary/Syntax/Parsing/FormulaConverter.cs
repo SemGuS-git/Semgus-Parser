@@ -86,10 +86,12 @@ namespace Semgus.Syntax {
 
             if (_env.TryResolveRelation(identifier, out var relation)) {
                 // Try to match the symbol to a semantic relation
-                return new SemanticRelationQuery(
+                var node = new SemanticRelationQuery(
                     relation: relation,
                     terms: args
                 ) { ParserContext = context };
+                node.AssertCorrectness();
+                return node;
             } else {
                 // If the symbol doesn't refer to a semantic relation, assume it refers to a library function
                 return new LibraryFunctionCall(
