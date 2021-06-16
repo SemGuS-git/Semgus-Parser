@@ -97,10 +97,10 @@ REALCONST : ('-'?([0-9])+'.'([0-9])+);
 
 //
 // We allow both single- and double-quoted literals
-// ...but they are restricted to [a-zA-Z0-9.]+.
+// no explicit support for escape sequences
 //
-SINGLEQUOTEDLIT : '\''([a-z]|[A-Z]|([0-9])|'.')+'\'';
-DOUBLEQUOTEDLIT : '"'([a-z]|[A-Z]|([0-9])|'.')+'"';
+SINGLEQUOTEDLIT : '\'' (~['])* '\'';
+DOUBLEQUOTEDLIT : '"' (~["])* '"';
 
 //
 // Comments are permissive. C, C++, and Lisp-style
