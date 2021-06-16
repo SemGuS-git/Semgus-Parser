@@ -7,8 +7,8 @@ namespace Semgus.Syntax {
         T Visit(NonterminalTermDeclaration node);
         T Visit(Operator node);
         T Visit(OpRewriteExpression node);
-        T Visit(Production node);
-        T Visit(ProductionRule node);
+        T Visit(ProductionGroup node);
+        T Visit(SemanticRule node);
         T Visit(SemanticRelationDeclaration node);
         T Visit(SemanticRelationInstance node);
         T Visit(SemanticRelationQuery node);

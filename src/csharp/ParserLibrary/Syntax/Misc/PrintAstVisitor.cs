@@ -135,7 +135,7 @@ namespace Semgus.Syntax {
                 return _builder;
             }
 
-            public CodeTextBuilder Visit(Production node) {
+            public CodeTextBuilder Visit(ProductionGroup node) {
                 using (_builder.InParens())
                 using (_builder.InLineBreaks()) {
                     _builder.LineBreak();
@@ -148,14 +148,14 @@ namespace Semgus.Syntax {
                         PrintVariableClosure(node.Closure);
                         _builder.LineBreak();
                         using (_builder.InParens()) {
-                            VisitEach(node.ProductionRules);
+                            VisitEach(node.SemanticRules);
                         }
                     }
                 }
                 return _builder;
             }
 
-            public CodeTextBuilder Visit(ProductionRule node) {
+            public CodeTextBuilder Visit(SemanticRule node) {
                 using (_builder.InLineBreaks()) {
                     DoVisit(node.RewriteExpression);
                     _builder.Write(" ");

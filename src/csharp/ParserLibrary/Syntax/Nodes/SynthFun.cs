@@ -10,9 +10,9 @@ namespace Semgus.Syntax {
         public ParserRuleContext ParserContext { get; set; }
         public string Name { get; }
         public VariableClosure Closure { get; }
-        public IReadOnlyList<Production> Productions { get; }
+        public IReadOnlyList<ProductionGroup> Productions { get; }
 
-        public SynthFun( string name, VariableClosure closure, IReadOnlyList<Production> productions) {
+        public SynthFun( string name, VariableClosure closure, IReadOnlyList<ProductionGroup> productions) {
             Name = name;
             Closure = closure;
             Productions = productions;

@@ -22,7 +22,7 @@ namespace Semgus.Syntax {
             Value = value;
         }
 
-        public override T Accept<T>(IAstVisitor<T> visitor) => visitor.Visit<TValue>(this);
+        public override T Accept<T>(IAstVisitor<T> visitor) => visitor.Visit(this);
 
         public override string PrintFormula() => Value.ToString();
     }

@@ -15,6 +15,8 @@ namespace Semgus.Syntax {
             try { 
                 return normalizer.Normalize(cst);
             } catch (SemgusSyntaxException e) {
+                if (e.ParserContext is null) throw e;
+
                 using (var file = new StreamReader(filename)) {
                     var exception = new FileContextSemgusSyntaxException(e.ParserContext,e.Message,GetFileContextString(e,file));
                     throw exception;

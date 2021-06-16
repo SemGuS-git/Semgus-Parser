@@ -31,10 +31,10 @@ namespace Semgus.Syntax {
 
         public override LiteralBase VisitQuotedLit([NotNull] SemgusParser.QuotedLitContext context) {
             if (context.DOUBLEQUOTEDLIT() != null) {
-                return new Literal<string>( value: Regex.Match(context.GetText(), "\"([^\"]*)\"").Captures[0].Value) {ParserContext = context};
+                return new Literal<string>( value: Regex.Match(context.GetText(), "\"([^\"]*)\"").Groups[1].Value) {ParserContext = context};
             }
             if (context.SINGLEQUOTEDLIT() != null) {
-                return new Literal<string>( value: Regex.Match(context.GetText(), "'([^']*)'").Captures[0].Value) {ParserContext = context};
+                return new Literal<string>( value: Regex.Match(context.GetText(), "'([^']*)'").Groups[1].Value) {ParserContext = context};
             }
 
             throw new ArgumentException();

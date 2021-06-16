@@ -74,7 +74,7 @@ namespace Semgus.Syntax {
             ) { ParserContext = context };
         }
 
-        private Production ProcessProduction([NotNull] SemgusParser.ProductionContext context) {
+        private ProductionGroup ProcessProduction([NotNull] SemgusParser.ProductionContext context) {
             var cst_lhs = context.production_lhs();
             var cst_rhs = context.production_rhs();
             var cst_rel = cst_lhs.nt_relation();
@@ -91,11 +91,11 @@ namespace Semgus.Syntax {
 
             var relationInstance = MakeRelationInstance(cst_rel);
 
-            var node = new Production(
+            var node = new ProductionGroup(
                 nonterminal: nonterminal,
                 closure: closure,
                 relationInstance: relationInstance,
-                productionRules: cst_rhs.Select(ProcessProductionRule).ToList()
+                semanticRules: cst_rhs.Select(ProcessProductionRule).ToList()
             ) { ParserContext = context };
 
             node.AssertCorrectness();
@@ -105,7 +105,7 @@ namespace Semgus.Syntax {
             return node;
         }
 
-        private ProductionRule ProcessProductionRule([NotNull] SemgusParser.Production_rhsContext context) {
+        private SemanticRule ProcessProductionRule([NotNull] SemgusParser.Production_rhsContext context) {
             var cst_expr = context.rhs_expression();
             var cst_pred = context.predicate();
 
@@ -119,7 +119,7 @@ namespace Semgus.Syntax {
 
             _closures.Push(closure);
 
-            var node = new ProductionRule(
+            var node = new SemanticRule(
                 rewriteExpression: choiceExpression,
                 closure: closure,
                 predicate: new FormulaConverter(_env, closure).ConvertFormula(cst_pred.formula())
