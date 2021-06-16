@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "ParserExample": {
+      "commandName": "Project",
+      "commandLineArgs": "invalid/max-exp.sem",
+      "workingDirectory": "$(SolutionDir)/src/test/resources/examples/"
+    }
+  }
+}

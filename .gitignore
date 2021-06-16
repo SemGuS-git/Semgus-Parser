@@ -7,3 +7,11 @@
 
 # Ignore Gradle build output directory
 build
+
+# Visual Studio ignores
+**/.vs
+**/bin
+**/obj
+
+**/.antlr
+**/.vscode
