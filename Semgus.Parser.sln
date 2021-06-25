@@ -5,9 +5,11 @@ VisualStudioVersion = 16.0.31005.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParserLibrary", "src\csharp\ParserLibrary\ParserLibrary.csproj", "{BB5F40AF-99CD-4A1B-B6E0-C1C3295D4666}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserExample", "src\csharp\ParserExample\ParserExample.csproj", "{7BFDAB3C-DC93-46D4-9B57-34FBB9DA2128}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParserExample", "src\csharp\ParserExample\ParserExample.csproj", "{7BFDAB3C-DC93-46D4-9B57-34FBB9DA2128}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserTests", "src\csharp\ParserTests\ParserTests.csproj", "{9757EBC9-B9C5-4AE0-919C-A80CBB1D4112}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParserTests", "src\csharp\ParserTests\ParserTests.csproj", "{9757EBC9-B9C5-4AE0-919C-A80CBB1D4112}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "S-Expressions", "src\csharp\S-Expressions\S-Expressions.csproj", "{D3DC421B-246E-483F-B393-F706E7049CC6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{9757EBC9-B9C5-4AE0-919C-A80CBB1D4112}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9757EBC9-B9C5-4AE0-919C-A80CBB1D4112}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9757EBC9-B9C5-4AE0-919C-A80CBB1D4112}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3DC421B-246E-483F-B393-F706E7049CC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3DC421B-246E-483F-B393-F706E7049CC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3DC421B-246E-483F-B393-F706E7049CC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3DC421B-246E-483F-B393-F706E7049CC6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
