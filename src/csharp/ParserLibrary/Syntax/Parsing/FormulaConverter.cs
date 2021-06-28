@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime;
-using Antlr4.Runtime.Misc;
-using Semgus.Parser.Internal;
+
+using Semgus.Parser.Forms;
+using Semgus.Parser.Reader;
+using Semgus.Parser.Util;
 
 namespace Semgus.Syntax {
     /// <summary>
@@ -38,50 +40,76 @@ namespace Semgus.Syntax {
         private readonly VariableClosure _closure;
 
         public FormulaConverter(LanguageEnvironment env, VariableClosure closure) {
-            this._env = env;
-            this._closure = closure;
+            _env = env;
+            _closure = closure;
         }
 
-        public IFormula ConvertFormula([NotNull] SemgusParser.FormulaContext context) {
-            var result = ConvertFormulaInner(context);
-            if (result is SymbolicPlaceholder placeholder) {
+        public IFormula ConvertFormula(FormulaForm form) {
+            var result = ConvertFormulaInner(form);
+            if (result is SymbolicPlaceholder) {
                 throw new Exception(); // probably an unbound variable
             }
             return result;
         }
 
-        private IFormula ConvertFormulaInner([NotNull] SemgusParser.FormulaContext context) {
-            if (context.literal() is SemgusParser.LiteralContext literalContext) {
-                return Literal.Convert(literalContext);
-            }
+        private IFormula ConvertFormulaInner(FormulaForm form)
+        {
 
-            if (context.symbol() is SemgusParser.SymbolContext symbolContext) {
-                var id = symbolContext.GetText();
-                if (_closure.TryResolve(id, out var variable)) {
-                    return new VariableEvaluation(variable) { ParserContext = context };
-                } else {
-                    return new SymbolicPlaceholder(id) { ParserContext = context };
+            if (form.Atom is not null)
+            {
+                if (form.Atom is SymbolToken symbol)
+                {
+                    var id = symbol.Name;
+                    if (_closure.TryResolve(id, out var variable))
+                    {
+                        return new VariableEvaluation(variable); // TODO { ParserContext = context };
+                    }
+                    else
+                    {
+                        return new SymbolicPlaceholder(id); // TODO { ParserContext = context };
+                    }
+                }
+                else if (form.Atom.IsLiteral)
+                {
+                    return Literal.Convert(form.Atom);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Non-literal, non-symbol atom encountered in formula context: " + form.Atom);
+                }
+            }
+            else if (form.List is not null)
+            {
+                if (form.List.Count == 0)
+                {
+                    // This shouldn't happen
+                    throw new InvalidOperationException("Empty formula encountered");
+                }
+
+                // Application
+                var subformulae = form.List.Select(ConvertFormulaInner);
+                var arguments = subformulae.Pop(out var head);
+                if (head is SymbolicPlaceholder placeholder)
+                {
+                    return MakeInvocation(form.Position, placeholder.Identifier, arguments.ToList());
+                }
+                else
+                {
+                    throw new InvalidOperationException("Expected symbol at head of formula, but got: " + head);
                 }
             }
 
-            var cst_subformulas = context.formula();
-
-            if (cst_subformulas.Length == 0) throw new SemgusSyntaxException(context, "Empty formula");
-
-            if (cst_subformulas.Length == 1) return ConvertFormulaInner(cst_subformulas[0]);
-
-            // Application
-            var subformulas = cst_subformulas.Select<SemgusParser.FormulaContext, IFormula>(ConvertFormulaInner).ToList();
-            if (subformulas[0] is SymbolicPlaceholder placeholder) {
-                return MakeInvocation(context, placeholder.Identifier, subformulas.Skip(1).ToList());
-            }
-
-            throw new SemgusSyntaxException(context, "Invalid formula");
+            // TODO throw new SemgusSyntaxException(context, "Invalid formula");
+            throw new InvalidOperationException("Invalid formula");
         }
 
-        private IFormula MakeInvocation(ParserRuleContext context, string identifier, List<IFormula> args) {
+        private IFormula MakeInvocation(SemgusParserContext context, string identifier, List<IFormula> args) {
             foreach (var arg in args) {
-                if (arg is SymbolicPlaceholder ph) throw new SemgusSyntaxException(ph.ParserContext, $"Unknown identifier \"{ph.Identifier}\" (not a variable in [{_closure.PrintAllResolvableVariables()}])");
+                if (arg is SymbolicPlaceholder ph)
+                {
+                    // TODO throw new SemgusSyntaxException(ph.ParserContext, $"Unknown identifier \"{ph.Identifier}\" (not a variable in [{_closure.PrintAllResolvableVariables()}])");
+                    throw new InvalidOperationException($"Unknown identifier \"{ph.Identifier}\" (not a variable in [{_closure.PrintAllResolvableVariables()}])");
+                }
             }
 
             if (_env.TryResolveRelation(identifier, out var relation)) {
@@ -89,7 +117,7 @@ namespace Semgus.Syntax {
                 var node = new SemanticRelationQuery(
                     relation: relation,
                     terms: args
-                ) { ParserContext = context };
+                ); // TODO { ParserContext = context };
                 node.AssertCorrectness();
                 return node;
             } else {
@@ -97,7 +125,7 @@ namespace Semgus.Syntax {
                 return new LibraryFunctionCall(
                     libraryFunction: _env.IncludeLibraryFunction(identifier),
                     arguments: args
-                ) {ParserContext = context};
+                ); // TODO {ParserContext = context};
             }
         }
     }

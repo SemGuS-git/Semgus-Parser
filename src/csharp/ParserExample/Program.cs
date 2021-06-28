@@ -8,9 +8,9 @@ using Semgus.Syntax;
 namespace Semgus.Parser.Example {
     class Program {
         static void Main(string[] args) {
-            Main2(args);
+            Main3(args);
         }
-
+        /*
         // Parser / lexer demo
         static void Main1(string[] args) {
             if (args.Length != 1) {
@@ -49,7 +49,7 @@ namespace Semgus.Parser.Example {
             }
             System.Console.WriteLine("Done");
         }
-
+        */
         private static void PrintExceptionAndItsLocationInFile(SemgusSyntaxException e, StreamReader file) {
             System.Console.WriteLine(e.Message);
             var l0 = e.ParserContext.Start.Line;
@@ -65,6 +65,26 @@ namespace Semgus.Parser.Example {
                 Console.WriteLine(line);
                 k++;
             }
+        }
+
+        public static void Main3(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Console.Error.WriteLine("Expects one argument: a Semgus file to parse");
+            }
+
+            var filename = args[0];
+
+            SemgusParser parser = new(filename);
+            parser.TryParse(out var problem);
+            Console.Out.WriteLine(problem.ToString());
+
+            var printer = new AstPrinter();
+
+            // Print the AST
+            Console.WriteLine(problem.GlobalEnvironment.PrettyPrint());
+            Console.WriteLine(printer.PrettyPrint(problem));
         }
     }
 }

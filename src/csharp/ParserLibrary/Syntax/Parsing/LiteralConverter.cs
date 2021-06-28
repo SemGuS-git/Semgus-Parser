@@ -1,43 +1,63 @@
 using System;
+using System.Collections;
 using System.Text.RegularExpressions;
 using Antlr4.Runtime.Misc;
 using Semgus.Parser.Internal;
+using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
     /// <summary>
     /// Visitor that converts literal CST nodes into corresponding generic-typed literal AST nodes.
-    /// TODO: throw exception when visiting non-literal contexts
     /// </summary>
-    public class LiteralConverter : SemgusBaseVisitor<LiteralBase> {
-        public static LiteralConverter Default { get; } = new LiteralConverter();
+    public class LiteralConverter : ISemgusTokenVisitor<LiteralBase>
+    {
+        public static LiteralConverter Default { get; } = new();
 
-        private LiteralConverter() { }
-        
-        public override LiteralBase VisitIntConst([NotNull] SemgusParser.IntConstContext context) =>
-            new Literal<int>( value: int.Parse(context.GetText())) {ParserContext = context};
+        public LiteralBase VisitSentinel(SentinelToken sentinel)
+        {
+            throw new InvalidOperationException("Sentinels are not literals: " + sentinel.Identifier);
+        }
 
-        public override LiteralBase VisitBoolConst([NotNull] SemgusParser.BoolConstContext context) =>
-            new Literal<bool>( value: bool.Parse(context.GetText())) {ParserContext = context};
+        public LiteralBase VisitSymbol(SymbolToken symbol)
+        {
+            throw new InvalidOperationException("Symbols are not literals: " + symbol.Name);
+        }
 
-        public override LiteralBase VisitBVConst([NotNull] SemgusParser.BVConstContext context) =>
-            throw new NotImplementedException();
+        public LiteralBase VisitKeyword(KeywordToken keyword)
+        {
+            throw new InvalidOperationException("Keywords are not literals: " + keyword.Name);
+        }
 
-        public override LiteralBase VisitEnumConst([NotNull] SemgusParser.EnumConstContext context) =>
-            throw new NotImplementedException();
-            
-        public override LiteralBase VisitRealConst([NotNull] SemgusParser.RealConstContext context) =>
-            new Literal<double>( value: double.Parse(context.GetText())) {ParserContext = context};
+        public LiteralBase VisitString(StringToken str)
+        {
+            return new Literal<string>(value: str.Value);
+        }
 
+        public LiteralBase VisitNumeral(NumeralToken num)
+        {
+            // TODO: int vs. long
+            return new Literal<int>(value: Convert.ToInt32(num.Value));
+        }
 
-        public override LiteralBase VisitQuotedLit([NotNull] SemgusParser.QuotedLitContext context) {
-            if (context.DOUBLEQUOTEDLIT() != null) {
-                return new Literal<string>( value: Regex.Match(context.GetText(), "\"([^\"]*)\"").Groups[1].Value) {ParserContext = context};
-            }
-            if (context.SINGLEQUOTEDLIT() != null) {
-                return new Literal<string>( value: Regex.Match(context.GetText(), "'([^']*)'").Groups[1].Value) {ParserContext = context};
-            }
+        public LiteralBase VisitDecimal(DecimalToken dec)
+        {
+            return new Literal<double>(value: dec.Value);
+        }
 
-            throw new ArgumentException();
+        public LiteralBase VisitBitVector(BitVectorToken bv)
+        {
+            return new Literal<BitArray>(bv.Value);
+        }
+
+        public LiteralBase VisitNil(NilToken nil)
+        {
+            // This one is interesting...A nil token is really just an empty list, so...
+            throw new InvalidOperationException("Nil is not approriate in a literal context: " + nil);
+        }
+
+        public LiteralBase VisitCons(ConsToken cons)
+        {
+            throw new InvalidOperationException("Conses are not literals: " + cons.ToString());
         }
     }
 

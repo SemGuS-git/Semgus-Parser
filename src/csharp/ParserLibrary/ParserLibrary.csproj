@@ -45,6 +45,9 @@
     <AdditionalFiles Include="$(RepositoryRoot)/Semgus.g4" Link="Grammar/Semgus.g4" />
     <AdditionalFiles Include="$(RepositoryRoot)/build.gradle" Link="Grammar/build.gradle" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\S-Expressions\S-Expressions.csproj" />
+  </ItemGroup>
   
   <!-- Generate the grammar sources on Windows -->
   <Target Name="BuildGrammar_win" BeforeTargets="BeforeBuild;BeforeRebuild" Condition="'$(OS)' == 'Windows_NT'" Inputs="@(AntlrGrammarGen)" Outputs="@(AntlrCS)">

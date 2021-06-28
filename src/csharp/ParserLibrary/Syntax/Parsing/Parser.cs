@@ -1,29 +1,8 @@
-﻿using Antlr4.Runtime;
-using Semgus.Parser.Internal;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 
 namespace Semgus.Syntax {
     public static class Parser {
-        public static (SemgusProblem, LanguageEnvironment) ParseFileToAst(string filename) {
-            SemgusLexer lexer = new SemgusLexer(new AntlrFileStream(filename));
-            SemgusParser parser = new SemgusParser(new CommonTokenStream(lexer));
-
-            var cst = parser.start();
-            var normalizer = new SyntaxNormalizer();
-
-            try { 
-                return normalizer.Normalize(cst);
-            } catch (SemgusSyntaxException e) {
-                if (e.ParserContext is null) throw e;
-
-                using (var file = new StreamReader(filename)) {
-                    var exception = new FileContextSemgusSyntaxException(e.ParserContext,e.Message,GetFileContextString(e,file));
-                    throw exception;
-                }
-            }
-        }
-
         private static string GetFileContextString(SemgusSyntaxException e, StreamReader file) {
             var sb = new StringBuilder();
             var l0 = e.ParserContext.Start.Line;

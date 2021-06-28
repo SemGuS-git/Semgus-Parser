@@ -15,24 +15,18 @@ namespace Semgus.Syntax {
         private bool _closed = false;
 
         public (SemgusProblem, LanguageEnvironment) Normalize([NotNull] SemgusParser.StartContext context) {
-            this._env = new LanguageEnvironmentCollector().Visit(context);
+            this._env = default; // new LanguageEnvironmentCollector().Visit(context);
             this._closures = new Stack<VariableClosure>();
 
             var sfNode = ProcessSynthFun(context.synth_fun());
 
-            _closures.Push(sfNode.Closure);
-
-            var constraints = context.constraint().Select(ProcessConstraint).ToList();
-
-            _closures.Pop();
-
-            return (
-                new SemgusProblem(
+            return (default);
+                /*new SemgusProblem(
                     synthFun: sfNode,
                     constraints: constraints
                 ) { ParserContext = context },
                 _env
-            );
+            );*/
         }
 
         private SynthFun ProcessSynthFun([NotNull] SemgusParser.Synth_funContext context) {
@@ -55,23 +49,6 @@ namespace Semgus.Syntax {
             _closures.Pop();
 
             return sfNode;
-        }
-
-        private Constraint ProcessConstraint([NotNull] SemgusParser.ConstraintContext context) {
-            var closure = MakeVariableClosure(new[]{
-                // Temp: hardcode t:Term into constraint context as auxiliary variable
-                new VariableDeclaration( name: "t", type: _env.ResolveType(NonterminalTermDeclaration.TYPE_NAME), VariableDeclaration.Context.CT_Term) { ParserContext = context}
-            });
-            _closures.Push(closure);
-
-            var formula = new FormulaConverter(_env, closure).ConvertFormula(context.formula());
-
-            _closures.Pop();
-
-            return new Constraint(
-                closure: closure,
-                formula: formula
-            ) { ParserContext = context };
         }
 
         private ProductionGroup ProcessProduction([NotNull] SemgusParser.ProductionContext context) {
@@ -110,7 +87,7 @@ namespace Semgus.Syntax {
             var cst_pred = context.predicate();
 
             var choiceExpressionConverter = new ChoiceExpressionConverter(_env);
-            var choiceExpression = choiceExpressionConverter.ProcessChoiceExpression(cst_expr);
+            var choiceExpression = default(ChoiceExpressionConverter);// choiceExpressionConverter.ProcessChoiceExpression(cst_expr);
 
             var closure = MakeVariableClosure(
                 choiceExpressionConverter.DeclaredTerms,
@@ -120,10 +97,10 @@ namespace Semgus.Syntax {
             _closures.Push(closure);
 
             var node = new SemanticRule(
-                rewriteExpression: choiceExpression,
+                rewriteExpression: default,//choiceExpression,
                 closure: closure,
-                predicate: new FormulaConverter(_env, closure).ConvertFormula(cst_pred.formula())
-            ) { ParserContext = context };
+                predicate: default// new FormulaConverter(_env, closure).ConvertFormula(cst_pred.formula())
+            );
 
             _closures.Pop();
             return node;
