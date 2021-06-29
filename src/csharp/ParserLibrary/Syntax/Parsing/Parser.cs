@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Semgus.Syntax {
     public static class Parser {
-        public static (SemgusProblem, LanguageEnvironment) ParseFileToAst(string filename) {
+        public static (SemgusProblem problem, LanguageEnvironment env) ParseFileToAst(string filename) {
             SemgusLexer lexer = new SemgusLexer(new AntlrFileStream(filename));
             SemgusParser parser = new SemgusParser(new CommonTokenStream(lexer));
 
