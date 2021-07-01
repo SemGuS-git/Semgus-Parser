@@ -1,22 +1,37 @@
-﻿using Semgus.Parser.Commands;
-using Semgus.Parser.Reader;
-using Semgus.Sexpr.Reader;
-using Semgus.Syntax;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using Semgus.Parser.Commands;
+using Semgus.Parser.Reader;
+using Semgus.Syntax;
 
 namespace Semgus.Parser
 {
+    /// <summary>
+    /// Parser that reads SemGuS files in S-expression format and turns them into SemgusProblems
+    /// </summary>
     public class SemgusParser : IDisposable
     {
+        /// <summary>
+        /// The underlying S-expression reader
+        /// </summary>
         private readonly SemgusReader _reader;
+
+        /// <summary>
+        /// Backing stream that the reader reads from
+        /// </summary>
         private readonly Stream _stream;
+
+        /// <summary>
+        /// Mapping of command names to command objects
+        /// </summary>
         private readonly IDictionary<string, ISemgusCommand> _commandDispatch;
 
+        /// <summary>
+        /// Creates a new SemGuS parser from the given file
+        /// </summary>
+        /// <param name="filename">Name of file to parser</param>
         public SemgusParser(string filename)
         {
             _stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -27,7 +42,25 @@ namespace Semgus.Parser
             _commandDispatch.Add(new DeclareVarCommand().AsKeyValuePair());
         }
 
+        /// <summary>
+        /// Attempts to parse a SemgusProblem from the underlying file
+        /// </summary>
+        /// <param name="problem">The parsed problem</param>
+        /// <param name="errorStream">TextWriter for errors. Defaults to Console.Error</param>
+        /// <returns>True if successfully parsed, false if one or more errors encountered</returns>
         public bool TryParse(out SemgusProblem problem, TextWriter errorStream = default)
+        {
+            return TryParse(out problem, out int _, errorStream);
+        }
+
+        /// <summary>
+        /// Attempts to parse a SemgusProblem from the underlying file
+        /// </summary>
+        /// <param name="problem">The parsed problem</param>
+        /// <param name="errCount">Count of encountered errors</param>
+        /// <param name="errorStream">TextWriter for errors. Defaults to Console.Error</param>
+        /// <returns>True if successfully parsed, false if one or more errors encountered</returns>
+        public bool TryParse(out SemgusProblem problem, out int errCount, TextWriter errorStream = default)
         {
             if (default == errorStream)
             {
@@ -36,15 +69,26 @@ namespace Semgus.Parser
 
             LanguageEnvironment langEnv = new();
 
-            problem = new(default, default, langEnv, new List<Constraint>());
+            // This is a hack to make the name analysis phase not complain about true and false,
+            // since they're not technically literals in SMT-LIB2 format, just symbols. It's the
+            // Core theory that imbues these with meaning, and we need a better way of handling that.
+            var boolType = langEnv.IncludeType("Bool");
+            VariableClosure startingClosure = new(default, new[] {
+                new VariableDeclaration("true",  boolType, VariableDeclaration.Context.CT_Auxiliary),
+                new VariableDeclaration("false", boolType, VariableDeclaration.Context.CT_Auxiliary)
+            });
+
+            problem = new(default, startingClosure, langEnv, new List<Constraint>());
             SemgusToken sexpr;
-            int errCount = 0;
+            errCount = 0;
             while (_reader.EndOfFileSentinel != (sexpr = _reader.Read(errorOnEndOfStream: false)))
             {
                 if (sexpr is not ConsToken cons)
                 {
                     // Error: top-level symbols and literals not allowed
-                    throw new InvalidOperationException("Top-level atoms not allowed: found " + sexpr.ToString() + " at " + sexpr.Position);
+                    errorStream.WriteParseError("Top-level atoms not allowed: found " + sexpr.ToString(), sexpr.Position);
+                    errCount += 1;
+                    continue;
                 }
                 else
                 {
@@ -54,11 +98,15 @@ namespace Semgus.Parser
                     var head = cons.Head;
                     if (head is not SymbolToken commandName)
                     {
-                        throw new InvalidOperationException("Expected command name, but got: " + sexpr.ToString() + " at " + sexpr.Position);
+                        errorStream.WriteParseError("Expected command name, but got: " + sexpr.ToString(), sexpr.Position);
+                        errCount += 1;
+                        continue;
                     }
                     else if (!_commandDispatch.TryGetValue(commandName.Name, out var command))
                     {
-                        throw new InvalidOperationException("Unknown top-level command: " + commandName.Name + " at " + commandName.ToString());
+                        errorStream.WriteParseError("Unknown top-level command: " + commandName.Name, commandName.Position);
+                        errCount += 1;
+                        continue;
                     }
                     else
                     {
@@ -74,6 +122,9 @@ namespace Semgus.Parser
             return true;
         }
 
+        /// <summary>
+        /// Disposes the underlying stream
+        /// </summary>
         public void Dispose()
         {
             ((IDisposable)_stream).Dispose();
