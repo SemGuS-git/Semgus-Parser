@@ -1,5 +1,5 @@
 using System;
-using Antlr4.Runtime;
+
 using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
@@ -19,7 +19,7 @@ namespace Semgus.Syntax {
 
     public class Literal<TValue> : LiteralBase
     {
-        public override ParserRuleContext ParserContext { get; set; }
+        public override SemgusParserContext ParserContext { get; set; }
 
         public TValue Value { get; }
         public override Type ValueType => typeof(TValue);

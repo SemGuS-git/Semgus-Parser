@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Antlr4.Runtime;
 
 using Semgus.Parser.Forms;
 using Semgus.Parser.Reader;
@@ -23,7 +22,7 @@ namespace Semgus.Syntax {
         /// otherwise, it must resolve to a variable name.
         /// </summary>
         private class SymbolicPlaceholder : IFormula {
-            public ParserRuleContext ParserContext { get; set; }
+            public SemgusParserContext ParserContext { get; set; }
             public string Identifier { get; }
 
             public SymbolicPlaceholder(string identifier) {

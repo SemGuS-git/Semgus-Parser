@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
-using Antlr4.Runtime;
+
+using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
     /// <summary>
     /// Invocation of an externally defined function, e.g. "and", "or", "=".
     /// /// </summary>
     public class LibraryFunctionCall : IFormula {
-        public ParserRuleContext ParserContext { get; set; }
+        public SemgusParserContext ParserContext { get; set; }
         public LibraryFunction LibraryFunction { get; }
         public IReadOnlyList<IFormula> Arguments { get; }
 

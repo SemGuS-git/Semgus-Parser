@@ -13,14 +13,14 @@ namespace Semgus.Parser
 {
     public class SemgusParser : IDisposable
     {
-        private readonly SexprReader<SemgusToken> _reader;
+        private readonly SemgusReader _reader;
         private readonly Stream _stream;
         private readonly IDictionary<string, ISemgusCommand> _commandDispatch;
 
         public SemgusParser(string filename)
         {
             _stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-            _reader = new SexprReader<SemgusToken>(new SemgusSexprFactory(), SemgusReadtableFactory.CreateSemgusReadtable(), _stream);
+            _reader = new SemgusReader(_stream);
             _commandDispatch = new Dictionary<string, ISemgusCommand>();
             _commandDispatch.Add(new SynthFunCommand().AsKeyValuePair());
             _commandDispatch.Add(new ConstraintCommand().AsKeyValuePair());
@@ -34,7 +34,7 @@ namespace Semgus.Parser
                 errorStream = Console.Error;
             }
 
-            LanguageEnvironment langEnv = new LanguageEnvironment();
+            LanguageEnvironment langEnv = new();
 
             problem = new(default, default, langEnv, new List<Constraint>());
             SemgusToken sexpr;

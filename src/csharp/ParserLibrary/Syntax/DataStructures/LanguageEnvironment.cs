@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Semgus.Parser.Internal;
+
 using Semgus.Parser.Reader;
 using Semgus.Util;
 

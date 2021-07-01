@@ -3,10 +3,6 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.1" />
-  </ItemGroup>
 
   <!-- Defines where the root of the repository is, so the Semgus.g4 and generated *.cs can be found -->
   <PropertyGroup>
@@ -17,48 +13,10 @@
     <Authors>Semgus</Authors>
     <Company>University of Wisconsin-Madison</Company>
     <Product>Semgus</Product>
+    <Version>1.1.0</Version>
   </PropertyGroup>
-
-  <!-- Generated *.cs files from ANTLR -->
-  <ItemGroup>
-    <AntlrCS Include="$(AntlrOutputDir)/SemgusParser.cs" />
-    <AntlrCS Include="$(AntlrOutputDir)/SemgusLexer.cs" />
-    <AntlrCS Include="$(AntlrOutputDir)/SemgusListener.cs" />
-    <AntlrCS Include="$(AntlrOutputDir)/SemgusBaseListener.cs" />
-    <AntlrCS Include="$(AntlrOutputDir)/SemgusVisitor.cs" />
-    <AntlrCS Include="$(AntlrOutputDir)/SemgusBaseVisitor.cs" />
-  </ItemGroup>
-
-  <!-- Includes the generated ANTLR files for compilation (and hides them in VS) -->
-  <ItemGroup>
-    <Compile Include="@(AntlrCS)" Visible="False" />
-  </ItemGroup>
-
-  <!-- Defines the grammar and Gradle files so the grammar can be recompiled if necessary -->
-  <ItemGroup>
-    <AntlrGrammarGen Include="$(RepositoryRoot)/Semgus.g4" />
-    <AntlrGrammarGen Include="$(RepositoryRoot)/build.gradle" />
-  </ItemGroup>
-
-  <!-- Show the grammar and Gradle files in VS. Also required to get incremental compiles working -->
-  <ItemGroup>
-    <AdditionalFiles Include="$(RepositoryRoot)/Semgus.g4" Link="Grammar/Semgus.g4" />
-    <AdditionalFiles Include="$(RepositoryRoot)/build.gradle" Link="Grammar/build.gradle" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\S-Expressions\S-Expressions.csproj" />
   </ItemGroup>
-  
-  <!-- Generate the grammar sources on Windows -->
-  <Target Name="BuildGrammar_win" BeforeTargets="BeforeBuild;BeforeRebuild" Condition="'$(OS)' == 'Windows_NT'" Inputs="@(AntlrGrammarGen)" Outputs="@(AntlrCS)">
-    <Message Text="Building Grammar..." />
-    <Exec Command="call gradlew.bat generateCsharpGrammarSource" WorkingDirectory="$(RepositoryRoot)" />
-  </Target>
-
-  <!-- Generate the grammar sources on Linux and macOS -->
-  <Target Name="BuildGrammar_unix" BeforeTargets="BeforeBuild;BeforeRebuild" Condition="'$(OS)' == 'Unix'" Inputs="@(AntlrGrammar)" Outputs="@(AntlrCS)">
-    <Message Text="Building Grammar..." />
-    <Exec Command="./gradlew generateCsharpGrammarSource" WorkingDirectory="$(RepositoryRoot)" />
-  </Target>
   
 </Project>

@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
-using Antlr4.Runtime;
+
+using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
     /// <summary>
     /// Production rewrite expression consisting of an operator followed by one or more other symbols.
     /// </summary>
     public class OpRewriteExpression : IProductionRewriteExpression {
-        public ParserRuleContext ParserContext { get; set; }
+        public SemgusParserContext ParserContext { get; set; }
         public Operator Op { get; }
         public IReadOnlyList<IProductionRewriteAtom> Operands { get; }
 

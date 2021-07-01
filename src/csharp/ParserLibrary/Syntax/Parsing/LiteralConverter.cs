@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-using System.Text.RegularExpressions;
-using Antlr4.Runtime.Misc;
-using Semgus.Parser.Internal;
+
 using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
