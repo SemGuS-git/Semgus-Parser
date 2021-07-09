@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using Antlr4.Runtime;
+
+using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
     /// <summary>
@@ -7,7 +8,7 @@ namespace Semgus.Syntax {
     /// Its list of productions acts as the specification for the DSL.
     /// </summary>
     public class SynthFun : ISyntaxNode {
-        public ParserRuleContext ParserContext { get; set; }
+        public SemgusParserContext ParserContext { get; set; }
         public string Name { get; }
         public VariableClosure Closure { get; }
         public IReadOnlyList<ProductionGroup> Productions { get; }

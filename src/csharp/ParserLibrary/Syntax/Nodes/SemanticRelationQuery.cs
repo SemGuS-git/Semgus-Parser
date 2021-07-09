@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using Antlr4.Runtime;
+
+using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
     /// <summary>
@@ -8,7 +9,7 @@ namespace Semgus.Syntax {
     /// This may appear inside of production rule predicates or constraints.
     /// </summary>
     public class SemanticRelationQuery : IFormula {
-        public ParserRuleContext ParserContext { get; set; }
+        public SemgusParserContext ParserContext { get; set; }
         public SemanticRelationDeclaration Relation { get; }
         public IReadOnlyList<IFormula> Terms { get; }
 

@@ -1,69 +1,87 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Antlr4.Runtime.Misc;
-using Semgus.Parser.Internal;
+
+using Semgus.Parser.Forms;
+using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
-    public class ChoiceExpressionConverter {
+    public class ChoiceExpressionConverter
+    {
         private readonly LanguageEnvironment _env;
         private readonly Dictionary<string,NonterminalTermDeclaration> _declaredTerms;
         
         public IReadOnlyCollection<NonterminalTermDeclaration> DeclaredTerms => _declaredTerms.Values;
 
-        public ChoiceExpressionConverter(LanguageEnvironment env) {
-            this._env = env;
-            this._declaredTerms = new Dictionary<string, NonterminalTermDeclaration>();
+        public ChoiceExpressionConverter(LanguageEnvironment env)
+        {
+            _env = env;
+            _declaredTerms = new Dictionary<string, NonterminalTermDeclaration>();
         }
 
-        public IProductionRewriteExpression ProcessChoiceExpression([NotNull] SemgusParser.Rhs_expressionContext context) {
-            var atoms = context.rhs_atom();
-            
-            if(context.op() is SemgusParser.OpContext opContext) {
+        public IProductionRewriteExpression ProcessChoiceExpression(ProductionRuleForm rule)
+        {
+            if (rule.Operator is not null)
+            {
+                // TODO: name isn't necessarily a symbol...
                 return new OpRewriteExpression(
-                    op: ProcessOperator(opContext),
-                    operands: atoms.Select(ProcessAtom).ToList()
-                ) {ParserContext = context};
-            } else {
-                if(atoms.Length != 1) throw new ArgumentException();
-                
-                return new AtomicRewriteExpression (
-                    atom: ProcessAtom(atoms[0])
-                ) {ParserContext = context};
+                    op: new Operator(NameForToken(rule.Operator.Name)),
+                    operands: rule.Operator.Parameters.Select(ProcessOperatorParameter).ToList()
+                );
+            }
+            else if (rule.Leaf is not null)
+            {
+                if (rule.Leaf.IsLiteral)
+                {
+                    return new AtomicRewriteExpression(atom: Literal.Convert(rule.Leaf));
+                }
+                else if (rule.Leaf is SymbolToken symb)
+                {
+                    return new AtomicRewriteExpression(atom: new LeafTerm(NameForToken(rule.Leaf)));
+                }
+                else
+                {
+                    throw new InvalidOperationException("Not a supported leaf token type: " + rule.Leaf.ToString());
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Not an operator or leaf: " + rule.ToString());
             }
         }
         
-        private Operator ProcessOperator([NotNull] SemgusParser.OpContext context) {
-            return new Operator(
-                text: context.symbol().GetText()
-            ) {ParserContext = context};
+        private string NameForToken(SemgusToken token)
+        {
+            if (token is SymbolToken symb)
+            {
+                return symb.Name;
+            }
+            else if (token is NumeralToken num)
+            {
+                return num.Value.ToString();
+            }
+            else if (token is DecimalToken dec)
+            {
+                return dec.Value.ToString();
+            }
+            else
+            {
+                throw new InvalidOperationException("Not a valid operator or leaf name: " + token.ToString());
+            }
         }
 
-        private IProductionRewriteAtom ProcessAtom([NotNull] SemgusParser.Rhs_atomContext context) {
-            if(context.nt_name() is SemgusParser.Nt_nameContext nt_nameContext) {
-                var term = new NonterminalTermDeclaration(
-                    name: context.nt_term().symbol().GetText(),
-                    type: _env.ResolveType(NonterminalTermDeclaration.TYPE_NAME),
-                    nonterminal: _env.ResolveNonterminal(nt_nameContext.symbol()),
-                    declarationContext: VariableDeclaration.Context.PR_Subterm
-                ) {ParserContext = context};
-                
-                _declaredTerms.Add(term.Name,term);
-                
-                return term;
-            }
-            
-            if(context.literal() is SemgusParser.LiteralContext literalContext) {
-                return Literal.Convert(literalContext);
-            }
-            
-            if(context.symbol() is SemgusParser.SymbolContext symbolContext) {
-                return new LeafTerm(
-                    text: symbolContext.GetText()
-                ) {ParserContext = context};
-            }
-            
-            throw new NotSupportedException();
+        private IProductionRewriteAtom ProcessOperatorParameter(OperatorParameterForm opForm)
+        {
+            NonterminalTermDeclaration term = new(
+                name: opForm.TermName.Name,
+                type: _env.ResolveType(NonterminalTermDeclaration.TYPE_NAME),
+                nonterminal: _env.ResolveNonterminal(opForm.Nonterminal.Name),
+                declarationContext: VariableDeclaration.Context.PR_Subterm
+            );
+
+            _declaredTerms.Add(term.Name, term);
+
+            return term;
         }
     }
 }

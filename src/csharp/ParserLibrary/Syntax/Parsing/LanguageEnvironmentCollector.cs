@@ -1,30 +1,48 @@
+using Semgus.Parser.Commands;
+using Semgus.Parser.Forms;
+using Semgus.Parser.Reader;
+using System.Collections.Generic;
 using System.Linq;
-using Antlr4.Runtime.Misc;
-using Semgus.Parser.Internal;
 
-namespace Semgus.Syntax {
+namespace Semgus.Syntax
+{
     /// <summary>
     /// Visitor that collects user-defined identifiers as part of the name analysis process.
     /// </summary>
-    public class LanguageEnvironmentCollector : SemgusBaseVisitor<LanguageEnvironment> {
-        private readonly LanguageEnvironment _env = new LanguageEnvironment();
-
-        protected override LanguageEnvironment DefaultResult => _env;
-
-        public override LanguageEnvironment VisitVar_decl([NotNull] SemgusParser.Var_declContext context) {
-            _env.IncludeType(context.type());
-            return _env;
+    // TODO: Do we still need this class?
+    public static class LanguageEnvironmentCollector
+    {
+        public static LanguageEnvironment ProcessSynthFun(IEnumerable<VariableDeclarationForm> varDecls, IEnumerable<ProductionForm> productions, LanguageEnvironment env)
+        {
+            ProcessVariableDeclarationList(varDecls, env);
+            foreach (var prod in productions)
+            {
+                ProcessVariableDeclarationList(prod.VariableDeclarations, env);
+                foreach (var prem in prod.Premises)
+                {
+                    ProcessVariableDeclarationList(prem.VariableDeclarations, env);
+                }
+                env.IncludeNonterminal(prod.Name.Name, new SemgusParserContext(prod.Name));
+                env.AddNewSemanticRelation(prod.RelationDefinition.Name.Name,
+                                           new SemgusParserContext(prod.Name),
+                                           prod.RelationDefinition.Types.Select(s => env.IncludeType(s.Name)).ToList());
+            }
+            return env;
         }
 
-        public override LanguageEnvironment VisitNt_name([NotNull] SemgusParser.Nt_nameContext context) {
-            _env.IncludeNonterminal(context.symbol());
-            return _env;
+        public static LanguageEnvironment ProcessVariableDeclarationList(IEnumerable<VariableDeclarationForm> forms, LanguageEnvironment env)
+        {
+            foreach (var decl in forms)
+            {
+                ProcessVariableDeclaration(decl, env);
+            }
+            return env;
         }
 
-        public override LanguageEnvironment VisitNt_relation_def([NotNull] SemgusParser.Nt_relation_defContext context) {
-            var symbols = context.symbol();
-            _env.AddNewSemanticRelation(symbols[0], symbols.Skip(1).Select(_env.IncludeType).ToList());
-            return _env;
+        public static LanguageEnvironment ProcessVariableDeclaration(VariableDeclarationForm form, LanguageEnvironment env)
+        {
+            env.IncludeType(form.Type.Name);
+            return env;
         }
     }
 }

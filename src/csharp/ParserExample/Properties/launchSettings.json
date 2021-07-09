@@ -2,7 +2,7 @@
   "profiles": {
     "ParserExample": {
       "commandName": "Project",
-      "commandLineArgs": "invalid/max-exp.sem",
+      "commandLineArgs": "sexpr/max-exp.sem",
       "workingDirectory": "$(SolutionDir)/src/test/resources/examples/"
     }
   }

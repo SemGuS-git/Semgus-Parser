@@ -1,4 +1,4 @@
-using Antlr4.Runtime;
+using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
     public class VariableDeclaration : ISyntaxNode {
@@ -13,7 +13,7 @@ namespace Semgus.Syntax {
             CT_Auxiliary,
         };
 
-        public ParserRuleContext ParserContext { get; set; }
+        public SemgusParserContext ParserContext { get; set; }
         public string Name { get; }
         public SemgusType Type { get; }
         public Context DeclarationContext { get; }

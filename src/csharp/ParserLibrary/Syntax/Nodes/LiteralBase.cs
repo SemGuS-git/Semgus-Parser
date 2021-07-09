@@ -1,12 +1,13 @@
 using System;
-using Antlr4.Runtime;
+
+using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
     /// <summary>
     /// Abstract base class for all literals, which should be generic subclasses.
     /// </summary>
     public abstract class LiteralBase : IFormula, IProductionRewriteAtom {
-        public abstract ParserRuleContext ParserContext { get; set; }
+        public abstract SemgusParserContext ParserContext { get; set; }
         
         public abstract T Accept<T>(IAstVisitor<T> visitor);
         

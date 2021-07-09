@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Semgus.Parser.Internal;
+
+using Semgus.Parser.Reader;
 using Semgus.Util;
 
 namespace Semgus.Syntax {
@@ -21,14 +22,33 @@ namespace Semgus.Syntax {
         private readonly Dictionary<string, LibraryFunction> _libraryFunctions = new Dictionary<string, LibraryFunction>();
         public IReadOnlyCollection <LibraryFunction> LibraryFunctions => _libraryFunctions.Values;
 
-        public SemanticRelationDeclaration AddNewSemanticRelation(SemgusParser.SymbolContext context, IReadOnlyList<SemgusType> elementTypes) {
-            var name = context.GetText();
+        public LanguageEnvironment Clone()
+        {
+            LanguageEnvironment clone = new();
+
+            static void ShallowCopyDictionary<TKey, TValue>(IDictionary<TKey, TValue> from, IDictionary<TKey, TValue> to)
+            {
+                foreach (var (k, v) in from)
+                {
+                    to.Add(k, v);
+                }
+            }
+
+            ShallowCopyDictionary(_types, clone._types);
+            ShallowCopyDictionary(_nonterminals, clone._nonterminals);
+            ShallowCopyDictionary(_relations, clone._relations);
+            ShallowCopyDictionary(_libraryFunctions, clone._libraryFunctions);
+
+            return clone;
+        }
+
+        public SemanticRelationDeclaration AddNewSemanticRelation(string name, SemgusParserContext context, IReadOnlyList<SemgusType> elementTypes) {
             if (_relations.ContainsKey(name)) throw new Exception();
 
             var rel = new SemanticRelationDeclaration(
                 name: name,
                 elementTypes: elementTypes
-            ) {ParserContext = context};
+            );
 
             _relations.Add(name, rel);
             return rel;
@@ -50,8 +70,7 @@ namespace Semgus.Syntax {
             return value;
         }
         
-        public Nonterminal IncludeNonterminal(SemgusParser.SymbolContext context) {
-            var name = context.GetText();
+        public Nonterminal IncludeNonterminal(string name, SemgusParserContext context) {
             if (_nonterminals.TryGetValue(name, out var value)) return value;
 
             value = new Nonterminal(name: name);

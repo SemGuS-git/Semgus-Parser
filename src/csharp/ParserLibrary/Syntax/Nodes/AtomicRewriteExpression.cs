@@ -1,12 +1,13 @@
 using System.Collections.Generic;
-using Antlr4.Runtime;
+
+using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
     /// <summary>
     /// Production rewrite expression consisting of a single atomic element.
     /// </summary>
     public class AtomicRewriteExpression : IProductionRewriteExpression {
-        public ParserRuleContext ParserContext { get; set; }
+        public SemgusParserContext ParserContext { get; set; }
         public IProductionRewriteAtom Atom { get; }
 
         public AtomicRewriteExpression(IProductionRewriteAtom atom) {

@@ -1,11 +1,11 @@
-using Antlr4.Runtime;
+using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
     /// <summary>
     /// Terminal symbol that appears in a production rewrite expression.
     /// </summary>
     public class LeafTerm : IProductionRewriteAtom {
-        public ParserRuleContext ParserContext { get; set; }
+        public SemgusParserContext ParserContext { get; set; }
         public string Text { get; }
 
         public LeafTerm(string text) {

@@ -1,11 +1,11 @@
-using Antlr4.Runtime;
+using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
     /// <summary>
     /// Specifies a single semantic rule in the form of a predicate that, when true, permits some particular rewrite.
     /// </summary>
     public class SemanticRule : ISyntaxNode {
-        public ParserRuleContext ParserContext { get; set; }
+        public SemgusParserContext ParserContext { get; set; }
         public IProductionRewriteExpression RewriteExpression { get; }
         public VariableClosure Closure { get; }
         public IFormula Predicate { get; }

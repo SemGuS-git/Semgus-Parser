@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using Antlr4.Runtime;
+
+using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
     /// <summary>
@@ -7,7 +8,7 @@ namespace Semgus.Syntax {
     /// This appears as the conclusion of a production CHC.
     /// </summary>
     public class SemanticRelationInstance : ISyntaxNode {
-        public ParserRuleContext ParserContext { get; set; }
+        public SemgusParserContext ParserContext { get; set; }
         public SemanticRelationDeclaration Relation { get; }
         public IReadOnlyList<VariableDeclaration> Elements { get; }
 

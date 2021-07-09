@@ -1,11 +1,11 @@
-using Antlr4.Runtime;
+using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
     /// <summary>
     /// Use of a variable in a formula
     /// </summary>
     public class VariableEvaluation : IFormula {
-        public ParserRuleContext ParserContext { get; set; }
+        public SemgusParserContext ParserContext { get; set; }
         public VariableDeclaration Variable { get; }
 
         public VariableEvaluation(VariableDeclaration variable) {

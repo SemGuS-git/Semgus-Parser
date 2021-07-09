@@ -1,0 +1,45 @@
+(synth-fun max2 ((x Int) (y Int)) ((result Int))
+                                                                            ; NT Start
+  (Start t (Start.Sem (Term Int Int Int))                                   ; NT name : relation-def : term name
+    (() (Start.Sem t x y result))                                           ; CHC conclusion
+  
+       (x () (and (= t (Leaf "x")) (= result x)))                           ; Leaf (x), with semantics for t and result.
+       (y () (and (= t (Leaf "y")) (= result y)))                           ; Using Leaf('y') to represent y as a term
+       (Zero () (and (= t (Leaf "0")) (= result 0)))                        ; Maybe we can automate the syntax part instead of
+       (1 () (and (= t (Leaf "1")) (= result 1)))                           ; having users write about terms
+       (n ((n.value Int)) (and (= t (Leaf "n.value")) (= result n.value)))  ; Symbolic integer n - Here, we use n.value to show that n and n.value are different constructs
+
+       ((+ (Start t1) (Start t2))
+        ((v1 Int) (v2 Int))
+        (and (= t (Plus t1 t2)) (Start.Sem t1 x y v1) (Start.Sem t2 x y v2) (= result (+ v1 v2))))
+         ; Premise for Plus: premise contains Start.Sems and computes v1 + v2 for result
+
+       ((ite (B tb) (Start t1) (Start t2))
+        ((vb Bool) (v1 Int) (v2 Int))
+	(and (= t (ITE tb t1 t2)) (B.Sem tb x y vb) (Start.Sem t1 x y v1) (Start.Sem t2 x y v2) (= result (ite vb v1 v2)))))
+         ; Premise for If-Then-Else: We can use NTs from other LHSes as well (scope should follow this NTs rules)
+ 
+                                                                            ; NT B
+  (B t (B.Sem (Term Int Int Bool))                                          ; NT def for B
+   (((rb Bool)) (B.Sem t x y rb))                                           ; CHC conclusion
+  
+     (true () (and (= t (Leaf "true")) (= rb true)))                        ; True
+     (false () (and (= t (Leaf "false")) (= rb false)))                     ; False
+
+     ((Not (B t1))
+      ((v1 Bool))
+      (and (= t (Not t1)) (B.Sem t1 x y v1) (= rb (not v1))))               ; For Not
+
+     ((and (B t1) (B t2))
+      ((v1 Bool) (v2 Bool))
+      (and (= t (And t1 t2)) (B.Sem t1 x y v1) (B.Sem t2 x y v2) (= rb (and v1 v2))))
+       ; For And
+
+     ((LT (Start t1) (Start t2))
+      ((v1 Int) (v2 Int))
+      (and (= t (LT t1 t2)) (Start.Sem t1 x y v1) (Start.Sem t2 x y v2) (= rb (< v1 v2))))))
+       ; For <
+
+
+; Specification (will get translated into constraint => realizable + check realizable)
+(constraint (and (Start.Sem t 4 2 4) (Start.Sem t 2 5 5)))
