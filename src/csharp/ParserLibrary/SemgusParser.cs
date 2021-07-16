@@ -40,6 +40,7 @@ namespace Semgus.Parser
             _commandDispatch.Add(new SynthFunCommand().AsKeyValuePair());
             _commandDispatch.Add(new ConstraintCommand().AsKeyValuePair());
             _commandDispatch.Add(new DeclareVarCommand().AsKeyValuePair());
+            _commandDispatch.Add(new MetadataCommand().AsKeyValuePair());
         }
 
         /// <summary>
