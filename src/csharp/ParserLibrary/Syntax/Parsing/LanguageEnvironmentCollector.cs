@@ -44,5 +44,11 @@ namespace Semgus.Syntax
             env.IncludeType(form.Type.Name);
             return env;
         }
+
+        public static LanguageEnvironment ProcessVariableDeclaration(DeclareVarForm form, LanguageEnvironment env)
+        {
+            env.IncludeType(form.Type.Name);
+            return env;
+        }
     }
 }

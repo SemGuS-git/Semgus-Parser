@@ -43,32 +43,19 @@ namespace Semgus.Parser.Commands
                 return default;
             }
 
-            if (!commandForm.TryPop(out SymbolToken name, out commandForm, out err, out errPos))
+            if (!DeclareVarForm.TryParse(commandForm, out var declForm, out err, out errPos))
             {
                 errorStream.WriteParseError(err, errPos);
                 errCount += 1;
                 return default;
             }
 
-            if (!commandForm.TryPop(out SymbolToken type, out commandForm, out err, out errPos))
-            {
-                errorStream.WriteParseError(err, errPos);
-                errCount += 1;
-                return default;
-            }
+            var env = LanguageEnvironmentCollector.ProcessVariableDeclaration(declForm, previous.GlobalEnvironment.Clone());
 
-            if (default != commandForm)
-            {
-                errorStream.WriteParseError("Extra data on variable declaration: " + commandForm.ToString(), commandForm.Position);
-            }
+            var newDecls = declForm.Symbols.Select(d =>
+                new VariableDeclaration(d.Name, env.ResolveType(declForm.Type.Name), VariableDeclaration.Context.CT_Auxiliary));
 
-            VariableDeclarationForm decl = new(name, type);
-
-            var env = LanguageEnvironmentCollector.ProcessVariableDeclaration(decl, previous.GlobalEnvironment.Clone());
-
-            VariableDeclaration vd = new(name.Name, env.ResolveType(type.Name), VariableDeclaration.Context.CT_Auxiliary);
-
-            VariableClosure closure = new(parent: previous.GlobalClosure, Enumerable.Empty<VariableDeclaration>().Append(vd));
+            VariableClosure closure = new(parent: previous.GlobalClosure, newDecls);
 
             return previous.UpdateEnvironment(env).UpdateClosure(closure);
         }
