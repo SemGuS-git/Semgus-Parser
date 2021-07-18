@@ -33,6 +33,15 @@ namespace Semgus.Parser.Reader
         }
 
         /// <summary>
+        /// Updates the source name associated with reported positions
+        /// </summary>
+        /// <param name="source">Source name to use</param>
+        public void SetSourceName(string source)
+        {
+            _reader.SourceName = source;
+        }
+
+        /// <summary>
         /// Reads a SemgusToken from this reader
         /// </summary>
         /// <param name="errorOnEndOfStream">Whether or not to throw an error on EOF</param>

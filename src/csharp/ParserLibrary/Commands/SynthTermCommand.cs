@@ -211,6 +211,11 @@ namespace Semgus.Parser.Commands
             var choiceExpressionConverter = new ChoiceExpressionConverter(env);
             var choiceExpression = choiceExpressionConverter.ProcessChoiceExpression(rule);
 
+            if (env.IsNameDeclared(choiceExpression.GetNamingSymbol()) || parentClosure.TryResolve(choiceExpression.GetNamingSymbol(), out _))
+            {
+                throw new InvalidOperationException($"{rule.Leaf?.Position ?? rule.Operator?.Name.Position}: Error declaring production: {choiceExpression.GetNamingSymbol()}. An object with the same name is already declared.");
+            }
+
             var closure = new VariableClosure(
                 parent: parentClosure,
                 variables:

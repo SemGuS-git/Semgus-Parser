@@ -18,14 +18,21 @@ namespace Semgus.Parser.Example {
             var filename = args[0];
 
             SemgusParser parser = new(filename);
-            parser.TryParse(out var problem);
-            Console.Out.WriteLine(problem.ToString());
+            parser.TryParse(out var problem, out int errCount);
+            if (problem is not null)
+            {
+                Console.Out.WriteLine(problem.ToString());
 
-            var printer = new AstPrinter();
+                var printer = new AstPrinter();
 
-            // Print the AST
-            Console.WriteLine(problem.GlobalEnvironment.PrettyPrint());
-            Console.WriteLine(printer.PrettyPrint(problem));
+                // Print the AST
+                Console.WriteLine(problem.GlobalEnvironment.PrettyPrint());
+                Console.WriteLine(printer.PrettyPrint(problem));
+            }
+            else
+            {
+                Console.WriteLine($"Failed to parse file. Encountered {errCount} error{(errCount != 1 ? "s" : "")}");
+            }
         }
     }
 }

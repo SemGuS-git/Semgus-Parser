@@ -36,6 +36,7 @@ namespace Semgus.Parser
         {
             _stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
             _reader = new SemgusReader(_stream);
+            _reader.SetSourceName(filename);
             _commandDispatch = new Dictionary<string, ISemgusCommand>();
             _commandDispatch.Add(new SynthTermCommand().AsKeyValuePair());
             _commandDispatch.Add(new ConstraintCommand().AsKeyValuePair());
@@ -112,7 +113,17 @@ namespace Semgus.Parser
                     }
                     else
                     {
-                        problem = command.Process(problem, cons, errorStream, ref errCount);
+                        try
+                        {
+                            problem = command.Process(problem, cons, errorStream, ref errCount);
+                        }
+                        catch (InvalidOperationException ioe)
+                        {
+                            errorStream.WriteLine("Fatal error during parsing: " + ioe.Message);
+                            errorStream.WriteLine("Full stack trace: \n" + ioe.ToString());
+                            errCount += 1;
+                            problem = default;
+                        }
                         if (problem is null)
                         {
                             errorStream.WriteLine("Terminating due to fatal error encountered while parsing command: " + commandName.Name);

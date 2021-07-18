@@ -57,6 +57,11 @@ namespace Semgus.Syntax {
         public SemanticRelationDeclaration AddNewSemanticRelation(string name, SemgusParserContext context, IReadOnlyList<SemgusType> elementTypes) {
             if (_relations.ContainsKey(name)) throw new Exception();
 
+            if (IsNameDeclared(name))
+            {
+                throw new InvalidOperationException($"Error declaring production at: {context.Position}. Name in use: {name}");
+            }
+
             var rel = new SemanticRelationDeclaration(
                 name: name,
                 elementTypes: elementTypes
@@ -97,11 +102,15 @@ namespace Semgus.Syntax {
             _libraryFunctions.Add(name, value);
             return value;
         }
-        
-        public Nonterminal AddNonterminal(string name, SemgusTermType type, SemgusParserContext context) {
-            if (_nonterminals.TryGetValue(name, out var value)) return value;
 
-            value = new Nonterminal(name: name, type: type);
+        public Nonterminal AddNonterminal(string name, SemgusTermType type, SemgusParserContext context) {
+            
+            if (IsNameDeclared(name))
+            {
+                throw new InvalidOperationException($"Error declaring nonterminal at: {context.Position}. Name in use: {name}");
+            }
+
+            Nonterminal value = new(name: name, type: type);
             _nonterminals.Add(name, value);
             return value;
         }
