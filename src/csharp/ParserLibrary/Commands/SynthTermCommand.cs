@@ -12,15 +12,17 @@ using Semgus.Syntax;
 namespace Semgus.Parser.Commands
 {
     /// <summary>
-    /// Command for defining a function to be synthesized, along with its grammar and syntax
-    /// Syntax: (synth-fun [name] [inputs] [outputs] [productions]*)
+    /// Command for defining a term to be synthesized, along with its type and grammar.
+    /// If the grammar is a symbol, it will use a previously-defined grammar [NOT SUPPORTED YET]
+    /// Otherwise, it can be a list containing an in-line grammar declaration.
+    /// Syntax: (synth-term [name] [type] [grammar])
     /// </summary>
-    public class SynthFunCommand : ISemgusCommand
+    public class SynthTermCommand : ISemgusCommand
     {
         /// <summary>
         /// Name of this command, as appearing in the source files
         /// </summary>
-        public string CommandName => "synth-fun";
+        public string CommandName => "synth-term";
 
         /// <summary>
         /// Tries to parse a synth fun command from the given form
@@ -47,7 +49,7 @@ namespace Semgus.Parser.Commands
                 return default;
             }
 
-            // Function name
+            // Objective name
             if (!form.TryPop(out SymbolToken name, out form, out err, out errPos))
             {
                 errorStream.WriteParseError(err, errPos);
@@ -55,58 +57,69 @@ namespace Semgus.Parser.Commands
                 return default;
             }
 
-            // Input parameters
-            if (!form.TryPop(out SemgusToken inputList, out form, out err, out errPos))
+            // Objective type
+            if (!form.TryPop(out SymbolToken type, out form, out err, out errPos))
             {
                 errorStream.WriteParseError(err, errPos);
                 errCount += 1;
                 return default;
             }
 
-            if (!VariableDeclarationForm.TryParseList(inputList, out var inputDecls, out err, out errPos))
+            if (!previous.GlobalEnvironment.TryResolveTermType(type.Name, out var objectiveType))
             {
-                errorStream.WriteParseError(err, errPos);
+                if (previous.GlobalEnvironment.IsNameDeclared(type.Name))
+                {
+                    errorStream.WriteParseError("Expected a term type, but got: " + type.Name, type.Position);
+                }
+                else
+                {
+                    errorStream.WriteParseError("Undeclared term type: " + type.Name, type.Position);
+                }
                 errCount += 1;
+                return default;
             }
 
-            // Output parameters
-            if (!form.TryPop(out SemgusToken outputList, out form, out err, out errPos))
+            VariableClosure nextClosure = new(parent: previous.GlobalClosure, new[]
+            {
+                new VariableDeclaration(name.Name, objectiveType, VariableDeclaration.Context.CT_Term)
+            });
+
+            // Grammar, possibly inline
+            if (!form.TryPop(out SemgusToken grammar, out form, out err, out errPos))
             {
                 errorStream.WriteParseError(err, errPos);
                 errCount += 1;
                 return default;
             }
-            if (!VariableDeclarationForm.TryParseList(outputList, out var outputDecls, out err, out errPos))
+
+            if (grammar is SymbolToken)
             {
-                errorStream.WriteParseError(err, errPos);
+                errorStream.WriteParseError("Non-inline grammar definitions not supported", grammar.Position);
                 errCount += 1;
+                return default;
             }
-
-            List<ProductionForm> productions = new();
-            while (default != form)
+            else if (grammar is ConsToken inlineGrammar)
             {
-                if (!form.TryPop(out ConsToken productionForm, out form, out err, out errPos))
+                if (!GrammarForm.TryParse(inlineGrammar, out var grammarForm, out err, out errPos))
                 {
                     errorStream.WriteParseError(err, errPos);
                     errCount += 1;
+                    return default;
                 }
-                if (!ProductionForm.TryParse(productionForm, out ProductionForm production, out err, out errPos))
-                {
-                    errorStream.WriteParseError(err, errPos);
-                    errCount += 1;
-                }
-                productions.Add(production);
+
+                var env = LanguageEnvironmentCollector.ProcessGrammar(grammarForm, previous.GlobalEnvironment.Clone());
+                var closure = new VariableClosure(parent: nextClosure,
+                                                FormsToDeclarations(grammarForm.VariableDeclarations, env, VariableDeclaration.Context.NT_Auxiliary));
+
+                SynthFun sf = new(name.Name, closure, grammarForm.Productions.Select(p => ProcessProduction(p, env, closure)).ToList());
+                return previous.AddSynthFun(sf).UpdateEnvironment(env).UpdateClosure(nextClosure);
             }
-
-            var env = LanguageEnvironmentCollector.ProcessSynthFun(inputDecls.Concat(outputDecls), productions, previous.GlobalEnvironment.Clone());
-
-            var closure = new VariableClosure(parent: previous.GlobalClosure,
-                                              FormsToDeclarations(inputDecls, env, VariableDeclaration.Context.SF_Input)
-                                              .Concat(FormsToDeclarations(outputDecls, env, VariableDeclaration.Context.SF_Output)));
-
-            SynthFun sf = new(name.Name, closure, productions.Select(p => ProcessProduction(p, env, closure)).ToList());
-
-            return previous.AddSynthFun(sf).UpdateEnvironment(env);
+            else
+            {
+                errorStream.WriteParseError("Unknown expression. Expected grammar definition: " + grammar, grammar.Position);
+                errCount += 1;
+                return default;
+            }
         }
 
         /// <summary>
@@ -119,14 +132,22 @@ namespace Semgus.Parser.Commands
         private ProductionGroup ProcessProduction(ProductionForm prod, LanguageEnvironment env, VariableClosure parentClosure)
         {
             var nonterminal = env.ResolveNonterminal(prod.Name.Name);
+            if (!parentClosure.TryResolve(prod.Term.Name, out var termVar))
+            {
+                throw new InvalidOperationException("Term variable not declared: " + prod.Term.Name);
+            }
+            if (termVar.Type != nonterminal.Type)
+            {
+                throw new InvalidOperationException($"Type of term variable {termVar} does not match nonterminal type: expected: {nonterminal.Type}, but got: {termVar.Type}.");
+            }
 
             // TODO *wjc: relable aux variables as outputs when implied by their position in the relation
             var closure = new VariableClosure(parent: parentClosure,
-                FormsToDeclarations(prod.VariableDeclarations, env, VariableDeclaration.Context.NT_Auxiliary)
+                Enumerable.Empty<VariableDeclaration>()
                   .Prepend(new NonterminalTermDeclaration(
                       name: prod.Term.Name,
-                      type: env.ResolveType(NonterminalTermDeclaration.TYPE_NAME),
-                      nonterminal: env.ResolveNonterminal(nonterminal.Name),
+                      type: nonterminal.Type,
+                      nonterminal: nonterminal,
                       declarationContext: VariableDeclaration.Context.NT_Term
                       ))
             );
@@ -136,7 +157,7 @@ namespace Semgus.Parser.Commands
                 throw new InvalidOperationException("Semantic relation must be a list: for nonterminal " + nonterminal.Name);
             }
 
-            var relationSymbols = prod.Relation.List.Select(f =>
+            var relationSymbolsAndAnnotations = prod.Relation.List.Select(f =>
             {
                 if (f.Atom is null)
                 {
@@ -148,29 +169,32 @@ namespace Semgus.Parser.Commands
                 }
                 else
                 {
-                    return symb;
+                    return (Symbol: symb, Annotation: f.Annotation);
                 }
             });
 
-            relationSymbols = relationSymbols.Pop(out var relName);
+            relationSymbolsAndAnnotations = relationSymbolsAndAnnotations.Pop(out var relNameAndAnnotation).ToList(); // Needs to be enumerated twice
 
-            var relationInstance = new SemanticRelationInstance(env.ResolveRelation(relName.Name),
-                                                                relationSymbols.Select(s => {
-                                                                    if (closure.TryResolve(s.Name, out var decl))
+            var relationInstance = new SemanticRelationInstance(env.ResolveRelation(relNameAndAnnotation.Symbol.Name),
+                                                                relNameAndAnnotation.Annotation,
+                                                                relationSymbolsAndAnnotations.Select(s =>
+                                                                {
+                                                                    if (closure.TryResolve(s.Symbol.Name, out var decl))
                                                                     {
                                                                         return decl;
                                                                     }
                                                                     else
                                                                     {
-                                                                        throw new InvalidOperationException("Unknown variable in semantic relation: " + s.Name);
+                                                                        throw new InvalidOperationException("Unknown variable in semantic relation: " + s.Symbol.Name);
                                                                     }
-                                                                }).ToList());
+                                                                }).ToList(),
+                                                                relationSymbolsAndAnnotations.Select(s => s.Annotation).ToList());
 
             var node = new ProductionGroup(
                 nonterminal: nonterminal,
                 closure: closure,
                 relationInstance: relationInstance,
-                semanticRules: prod.Premises.Select(p => ProcessProductionRule(p, env, closure)).ToList()
+                semanticRules: prod.Productions.Select(p => ProcessProductionRule(p, env, closure)).ToList()
             );
 
             node.AssertCorrectness();
@@ -190,17 +214,23 @@ namespace Semgus.Parser.Commands
             var choiceExpressionConverter = new ChoiceExpressionConverter(env);
             var choiceExpression = choiceExpressionConverter.ProcessChoiceExpression(rule);
 
+            if (env.IsNameDeclared(choiceExpression.GetNamingSymbol()) || parentClosure.TryResolve(choiceExpression.GetNamingSymbol(), out _))
+            {
+                throw new InvalidOperationException($"{rule.Leaf?.Position ?? rule.Operator?.Name.Position}: Error declaring production: {choiceExpression.GetNamingSymbol()}. An object with the same name is already declared.");
+            }
+
             var closure = new VariableClosure(
                 parent: parentClosure,
                 variables:
                 choiceExpressionConverter.DeclaredTerms
-                .Concat(FormsToDeclarations(rule.VariableDeclarations, env, VariableDeclaration.Context.PR_Auxiliary))
             );
+
+            FormulaConverter fConv = new(env, closure);
 
             var node = new SemanticRule(
                 rewriteExpression: choiceExpression,
                 closure: closure,
-                predicate: new FormulaConverter(env, closure).ConvertFormula(rule.Predicate)
+                predicates: rule.Predicates.Select(p => fConv.ConvertFormula(p)).ToList()
             );
             return node;
         }
@@ -212,11 +242,11 @@ namespace Semgus.Parser.Commands
         /// <param name="env">The current environment</param>
         /// <param name="context">The usage context for the variables</param>
         /// <returns>The processed declarations</returns>
-        private IEnumerable<VariableDeclaration> FormsToDeclarations(IReadOnlyList<VariableDeclarationForm> decls,
+        private IEnumerable<VariableDeclaration> FormsToDeclarations(IReadOnlyList<DeclareVarForm> decls,
                                                                        LanguageEnvironment env,
                                                                        VariableDeclaration.Context context)
         {
-            return decls.Select(decl => new VariableDeclaration(decl.Name.Name, env.ResolveType(decl.Type.Name), context));
+            return decls.SelectMany(decl => decl.Symbols.Select(d => new VariableDeclaration(d.Name, env.ResolveType(decl.Type.Name), context)));
         }
     }
 }

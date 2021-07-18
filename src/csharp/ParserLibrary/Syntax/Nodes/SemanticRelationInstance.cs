@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 
+using Semgus.Parser.Forms;
 using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
@@ -11,10 +12,14 @@ namespace Semgus.Syntax {
         public SemgusParserContext ParserContext { get; set; }
         public SemanticRelationDeclaration Relation { get; }
         public IReadOnlyList<VariableDeclaration> Elements { get; }
+        public Annotation Annotation { get; }
+        public IReadOnlyList<Annotation> ElementAnnotations { get; }
 
-        public SemanticRelationInstance(SemanticRelationDeclaration relation, IReadOnlyList<VariableDeclaration> elements) {
+        public SemanticRelationInstance(SemanticRelationDeclaration relation, Annotation annotation, IReadOnlyList<VariableDeclaration> elements, IReadOnlyList<Annotation> elementAnnotations) {
             Relation = relation;
+            Annotation = annotation;
             Elements = elements;
+            ElementAnnotations = elementAnnotations;
         }
 
         public void AssertCorrectness() {

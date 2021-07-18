@@ -31,5 +31,11 @@ namespace Semgus.Sexpr.Reader
         /// The default position, pointed at 0:0 with an unknown source
         /// </summary>
         public static readonly SexprPosition Default = new(0, 0, "<unknown>");
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{Source}:{Line}:{Column}";
+        }
     }
 }

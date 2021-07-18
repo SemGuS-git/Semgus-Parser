@@ -10,17 +10,20 @@ namespace Semgus.Syntax {
     /// Contains declarations for identifiers that are "global" within the language of a synthesis problem.
     /// </summary>
     public class LanguageEnvironment {
-        private readonly Dictionary<string, SemgusType> _types = new Dictionary<string, SemgusType>();
+        private readonly Dictionary<string, SemgusType> _types = new();
         public IReadOnlyCollection <SemgusType> Types => _types.Values;
         
-        private readonly Dictionary<string, Nonterminal> _nonterminals = new Dictionary<string, Nonterminal>();
+        private readonly Dictionary<string, Nonterminal> _nonterminals = new();
         public IReadOnlyCollection <Nonterminal> Nonterminals => _nonterminals.Values;
         
-        private readonly Dictionary<string, SemanticRelationDeclaration> _relations = new Dictionary<string, SemanticRelationDeclaration>();
+        private readonly Dictionary<string, SemanticRelationDeclaration> _relations = new();
         public IReadOnlyCollection <SemanticRelationDeclaration> Relations => _relations.Values;
         
-        private readonly Dictionary<string, LibraryFunction> _libraryFunctions = new Dictionary<string, LibraryFunction>();
+        private readonly Dictionary<string, LibraryFunction> _libraryFunctions = new();
         public IReadOnlyCollection <LibraryFunction> LibraryFunctions => _libraryFunctions.Values;
+
+        private readonly Dictionary<string, SemgusTermType> _termTypes = new();
+        public IReadOnlyCollection<SemgusTermType> TermTypes => _termTypes.Values;
 
         public LanguageEnvironment Clone()
         {
@@ -38,12 +41,26 @@ namespace Semgus.Syntax {
             ShallowCopyDictionary(_nonterminals, clone._nonterminals);
             ShallowCopyDictionary(_relations, clone._relations);
             ShallowCopyDictionary(_libraryFunctions, clone._libraryFunctions);
+            ShallowCopyDictionary(_termTypes, clone._termTypes);
 
             return clone;
         }
 
+        public bool IsNameDeclared(string name)
+        {
+            return _types.ContainsKey(name)                // Term Types are a subset of all types
+                || _nonterminals.ContainsKey(name)
+                || _relations.ContainsKey(name)
+                || _libraryFunctions.ContainsKey(name);
+        }
+
         public SemanticRelationDeclaration AddNewSemanticRelation(string name, SemgusParserContext context, IReadOnlyList<SemgusType> elementTypes) {
             if (_relations.ContainsKey(name)) throw new Exception();
+
+            if (IsNameDeclared(name))
+            {
+                throw new InvalidOperationException($"Error declaring production at: {context.Position}. Name in use: {name}");
+            }
 
             var rel = new SemanticRelationDeclaration(
                 name: name,
@@ -53,6 +70,22 @@ namespace Semgus.Syntax {
             _relations.Add(name, rel);
             return rel;
         }
+
+        public SemgusTermType AddTermType(string name, SemgusParserContext declContext)
+        {
+            if (IsNameDeclared(name))
+            {
+                throw new InvalidOperationException("Name already declared: " + name);
+            }
+
+            SemgusTermType stt = new(name, declContext);
+            _types.Add(name, stt);
+            _termTypes.Add(name, stt);
+            return stt;
+        }
+
+        public bool TryResolveTermType(string typename, out SemgusTermType type)
+            => _termTypes.TryGetValue(typename, out type);
 
         public SemgusType IncludeType(string name) {
             if (_types.TryGetValue(name, out var value)) return value;
@@ -69,11 +102,15 @@ namespace Semgus.Syntax {
             _libraryFunctions.Add(name, value);
             return value;
         }
-        
-        public Nonterminal IncludeNonterminal(string name, SemgusParserContext context) {
-            if (_nonterminals.TryGetValue(name, out var value)) return value;
 
-            value = new Nonterminal(name: name);
+        public Nonterminal AddNonterminal(string name, SemgusTermType type, SemgusParserContext context) {
+            
+            if (IsNameDeclared(name))
+            {
+                throw new InvalidOperationException($"Error declaring nonterminal at: {context.Position}. Name in use: {name}");
+            }
+
+            Nonterminal value = new(name: name, type: type);
             _nonterminals.Add(name, value);
             return value;
         }

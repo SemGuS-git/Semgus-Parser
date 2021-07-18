@@ -163,8 +163,11 @@ namespace Semgus.Syntax {
                         _builder.LineBreak();
                         PrintVariableClosure(node.Closure);
                         _builder.LineBreak();
-                        DoVisit(node.Predicate);
-                        _builder.LineBreak();
+                        foreach (var pred in node.Predicates)
+                        {
+                            DoVisit(pred);
+                            _builder.LineBreak();
+                        }
                     }
                     return _builder;
                 }

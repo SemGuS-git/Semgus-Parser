@@ -48,6 +48,15 @@ namespace Semgus.Sexpr.Reader
         public SexprPosition CurrentPosition { get; private set; } = new SexprPosition(0, 0, "<unknown>");
 
         /// <summary>
+        /// The name of the source used to report positions
+        /// </summary>
+        public string SourceName
+        {
+            get => CurrentPosition.Source;
+            set => CurrentPosition = new SexprPosition(CurrentPosition.Line, CurrentPosition.Column, value);
+        }
+
+        /// <summary>
         /// Constructs a new reader
         /// </summary>
         /// <param name="sexprFactory">Factory for creating S-expressions</param>

@@ -72,10 +72,12 @@ namespace Semgus.Syntax {
 
         private IProductionRewriteAtom ProcessOperatorParameter(OperatorParameterForm opForm)
         {
+            var nonterminal = _env.ResolveNonterminal(opForm.Nonterminal.Name);
+
             NonterminalTermDeclaration term = new(
                 name: opForm.TermName.Name,
-                type: _env.ResolveType(NonterminalTermDeclaration.TYPE_NAME),
-                nonterminal: _env.ResolveNonterminal(opForm.Nonterminal.Name),
+                type: nonterminal.Type,
+                nonterminal: nonterminal,
                 declarationContext: VariableDeclaration.Context.PR_Subterm
             );
 

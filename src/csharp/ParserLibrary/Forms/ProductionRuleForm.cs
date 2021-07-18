@@ -8,10 +8,10 @@ namespace Semgus.Parser.Forms
 {
     /// <summary>
     /// A form holding a production rule (a.k.a. RHS of a CHC). Note that it is either a leaf or an operator.
-    /// Syntax (leaf)    : ([name] ([decls]*) [predicate])
-    /// Syntax (operator): (([name] [opParams]*) ([decls]*) [predicate]) 
+    /// Syntax (leaf)    : ([name] [predicate]+)
+    /// Syntax (operator): (([name] [opParams]*) [predicate]+) 
     /// </summary>
-    public record ProductionRuleForm(SemgusToken Leaf, OperatorDefinitionForm Operator, IReadOnlyList<VariableDeclarationForm> VariableDeclarations, FormulaForm Predicate)
+    public record ProductionRuleForm(SemgusToken Leaf, OperatorDefinitionForm Operator, IReadOnlyList<FormulaForm> Predicates)
     {
         /// <summary>
         /// Tries to parse a production rule (a.k.a. RHS of a production) from the given form
@@ -40,32 +40,22 @@ namespace Semgus.Parser.Forms
                 name = default;
             }
 
-            if (!form.TryPop(out SemgusToken varDeclForm, out form, out err, out errPos))
+            List<FormulaForm> formulae = new();
+            while (default != form)
             {
-                return false;
-            }
-            if (!VariableDeclarationForm.TryParseList(varDeclForm, out var varDecls, out err, out errPos))
-            {
-                return false;
+
+                if (!form.TryPop(out SemgusToken predicateForm, out form, out err, out errPos))
+                {
+                    return false;
+                }
+                if (!FormulaForm.TryParse(predicateForm, out var predicate, out err, out errPos))
+                {
+                    return false;
+                }
+                formulae.Add(predicate);
             }
 
-            if (!form.TryPop(out SemgusToken predicateForm, out form, out err, out errPos))
-            {
-                return false;
-            }
-            if (!FormulaForm.TryParse(predicateForm, out var predicate, out err, out errPos))
-            {
-                return false;
-            }
-
-            if (default != form)
-            {
-                err = "Extra data at end of production rule declaration.";
-                errPos = form.Position;
-                return false;
-            }
-
-            rule = new ProductionRuleForm(name, opDefn, varDecls, predicate);
+            rule = new ProductionRuleForm(name, opDefn, formulae);
             return true;
         }
     }

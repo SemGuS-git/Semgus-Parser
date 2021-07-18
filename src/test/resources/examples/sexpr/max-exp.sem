@@ -1,45 +1,77 @@
-(synth-fun max2 ((x Int) (y Int)) ((result Int))
-                                                                            ; NT Start
-  (Start t (Start.Sem (Term Int Int Int))                                   ; NT name : relation-def : term name
-    (() (Start.Sem t x y result))                                           ; CHC conclusion
-  
-       (x () (and (= t (Leaf "x")) (= result x)))                           ; Leaf (x), with semantics for t and result.
-       (y () (and (= t (Leaf "y")) (= result y)))                           ; Using Leaf('y') to represent y as a term
-       (Zero () (and (= t (Leaf "0")) (= result 0)))                        ; Maybe we can automate the syntax part instead of
-       (1 () (and (= t (Leaf "1")) (= result 1)))                           ; having users write about terms
-       (n ((n.value Int)) (and (= t (Leaf "n.value")) (= result n.value)))  ; Symbolic integer n - Here, we use n.value to show that n and n.value are different constructs
+; Lisp-style comments only
 
-       ((+ (Start t1) (Start t2))
-        ((v1 Int) (v2 Int))
-        (and (= t (Plus t1 t2)) (Start.Sem t1 x y v1) (Start.Sem t2 x y v2) (= result (+ v1 v2))))
-         ; Premise for Plus: premise contains Start.Sems and computes v1 + v2 for result
+(metadata :format-version "1.0.0") ; Optional
+(metadata :author "Jinwoo Kim")
+(metadata :realizable true)
 
-       ((ite (B tb) (Start t1) (Start t2))
-        ((vb Bool) (v1 Int) (v2 Int))
-	(and (= t (ITE tb t1 t2)) (B.Sem tb x y vb) (Start.Sem t1 x y v1) (Start.Sem t2 x y v2) (= result (ite vb v1 v2)))))
-         ; Premise for If-Then-Else: We can use NTs from other LHSes as well (scope should follow this NTs rules)
- 
-                                                                            ; NT B
-  (B t (B.Sem (Term Int Int Bool))                                          ; NT def for B
-   (((rb Bool)) (B.Sem t x y rb))                                           ; CHC conclusion
-  
-     (true () (and (= t (Leaf "true")) (= rb true)))                        ; True
-     (false () (and (= t (Leaf "false")) (= rb false)))                     ; False
+(declare-term-type E.Term) ; <nt>.Term naming convention is optional
+(declare-term-type B.Term)
+; We could also write (declare-term-type (E.Term B.Term)) for brevity
 
-     ((Not (B t1))
-      ((v1 Bool))
-      (and (= t (Not t1)) (B.Sem t1 x y v1) (= rb (not v1))))               ; For Not
+(synth-term max2 E.Term (
+  (declare-var (et et1 et2) E.Term) ; Invisible outside of synth-term
+  (declare-var (bt bt1 bt2) B.Term)
 
-     ((and (B t1) (B t2))
-      ((v1 Bool) (v2 Bool))
-      (and (= t (And t1 t2)) (B.Sem t1 x y v1) (B.Sem t2 x y v2) (= rb (and v1 v2))))
-       ; For And
+  (declare-var (x y r r1 r2) Int) ; Var names cannot start with numerals
+  (declare-var rb Bool)
 
-     ((LT (Start t1) (Start t2))
-      ((v1 Int) (v2 Int))
-      (and (= t (LT t1 t2)) (Start.Sem t1 x y v1) (Start.Sem t2 x y v2) (= rb (< v1 v2))))))
-       ; For <
+  ; Declarations for nonterminals, including sem rel signature
+  ; <nt>.Sem naming convention is optional
+  (declare-nt IntExpr E.Term (IntExpr.Sem E.Term Int Int Int))
+  (declare-nt B B.Term (B.Sem B.Term Int Int Bool))
+
+  ; We can define multiple NTs per term type
+  (declare-nt IntVar E.Term (IntVar.Sem E.Term Int Int Int))
+
+  ((IntExpr et) (IntExpr.Sem et x y (! r :out)) ; Annotation used to mark output variable
+    (x.Syn (= r x)) ; As usual, <node>.Syn naming convention is optional
+    (y.Syn (= r y))
+    ($0.Syn (= r 0)) ; RHS constructors can start with numerals (SMTLIB2 does not allow this)
+
+    ((+.Syn (IntExpr et1) (IntVar et2)) (and
+      (IntExpr.Sem et1 x y r1)
+      (IntVar.Sem et2 x y r2)
+      (= r (+ r1 r2))
+    ))
+
+    ; Branching ITE
+    ((ITE.Syn (B bt1) (IntVar et1) (IntVar et2))
+      (and
+        (B.Sem bt1 x y rb)
+        (= rb true)
+        (IntVar.Sem et1 x y r)
+      )
+      (and
+        (B.Sem bt1 x y rb)
+        (= rb false)
+        (IntVar.Sem et2 x y r)
+      )
+    )
+  )
+
+  ; A different int expression NT that only produces leaf nodes
+  ((IntVar et) (IntVar.Sem et x y (! r :out))
+    (x.Syn (= r x))
+    (y.Syn (= r y))
+    ($0.Syn (= r 0))
+  )
+
+  ((B bt) (B.Sem bt x y (! rb :out))
+
+     (True.Syn (= rb true))
+     (False.Syn (= rb false))
+
+     ; Non-deterministic semantics: may or may not be supported by solvers
+     (ND.Syn (= rb true) (= rb false))
 
 
-; Specification (will get translated into constraint => realizable + check realizable)
-(constraint (and (Start.Sem t 4 2 4) (Start.Sem t 2 5 5)))
+  )
+))
+
+; Example-guided constraint
+(constraint (and (IntExpr.Sem max2 4 2 4) (IntExpr.Sem max2 2 5 5)))
+
+(declare-var (z w) Int) ; Could also be separate statements
+
+; Universally quantified constraint
+(constraint (=> (IntExpr.Sem max2 z (- z 1) w) (= w z)))
