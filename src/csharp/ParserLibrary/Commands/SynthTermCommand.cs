@@ -157,7 +157,7 @@ namespace Semgus.Parser.Commands
                 throw new InvalidOperationException("Semantic relation must be a list: for nonterminal " + nonterminal.Name);
             }
 
-            var relationSymbols = prod.Relation.List.Select(f =>
+            var relationSymbolsAndAnnotations = prod.Relation.List.Select(f =>
             {
                 if (f.Atom is null)
                 {
@@ -169,23 +169,26 @@ namespace Semgus.Parser.Commands
                 }
                 else
                 {
-                    return symb;
+                    return (Symbol: symb, Annotation: f.Annotation);
                 }
             });
 
-            relationSymbols = relationSymbols.Pop(out var relName);
+            relationSymbolsAndAnnotations = relationSymbolsAndAnnotations.Pop(out var relNameAndAnnotation).ToList(); // Needs to be enumerated twice
 
-            var relationInstance = new SemanticRelationInstance(env.ResolveRelation(relName.Name),
-                                                                relationSymbols.Select(s => {
-                                                                    if (closure.TryResolve(s.Name, out var decl))
+            var relationInstance = new SemanticRelationInstance(env.ResolveRelation(relNameAndAnnotation.Symbol.Name),
+                                                                relNameAndAnnotation.Annotation,
+                                                                relationSymbolsAndAnnotations.Select(s =>
+                                                                {
+                                                                    if (closure.TryResolve(s.Symbol.Name, out var decl))
                                                                     {
                                                                         return decl;
                                                                     }
                                                                     else
                                                                     {
-                                                                        throw new InvalidOperationException("Unknown variable in semantic relation: " + s.Name);
+                                                                        throw new InvalidOperationException("Unknown variable in semantic relation: " + s.Symbol.Name);
                                                                     }
-                                                                }).ToList());
+                                                                }).ToList(),
+                                                                relationSymbolsAndAnnotations.Select(s => s.Annotation).ToList());
 
             var node = new ProductionGroup(
                 nonterminal: nonterminal,
