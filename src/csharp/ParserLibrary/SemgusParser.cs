@@ -37,10 +37,11 @@ namespace Semgus.Parser
             _stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
             _reader = new SemgusReader(_stream);
             _commandDispatch = new Dictionary<string, ISemgusCommand>();
-            _commandDispatch.Add(new SynthFunCommand().AsKeyValuePair());
+            _commandDispatch.Add(new SynthTermCommand().AsKeyValuePair());
             _commandDispatch.Add(new ConstraintCommand().AsKeyValuePair());
             _commandDispatch.Add(new DeclareVarCommand().AsKeyValuePair());
             _commandDispatch.Add(new MetadataCommand().AsKeyValuePair());
+            _commandDispatch.Add(new DeclareTermTypeCommand().AsKeyValuePair());
         }
 
         /// <summary>

@@ -8,8 +8,11 @@ namespace Semgus.Syntax {
     public class Nonterminal : IEquatable<Nonterminal> {
         public string Name { get; }
 
-        public Nonterminal(string name) {
+        public SemgusTermType Type { get; }
+
+        public Nonterminal(string name, SemgusTermType type) {
             Name = name;
+            Type = type;
         }
 
         public override string ToString() => Name;

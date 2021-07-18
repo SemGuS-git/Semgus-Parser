@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 using Semgus.Parser.Reader;
 
 namespace Semgus.Syntax {
@@ -8,12 +10,12 @@ namespace Semgus.Syntax {
         public SemgusParserContext ParserContext { get; set; }
         public IProductionRewriteExpression RewriteExpression { get; }
         public VariableClosure Closure { get; }
-        public IFormula Predicate { get; }
+        public IReadOnlyList<IFormula> Predicates { get; }
 
-        public SemanticRule(IProductionRewriteExpression rewriteExpression, VariableClosure closure, IFormula predicate) {
+        public SemanticRule(IProductionRewriteExpression rewriteExpression, VariableClosure closure, IReadOnlyList<IFormula> predicates) {
             RewriteExpression = rewriteExpression;
             Closure = closure;
-            Predicate = predicate;
+            Predicates = predicates;
         }
 
         // Indicates whether this rule is a leaf (zero nonterminal child terms) or a branch (one or more nonterminal child terms).

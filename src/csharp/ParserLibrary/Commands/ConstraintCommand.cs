@@ -62,16 +62,9 @@ namespace Semgus.Parser.Commands
                 return default;
             }
 
-            var closure = new VariableClosure(previous.GlobalClosure, new[] {
-                // Temp: hardcode t:Term into constraint context as auxiliary variable
-                new VariableDeclaration(name: "t",
-                                        type: previous.GlobalEnvironment.ResolveType(NonterminalTermDeclaration.TYPE_NAME),
-                                        declarationContext: VariableDeclaration.Context.CT_Term) // TODO { ParserContext = context}
-            });
-
             var constraint = new Constraint(
-                closure: closure,
-                formula: new FormulaConverter(previous.GlobalEnvironment, closure).ConvertFormula(formula)
+                closure: previous.GlobalClosure,
+                formula: new FormulaConverter(previous.GlobalEnvironment, previous.GlobalClosure).ConvertFormula(formula)
             );
 
             return previous.AddConstraint(constraint);
