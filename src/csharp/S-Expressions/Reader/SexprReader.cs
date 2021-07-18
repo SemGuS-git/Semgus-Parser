@@ -440,7 +440,15 @@ namespace Semgus.Sexpr.Reader
                 }
                 else
                 {
-                    list.Add(Read());
+                    var sexpr = ReadImpl();
+                    if (sexpr!.Equals(NothingSentinel) || sexpr!.Equals(EndOfFileSentinel))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        list.Add(sexpr);
+                    }
                 }
             }
         }
