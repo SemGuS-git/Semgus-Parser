@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using System.Text;
 
 using Semgus.Sexpr.Reader;
@@ -31,7 +32,21 @@ namespace Semgus.Parser.Reader
     {
         public override TResult Accept<TResult>(ISemgusTokenVisitor<TResult> visitor) => visitor.VisitSymbol(this);
 
+        // Technically, there's more than this we need to check, but this is good enough for now
+        public bool IsSmtLibCompliant => !char.IsDigit(Name[0]);
+
+        public bool IsSmtLibInternal => Name[0] == '@' || Name[0] == '.';
+
+        public bool IsSmtLibReserved => _smtLibReserved.Contains(Name);
+
         public override string ToString() => Name;
+
+        private static readonly string[] _smtLibReserved =
+        {
+            "BINARY", "DECIMAL", "HEXADECIMAL", "NUMERAL", "STRING",
+            "_", "!",
+            "as", "let", "exists", "forall", "match", "par"
+        };
     }
 
     /// <summary>

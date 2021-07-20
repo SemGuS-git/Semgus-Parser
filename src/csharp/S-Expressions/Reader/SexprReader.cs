@@ -280,6 +280,8 @@ namespace Semgus.Sexpr.Reader
 
             var original = constituents;
             bool isKeyword = false;
+            // We still want to ban numbers with leading zeros, lest they be confused with octal
+            bool maybeNumberWithLeadingZero = false;
 
             // This is messy because it's adapted from SBCL's reader.lisp
             // Please excuse the use of goto
@@ -302,9 +304,14 @@ namespace Semgus.Sexpr.Reader
             {
                 goto digit;
             }
+            else if (getCT(constituents[0]).HasFlag(ConstituentTrait.Digit))
+            {
+                maybeNumberWithLeadingZero = true;
+                goto digit;
+            }
             else
             {
-                throw new Exception("Leading zeros forbidden: " + original.ToString());
+                goto symbol;
             }
 
         digit:
@@ -317,7 +324,8 @@ namespace Semgus.Sexpr.Reader
                     {
                         if (isDecimal)
                         {
-                            throw new Exception("Extra decimal point: " + original.ToString());
+                            // Extra dot. Not a number.
+                            goto symbol;
                         }
                         else
                         {
@@ -326,9 +334,16 @@ namespace Semgus.Sexpr.Reader
                     }
                     else if (!ct.HasFlag(ConstituentTrait.Digit))
                     {
-                        throw new Exception("Invalid character in number: '" + c + "' in: " + original.ToString());
+                        // Not a number. Must be a symbol.
+                        goto symbol;
                     }
                 }
+
+                if (maybeNumberWithLeadingZero)
+                {
+                    throw new InvalidOperationException("Numbers with leading zeros are forbidden: " + original.ToString());
+                }
+
                 if (isDecimal)
                 {
                     return _sexprFactory.ConstructDecimal(double.Parse(original), position);

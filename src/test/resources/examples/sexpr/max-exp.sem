@@ -26,7 +26,7 @@
   ((IntExpr et) (IntExpr.Sem et x y (! r :out)) ; Annotation used to mark output variable
     (x.Syn (= r x)) ; As usual, <node>.Syn naming convention is optional
     (y.Syn (= r y))
-    ($0.Syn (= r 0)) ; RHS constructors can start with numerals (SMTLIB2 does not allow this)
+    (0.Syn (= r 0)) ; RHS constructors can start with numerals (SMTLIB2 does not allow this)
 
     ((+.Syn (IntExpr et1) (IntVar et2)) (and
       (IntExpr.Sem et1 x y r1)
@@ -53,7 +53,7 @@
   ((IntVar et) (IntVar.Sem et x y (! r :out))
     (x.Syn (= r x))
     (y.Syn (= r y))
-    ($0.Syn (= r 0))
+    (0.Syn (= r 0))
   )
 
   ((B bt) (B.Sem bt x y (! rb :out))
