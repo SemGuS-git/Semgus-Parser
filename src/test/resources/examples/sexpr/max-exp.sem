@@ -17,11 +17,11 @@
 
   ; Declarations for nonterminals, including sem rel signature
   ; <nt>.Sem naming convention is optional
-  (declare-nt IntExpr E.Term (IntExpr.Sem E.Term Int Int Int))
-  (declare-nt B B.Term (B.Sem B.Term Int Int Bool))
+  (declare-nt IntExpr E.Term (IntExpr.Sem (E.Term Int Int Int)))
+  (declare-nt B B.Term (B.Sem (B.Term Int Int Bool)))
 
   ; We can define multiple NTs per term type
-  (declare-nt IntVar E.Term (IntVar.Sem E.Term Int Int Int))
+  (declare-nt IntVar E.Term (IntVar.Sem (E.Term Int Int Int)))
 
   ((IntExpr et) (IntExpr.Sem et x y (! r :out)) ; Annotation used to mark output variable
     (x.Syn (= r x)) ; As usual, <node>.Syn naming convention is optional
