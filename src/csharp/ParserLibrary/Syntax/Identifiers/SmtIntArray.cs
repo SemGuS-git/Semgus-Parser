@@ -40,6 +40,8 @@ namespace Semgus.Syntax {
             }
         }
 
+        public override string ToString() => $"{{ {string.Join(", ", _map.Select(kvp => $"{kvp.Key}: {kvp.Value}"))} }}";
+
         public override bool Equals(object obj) => Equals(obj as SmtIntArray);
 
         public bool Equals(SmtIntArray other) =>

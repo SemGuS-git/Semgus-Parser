@@ -24,6 +24,26 @@ namespace Semgus.Syntax {
             }
         }
 
+        public static (SemgusProblem problem,LanguageEnvironment env) ParseTextToAst(string text) {
+
+            SemgusLexer lexer = new SemgusLexer(new AntlrInputStream(text));
+            SemgusParser parser = new SemgusParser(new CommonTokenStream(lexer));
+
+            var cst = parser.start();
+            var normalizer = new SyntaxNormalizer();
+
+            try {
+                return normalizer.Normalize(cst);
+            } catch (SemgusSyntaxException e) {
+                if (e.ParserContext is null) throw e;
+
+                using (var file = new StreamReader(text)) {
+                    var exception = new FileContextSemgusSyntaxException(e.ParserContext, e.Message, GetFileContextString(e, file));
+                    throw exception;
+                }
+            }
+        }
+
         private static string GetFileContextString(SemgusSyntaxException e, StreamReader file) {
             var sb = new StringBuilder();
             var l0 = e.ParserContext.Start.Line;

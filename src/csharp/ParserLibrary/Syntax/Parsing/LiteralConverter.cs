@@ -20,7 +20,7 @@ namespace Semgus.Syntax {
             new Literal<bool>( value: bool.Parse(context.GetText())) {ParserContext = context};
 
         public override LiteralBase VisitBVConst([NotNull] SemgusParser.BVConstContext context) =>
-            new Literal<SmtBitVec32>(value: ParseBitVec32(context.GetText())) { ParserContext = context };
+            new Literal<SmtBitVec32>(value: SmtBitVec32.Parse(context.GetText())) { ParserContext = context };
 
         public override LiteralBase VisitEnumConst([NotNull] SemgusParser.EnumConstContext context) =>
             throw new NotImplementedException();
@@ -38,18 +38,6 @@ namespace Semgus.Syntax {
             }
 
             throw new ArgumentException();
-        }
-
-        private SmtBitVec32 ParseBitVec32(string str) {
-            uint value;
-            if (str.StartsWith("#x")) {
-                value = Convert.ToUInt32(str.Substring(2), 16);
-            } else if (str.StartsWith("#b")) {
-                value = Convert.ToUInt32(str.Substring(2), 2);
-            } else {
-                throw new ArgumentException();
-            }
-            return new SmtBitVec32(value);
         }
     }
 
