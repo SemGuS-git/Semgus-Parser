@@ -63,6 +63,7 @@ namespace ParserTests
         [InlineData("0.test", false, false)]
         [InlineData("@test", true, true)]
         [InlineData(".test", true, true)]
+        [InlineData("9.5.6", false, false)]
         public void ReadsSymbol(string symbolName, bool isCompliant, bool isInternal)
         {
             SemgusReader reader = new(symbolName);
