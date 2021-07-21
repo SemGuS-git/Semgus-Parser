@@ -31,6 +31,8 @@ namespace Semgus.Syntax {
             }
             else if (rule.Leaf is not null)
             {
+                // TODO: this does not support a term atom, which is included in the spec.
+
                 if (rule.Leaf.IsLiteral)
                 {
                     return new AtomicRewriteExpression(atom: Literal.Convert(rule.Leaf));
@@ -70,6 +72,7 @@ namespace Semgus.Syntax {
             }
         }
 
+        // TODO: this only supports term parameters, while the spec is broader.
         private IProductionRewriteAtom ProcessOperatorParameter(OperatorParameterForm opForm)
         {
             var nonterminal = _env.ResolveNonterminal(opForm.Nonterminal.Name);

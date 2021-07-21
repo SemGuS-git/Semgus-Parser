@@ -58,6 +58,8 @@ namespace Semgus.Syntax {
 
             public CodeTextBuilder Visit(LeafTerm node) => _builder.Write(node.Text);
 
+            public CodeTextBuilder Visit(LibraryDefinedSymbol node) => _builder.Write(node.Identifier);
+
             public CodeTextBuilder Visit(LibraryFunctionCall node) {
                 using (_builder.InParens()) {
                     _builder.Write(node.LibraryFunction.Name);

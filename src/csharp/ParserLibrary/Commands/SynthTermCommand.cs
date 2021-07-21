@@ -141,16 +141,15 @@ namespace Semgus.Parser.Commands
                 throw new InvalidOperationException($"Type of term variable {termVar} does not match nonterminal type: expected: {nonterminal.Type}, but got: {termVar.Type}.");
             }
 
-            // TODO *wjc: relable aux variables as outputs when implied by their position in the relation
-            var closure = new VariableClosure(parent: parentClosure,
-                Enumerable.Empty<VariableDeclaration>()
-                  .Prepend(new NonterminalTermDeclaration(
-                      name: prod.Term.Name,
-                      type: nonterminal.Type,
-                      nonterminal: nonterminal,
-                      declarationContext: VariableDeclaration.Context.NT_Term
-                      ))
+
+            NonterminalTermDeclaration termDec = new(
+                name: prod.Term.Name,
+                type: nonterminal.Type,
+                nonterminal: nonterminal,
+                declarationContext: VariableDeclaration.Context.NT_Term
             );
+
+            var closure = new VariableClosure(parent: parentClosure, Enumerable.Empty<VariableDeclaration>().Prepend(termDec));
 
             if (prod.Relation.List is null)
             {
@@ -192,6 +191,7 @@ namespace Semgus.Parser.Commands
 
             var node = new ProductionGroup(
                 nonterminal: nonterminal,
+                termVariable: termDec,
                 closure: closure,
                 relationInstance: relationInstance,
                 semanticRules: prod.Productions.Select(p => ProcessProductionRule(p, env, closure)).ToList()

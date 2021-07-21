@@ -10,12 +10,14 @@ namespace Semgus.Syntax {
     public class ProductionGroup : ISyntaxNode {
         public SemgusParserContext ParserContext { get; set; }
         public Nonterminal Nonterminal { get; }
+        public NonterminalTermDeclaration TermVariable { get; }
         public VariableClosure Closure { get; }
         public SemanticRelationInstance RelationInstance { get; } // CHC conclusion
         public IReadOnlyList<SemanticRule> SemanticRules { get; } // CHC premises
 
-        public ProductionGroup(Nonterminal nonterminal, VariableClosure closure, SemanticRelationInstance relationInstance, IReadOnlyList<SemanticRule> semanticRules) {
+        public ProductionGroup(Nonterminal nonterminal, NonterminalTermDeclaration termVariable, VariableClosure closure, SemanticRelationInstance relationInstance, IReadOnlyList<SemanticRule> semanticRules) {
             this.Nonterminal = nonterminal;
+            this.TermVariable = termVariable;
             this.Closure = closure;
             this.RelationInstance = relationInstance;
             this.SemanticRules = semanticRules;
