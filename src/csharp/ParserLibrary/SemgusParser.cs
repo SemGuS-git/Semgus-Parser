@@ -72,14 +72,7 @@ namespace Semgus.Parser
 
             LanguageEnvironment langEnv = new();
 
-            // This is a hack to make the name analysis phase not complain about true and false,
-            // since they're not technically literals in SMT-LIB2 format, just symbols. It's the
-            // Core theory that imbues these with meaning, and we need a better way of handling that.
-            var boolType = langEnv.IncludeType("Bool");
-            VariableClosure startingClosure = new(default, new[] {
-                new VariableDeclaration("true",  boolType, VariableDeclaration.Context.CT_Auxiliary),
-                new VariableDeclaration("false", boolType, VariableDeclaration.Context.CT_Auxiliary)
-            });
+            VariableClosure startingClosure = new(default, Array.Empty<VariableDeclaration>());
 
             problem = new(default, startingClosure, langEnv, new List<Constraint>());
             SemgusToken sexpr;

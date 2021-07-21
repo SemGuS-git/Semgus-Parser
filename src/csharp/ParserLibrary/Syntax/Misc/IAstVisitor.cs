@@ -3,6 +3,7 @@ namespace Semgus.Syntax {
         T Visit(AtomicRewriteExpression node);
         T Visit(Constraint node);
         T Visit(LeafTerm node);
+        T Visit(LibraryDefinedSymbol node);
         T Visit(LibraryFunctionCall node);
         T Visit(NonterminalTermDeclaration node);
         T Visit(Operator node);
