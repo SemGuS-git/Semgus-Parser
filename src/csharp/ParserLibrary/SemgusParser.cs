@@ -44,6 +44,18 @@ namespace Semgus.Parser
             _commandDispatch.Add(new MetadataCommand().AsKeyValuePair());
             _commandDispatch.Add(new DeclareTermTypeCommand().AsKeyValuePair());
         }
+        
+        public SemgusParser(Stream stream, string sourceName) {
+            _stream = stream;
+            _reader = new SemgusReader(_stream);
+            _reader.SetSourceName(sourceName);
+            _commandDispatch = new Dictionary<string, ISemgusCommand>();
+            _commandDispatch.Add(new SynthTermCommand().AsKeyValuePair());
+            _commandDispatch.Add(new ConstraintCommand().AsKeyValuePair());
+            _commandDispatch.Add(new DeclareVarCommand().AsKeyValuePair());
+            _commandDispatch.Add(new MetadataCommand().AsKeyValuePair());
+            _commandDispatch.Add(new DeclareTermTypeCommand().AsKeyValuePair());
+        }
 
         /// <summary>
         /// Attempts to parse a SemgusProblem from the underlying file
