@@ -103,17 +103,28 @@ namespace Semgus.Parser.Reader
         public override bool IsLiteral => true;
     }
 
+    public interface IConsOrNil
+    {
+        public bool IsNil();
+        public SemgusToken First();
+        public IConsOrNil Rest();
+    }
+
     /// <summary>
     /// Nil, a.k.a. the empty list ().
     /// Note that nicely mapping this to C# types is difficult; in reality, Nil should be a 
     /// sub-type of everything else (including cons), but since multiple inheritance isn't 
     /// supported, we just shoe-horn it in as an independent token type.
     /// </summary>
-    public record NilToken(SexprPosition Position) : SemgusToken(Position)
+    public record NilToken(SexprPosition Position) : SemgusToken(Position), IConsOrNil
     {
         public override TResult Accept<TResult>(ISemgusTokenVisitor<TResult> visitor) => visitor.VisitNil(this);
 
         public override string ToString() => "nil";
+
+        public bool IsNil() => true;
+        public SemgusToken First() => this;
+        public IConsOrNil Rest() => this;
     }
 
     /// <summary>
@@ -123,7 +134,7 @@ namespace Semgus.Parser.Reader
     /// a function, but C# doesn't have a built-in list type that lets you do this.
     /// So we go the traditional route and build our own linked lists with conses.
     /// </summary>
-    public record ConsToken(SemgusToken Head, SemgusToken Tail, SexprPosition Position) : SemgusToken(Position)
+    public record ConsToken(SemgusToken Head, SemgusToken Tail, SexprPosition Position) : SemgusToken(Position), IConsOrNil
     {
         public override TResult Accept<TResult>(ISemgusTokenVisitor<TResult> visitor) => visitor.VisitCons(this);
 
@@ -151,5 +162,9 @@ namespace Semgus.Parser.Reader
                 builder.Append(Tail.ToString());
             }
         }
+
+        public bool IsNil() => false;
+        public SemgusToken First() => Head;
+        public IConsOrNil Rest() => Tail as IConsOrNil;
     }
 }

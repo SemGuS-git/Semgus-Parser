@@ -7,6 +7,8 @@ using Semgus.Parser.Reader;
 using Semgus.Sexpr.Reader;
 using Semgus.Syntax;
 
+using Semgus.Model.Smt.Terms;
+
 namespace Semgus.Parser.Commands
 {
     /// <summary>
@@ -15,6 +17,12 @@ namespace Semgus.Parser.Commands
     /// </summary>
     public class ConstraintCommand : ISemgusCommand
     {
+        [Command("constraint")]
+        public static void Constraint(SmtTerm predicate)
+        {
+            Console.WriteLine(predicate.ToString());
+        }
+        
         /// <summary>
         /// Name of this command
         /// </summary>

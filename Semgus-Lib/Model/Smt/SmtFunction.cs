@@ -1,0 +1,127 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Semgus.Model.Smt
+{
+    public class SmtFunction
+    {
+        public SmtFunction(SmtIdentifier name, SmtTheory theory, params SmtFunctionRank[] rankTemplates)
+        {
+            Name = name;
+            Theory = theory;
+            _rankTemplates = new List<SmtFunctionRank>(rankTemplates);
+        }
+
+        public SmtIdentifier Name { get; private set; }
+        public SmtTheory Theory { get; private set; }
+        private readonly List<SmtFunctionRank> _rankTemplates;
+
+        public void AddRankTemplate(SmtFunctionRank rank)
+        {
+            _rankTemplates.Add(rank);
+        }
+
+        public IReadOnlyCollection<SmtFunctionRank> RankTemplates => _rankTemplates;
+
+        public bool TryResolveRank([NotNullWhen(true)] out SmtFunctionRank? rank, SmtSort? returnSort, params SmtSort[] argumentSorts)
+        {
+            var sameArity = _rankTemplates
+                .Where(r => r.Arity == argumentSorts.Length);
+            
+            foreach (var template in sameArity)
+            {
+                if (TryResolveRank(out rank, template, returnSort, argumentSorts))
+                {
+                    return true; // We just pick the first one...maybe we need to check all templates and report ambiguities. TODO.
+                }
+            }
+            rank = default;
+            return false;
+        }
+
+        private bool TryResolveRank([NotNullWhen(true)] out SmtFunctionRank? rank, SmtFunctionRank template, SmtSort? returnSort, params SmtSort[] argumentSorts)
+        {
+            Dictionary<SmtSort, SmtSort> resolvedParameters = new();
+
+            if (template.ArgumentSorts.Count != argumentSorts.Length)
+            {
+                rank = default;
+                return false;
+            }
+
+            if (!template.ReturnSort.IsParametric && returnSort is not null && returnSort != template.ReturnSort)
+            {
+                rank = default;
+                return false;
+            }
+
+            for (int ix = 0; ix < argumentSorts.Length; ++ix)
+            {
+                var templateSort = template.ArgumentSorts[ix];
+                var concreteSort = argumentSorts[ix];
+
+                if (templateSort.IsParametric)
+                {
+                    if (resolvedParameters.TryGetValue(templateSort, out var sort))
+                    {
+                        templateSort = sort;
+                    }
+                    else
+                    {
+                        resolvedParameters.Add(templateSort, concreteSort);
+                        templateSort = concreteSort;
+                    }
+                }
+
+                if (templateSort != concreteSort)
+                {
+                    rank = default;
+                    return false;
+                }
+            }
+
+            if (template.IsParametric)
+            {
+                var retSort = template.ReturnSort;
+                if (retSort.IsParametric)
+                {
+                    if (resolvedParameters.TryGetValue(retSort, out SmtSort? resRetSort))
+                    {
+                        // Case: the return value is a parameter we know about
+                        retSort = resRetSort;
+                    }
+                    else if (returnSort is not null)
+                    {
+                        // Case: the return value is a free parameter, and we are given a return value
+                        retSort = returnSort;
+                    }
+                    else
+                    {
+                        // Case: the return value is a free parameter, and we can't resolve it
+                        rank = default;
+                        return false;
+                    }
+                }
+
+                if (returnSort is not null && returnSort != retSort)
+                {
+                    rank = default;
+                    return false;
+                }
+
+                // By this point, we validated that the provided sorts fulfill the template
+                rank = new SmtFunctionRank(retSort, argumentSorts);
+                return true;
+            }
+            else
+            {
+                rank = template;
+                return true;
+            }
+        }
+    }
+}

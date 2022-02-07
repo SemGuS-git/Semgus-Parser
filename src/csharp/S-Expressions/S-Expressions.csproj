@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Semgus.Sexpr</RootNamespace>
     <Nullable>enable</Nullable>
     <PackageId>Semgus.Sexpr</PackageId>
@@ -9,5 +9,9 @@
     <Company>University of Wisconsin-Madison</Company>
     <Product>Semgus</Product>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+  </ItemGroup>
 
 </Project>

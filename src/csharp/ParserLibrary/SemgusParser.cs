@@ -42,7 +42,7 @@ namespace Semgus.Parser
             _commandDispatch.Add(new ConstraintCommand().AsKeyValuePair());
             _commandDispatch.Add(new DeclareVarCommand().AsKeyValuePair());
             _commandDispatch.Add(new MetadataCommand().AsKeyValuePair());
-            _commandDispatch.Add(new DeclareTermTypeCommand().AsKeyValuePair());
+            //_commandDispatch.Add(new DeclareTermTypeCommand().AsKeyValuePair());
         }
         
         public SemgusParser(Stream stream, string sourceName) {
@@ -54,7 +54,7 @@ namespace Semgus.Parser
             _commandDispatch.Add(new ConstraintCommand().AsKeyValuePair());
             _commandDispatch.Add(new DeclareVarCommand().AsKeyValuePair());
             _commandDispatch.Add(new MetadataCommand().AsKeyValuePair());
-            _commandDispatch.Add(new DeclareTermTypeCommand().AsKeyValuePair());
+            //_commandDispatch.Add(new DeclareTermTypeCommand().AsKeyValuePair());
         }
 
         /// <summary>

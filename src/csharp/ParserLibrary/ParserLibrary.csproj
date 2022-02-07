@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <!-- Defines where the root of the repository is, so the Semgus.g4 and generated *.cs can be found -->
@@ -14,8 +14,10 @@
     <Company>University of Wisconsin-Madison</Company>
     <Product>Semgus</Product>
     <Version>1.1.0</Version>
+    <Nullable>warnings</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Semgus-Lib\Semgus-Lib.csproj" />
     <ProjectReference Include="..\S-Expressions\S-Expressions.csproj" />
   </ItemGroup>
   
