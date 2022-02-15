@@ -15,21 +15,16 @@ namespace Semgus.Model.Smt
         }
 
         public SmtIdentifier Name { get; }
+
+        /// <summary>
+        /// Does this sort have parameters?
+        /// </summary>
         public bool IsParametric { get; protected set; } = false;
 
-        public static SmtSort BoolSort = GetOrCreateSort("Bool");
-        public static SmtSort IntSort = GetOrCreateSort("Int");
-        public static SmtSort StringSort = GetOrCreateSort("String");
-
-        public static SmtSort GetOrCreateSort(string id)
-        {
-            return GetOrCreateSort(new SmtIdentifier(id));
-        }
-
-        public static SmtSort GetOrCreateSort(SmtIdentifier id)
-        {
-            return new GenericSort(id);
-        }
+        /// <summary>
+        /// Is this sort a sort parameter? A.k.a., needs to be resolved to a "real" sort?
+        /// </summary>
+        public bool IsSortParameter { get; protected set; } = false;
 
         private class GenericSort : SmtSort
         {
@@ -43,7 +38,7 @@ namespace Semgus.Model.Smt
             {
                 public UniqueSort(string prefix, long counter) : base(new SmtIdentifier($"{prefix}{counter}"))
                 {
-                    IsParametric = true;
+                    IsSortParameter = true;
                 }
             }
             
@@ -60,7 +55,8 @@ namespace Semgus.Model.Smt
 
             public SmtSort Next()
             {
-                return new UniqueSort(_prefix, Interlocked.Increment(ref _counter));
+                Sort = new UniqueSort(_prefix, Interlocked.Increment(ref _counter));
+                return Sort;
             }
         }
     }

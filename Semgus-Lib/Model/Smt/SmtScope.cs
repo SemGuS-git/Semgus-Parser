@@ -31,26 +31,19 @@ namespace Semgus.Model.Smt
             }
         }
 
-        public void AddVariableBinding(SmtIdentifier id, SmtSort sort, BindingType bindingType)
+        public IReadOnlyCollection<SmtVariableBinding> LocalBindings { get => _variableBindings.Values; }
+
+        public SmtVariableBinding AddVariableBinding(SmtIdentifier id, SmtSort sort, SmtVariableBindingType bindingType)
         {
-            if (!_variableBindings.TryAdd(id, new SmtVariableBinding(id, sort, bindingType, this)))
+            var binding = new SmtVariableBinding(id, sort, bindingType, this);
+            if (!_variableBindings.TryAdd(id, binding))
             {
                 throw new InvalidOperationException($"Identifer {id.Symbol} already bound in this scope.");
             }
             // TODO: it's an error to shadow theory symbols
+            return binding;
         }
 
         private readonly Dictionary<SmtIdentifier, SmtVariableBinding> _variableBindings;
-
-        public record SmtVariableBinding(SmtIdentifier Id, SmtSort Sort, BindingType BindingType, SmtScope DeclaringScope);
-
-        public enum BindingType
-        {
-            Free,
-            Bound,
-            Existential,
-            Universal
-        }
-
     }
 }

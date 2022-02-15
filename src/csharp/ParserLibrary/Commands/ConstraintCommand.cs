@@ -15,67 +15,39 @@ namespace Semgus.Parser.Commands
     /// Command for adding a new constraint into the SemGuS problem
     /// Syntax: (constraint [predicate])
     /// </summary>
-    public class ConstraintCommand : ISemgusCommand
+    public class ConstraintCommand
     {
-        [Command("constraint")]
-        public static void Constraint(SmtTerm predicate)
+        private readonly ISemgusProblemHandler _problemHandler;
+        private readonly ISmtContextProvider _smtProvider;
+        private readonly ISemgusContextProvider _semgusProvider;
+
+        public ConstraintCommand(ISemgusProblemHandler handler, ISmtContextProvider smtProvider, ISemgusContextProvider semgusProvider)
         {
-            Console.WriteLine(predicate.ToString());
+            _problemHandler = handler;
+            _smtProvider = smtProvider;
+            _semgusProvider = semgusProvider;
+        }
+
+        [Command("constraint")]
+        public void Constraint(SmtTerm predicate)
+        {
+            // Only Boolean constraints are valid
+            var boolSort = _smtProvider.Context.GetSortDeclaration(new("Bool"));
+            if (predicate.Sort == boolSort)
+            {
+                _semgusProvider.Context.AddConstraint(predicate);
+                _problemHandler.OnConstraint(_smtProvider.Context, _semgusProvider.Context, predicate);
+            }
+            else if (predicate.Sort == ErrorSort.Instance)
+            {
+                throw new InvalidOperationException("Term in constraint is in error state: " + predicate);
+            }
+            else
+            {
+                throw new InvalidOperationException("Term in constraint is not of Bool sort: " + predicate);
+            }
         }
         
-        /// <summary>
-        /// Name of this command
-        /// </summary>
-        public string CommandName => "constraint";
-
-        /// <summary>
-        /// Processes a constraint command
-        /// </summary>
-        /// <param name="previous">The SemgusProblem, prior to invocation of this command</param>
-        /// <param name="form">The command form</param>
-        /// <returns>The new SemgusProblem with the added constraint</returns>
-        public SemgusProblem Process(SemgusProblem previous, ConsToken form, TextWriter errorStream, ref int errCount)
-        {
-            string err;
-            SexprPosition errPos;
-
-            // First element: the "constraint" symbol
-            if (!form.TryPop(out SymbolToken _, out form, out err, out errPos))
-            {
-                errorStream.WriteParseError(err, errPos);
-                errCount += 1;
-                return default;
-            }
-
-            // Second element: the predicate
-            if (!form.TryPop(out SemgusToken formulaForm, out form, out err, out errPos))
-            {
-                errorStream.WriteParseError(err, errPos);
-                errCount += 1;
-                return default;
-            }
-
-            if (!FormulaForm.TryParse(formulaForm, out FormulaForm formula, out err, out errPos))
-            {
-                errorStream.WriteParseError(err, errPos);
-                errCount += 1;
-                return default;
-            }
-
-            // Only two arguments permitted
-            if (default != form)
-            {
-                errorStream.WriteParseError("Extra data at end of constraint command.", form.Position);
-                errCount += 1;
-                return default;
-            }
-
-            var constraint = new Constraint(
-                closure: previous.GlobalClosure,
-                formula: new FormulaConverter(previous.GlobalEnvironment, previous.GlobalClosure).ConvertFormula(formula)
-            );
-
-            return previous.AddConstraint(constraint);
-        }
+        
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Semgus.Model;
 using Semgus.Model.Smt;
+using Semgus.Model.Smt.Terms;
 
 #nullable enable
 
@@ -20,8 +21,10 @@ namespace Semgus.Parser
 
         public void OnSynthFun(SmtContext ctx, SmtIdentifier name, IList<SmtConstant> args, SmtSort sort);
 
-        public void AddLibraryFunction(SmtFunction fun);
-
         public void OnSetInfo(SmtContext ctx, SmtKeyword keyword);
+
+        public void OnConstraint(SmtContext smtCtx, SemgusContext semgusCxt, SmtTerm constraint);
+
+        public void OnCheckSynth(SmtContext smtCtx, SemgusContext semgusCtx);
     }
 }

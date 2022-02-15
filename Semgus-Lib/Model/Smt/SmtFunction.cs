@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Semgus.Model.Smt.Terms;
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -14,6 +16,14 @@ namespace Semgus.Model.Smt
             Name = name;
             Theory = theory;
             _rankTemplates = new List<SmtFunctionRank>(rankTemplates);
+            _definitions = new Dictionary<SmtFunctionRank, SmtLambdaBinder>();
+        }
+
+        private readonly IDictionary<SmtFunctionRank, SmtLambdaBinder> _definitions;
+
+        public void AddDefinition(SmtFunctionRank rank, SmtLambdaBinder definition)
+        {
+            _definitions[rank] = definition;
         }
 
         public SmtIdentifier Name { get; private set; }
@@ -53,7 +63,7 @@ namespace Semgus.Model.Smt
                 return false;
             }
 
-            if (!template.ReturnSort.IsParametric && returnSort is not null && returnSort != template.ReturnSort)
+            if (!template.ReturnSort.IsSortParameter && returnSort is not null && returnSort != template.ReturnSort)
             {
                 rank = default;
                 return false;
@@ -64,7 +74,7 @@ namespace Semgus.Model.Smt
                 var templateSort = template.ArgumentSorts[ix];
                 var concreteSort = argumentSorts[ix];
 
-                if (templateSort.IsParametric)
+                if (templateSort.IsSortParameter)
                 {
                     if (resolvedParameters.TryGetValue(templateSort, out var sort))
                     {
@@ -84,10 +94,10 @@ namespace Semgus.Model.Smt
                 }
             }
 
-            if (template.IsParametric)
+            if (template.HasUnresolvedSortParameters)
             {
                 var retSort = template.ReturnSort;
-                if (retSort.IsParametric)
+                if (retSort.IsSortParameter)
                 {
                     if (resolvedParameters.TryGetValue(retSort, out SmtSort? resRetSort))
                     {

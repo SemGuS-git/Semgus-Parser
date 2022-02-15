@@ -15,6 +15,7 @@ namespace Semgus.Parser.Reader
         public ErrorTerm(string message) : base(ErrorSort.Instance)
         {
             Message = message;
+            Console.WriteLine(message);
         }
     }
 }

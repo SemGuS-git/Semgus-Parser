@@ -8,15 +8,18 @@ namespace Semgus.Model.Smt.Terms
 {
     public class SmtVariable : SmtTerm
     {
-        public SmtVariable(SmtIdentifier name, SmtScope.SmtVariableBinding binding) : base(binding.Sort)
+        public SmtVariable(SmtIdentifier name, SmtVariableBinding binding) : base(binding.Sort)
         {
             Name = name;
             Binding = binding;
         }
 
         public SmtIdentifier Name { get; }
-        public SmtScope.SmtVariableBinding Binding { get; }
+        public SmtVariableBinding Binding { get; }
 
-
+        public override string ToString()
+        {
+            return Name.ToString();
+        }
     }
 }

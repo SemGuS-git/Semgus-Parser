@@ -108,6 +108,7 @@ namespace Semgus.Parser.Reader
         public bool IsNil();
         public SemgusToken First();
         public IConsOrNil Rest();
+        public SexprPosition Position { get; }
     }
 
     /// <summary>

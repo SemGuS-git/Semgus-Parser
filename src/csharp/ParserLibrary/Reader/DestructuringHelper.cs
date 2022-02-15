@@ -97,37 +97,35 @@ namespace Semgus.Parser.Reader
                 var exactly = param.GetCustomAttribute<ExactlyAttribute>();
                 if (exactly is not null)
                 {
-                    if (type == typeof(SmtIdentifier))
+                    if (type == typeof(SmtIdentifier) && _conv.TryConvert(item, out SmtIdentifier? id))
                     {
-                        if (_conv.TryConvert(item, out SmtIdentifier? id)) {
-                            if (id.Symbol == exactly.Identifier)
-                            {
-                                parameters[paramIx] = id;
-                            }
-                            else
-                            {
-                                return false;
-                            }
-                        }
-                        else if (_conv.TryConvert(item, out SymbolToken? token))
+                        if (id.Symbol == exactly.Identifier)
                         {
-                            if (token.Name == exactly.Identifier)
-                            {
-                                parameters[paramIx] = token;
-                            }
-                            else
-                            {
-                                return true;
-                            }
+                            parameters[paramIx] = id;
                         }
                         else
                         {
-                            throw new InvalidOperationException("Invalid use of 'Exactly' attribute. Only valid on SmtIdentifier and SymbolToken parameters");
+                            return false;
                         }
-
-                        form = Advance(form);
-                        continue;
                     }
+                    else if (type == typeof(SymbolToken) && _conv.TryConvert(item, out SymbolToken? token))
+                    {
+                        if (token.Name == exactly.Identifier)
+                        {
+                            parameters[paramIx] = token;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Invalid use of 'Exactly' attribute. Only valid on SmtIdentifier and SymbolToken parameters");
+                    }
+
+                    form = Advance(form);
+                    continue;
                 }
 
                 var not = param.GetCustomAttribute<NotTypeAttribute>();

@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+using Semgus.Model;
+using Semgus.Model.Smt;
 using Semgus.Parser.Commands;
 using Semgus.Parser.Reader;
 using Semgus.Syntax;
 
 namespace Semgus.Parser
 {
-    /// <summary>
-    /// Parser that reads SemGuS files in S-expression format and turns them into SemgusProblems
-    /// </summary>
     public class SemgusParser : IDisposable
     {
         /// <summary>
@@ -26,7 +29,9 @@ namespace Semgus.Parser
         /// <summary>
         /// Mapping of command names to command objects
         /// </summary>
-        private readonly IDictionary<string, ISemgusCommand> _commandDispatch;
+        private readonly IDictionary<string, MethodInfo> _commandDispatch;
+
+        private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
         /// Creates a new SemGuS parser from the given file
@@ -37,24 +42,52 @@ namespace Semgus.Parser
             _stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
             _reader = new SemgusReader(_stream);
             _reader.SetSourceName(filename);
-            _commandDispatch = new Dictionary<string, ISemgusCommand>();
-            _commandDispatch.Add(new SynthTermCommand().AsKeyValuePair());
-            _commandDispatch.Add(new ConstraintCommand().AsKeyValuePair());
-            _commandDispatch.Add(new DeclareVarCommand().AsKeyValuePair());
-            _commandDispatch.Add(new MetadataCommand().AsKeyValuePair());
-            //_commandDispatch.Add(new DeclareTermTypeCommand().AsKeyValuePair());
+            _commandDispatch = new Dictionary<string, MethodInfo>();
+            _serviceProvider = ProcessCommandInfo();
         }
-        
-        public SemgusParser(Stream stream, string sourceName) {
+
+        public SemgusParser(Stream stream, string sourceName)
+        {
             _stream = stream;
             _reader = new SemgusReader(_stream);
             _reader.SetSourceName(sourceName);
-            _commandDispatch = new Dictionary<string, ISemgusCommand>();
-            _commandDispatch.Add(new SynthTermCommand().AsKeyValuePair());
-            _commandDispatch.Add(new ConstraintCommand().AsKeyValuePair());
-            _commandDispatch.Add(new DeclareVarCommand().AsKeyValuePair());
-            _commandDispatch.Add(new MetadataCommand().AsKeyValuePair());
-            //_commandDispatch.Add(new DeclareTermTypeCommand().AsKeyValuePair());
+            _commandDispatch = new Dictionary<string, MethodInfo>();
+            _serviceProvider = ProcessCommandInfo();
+        }
+
+        private IServiceProvider ProcessCommandInfo()
+        {
+            void procClass(Type t)
+            {
+                foreach (var m in t.GetMethods())
+                {
+                    var cmdAttr = m.GetCustomAttribute<CommandAttribute>();
+                    if (cmdAttr is not null)
+                    {
+                        _commandDispatch.Add(cmdAttr.Name, m);
+                    }
+                }
+            }
+
+            procClass(typeof(SetInfoCommand));
+            procClass(typeof(SynthFunCommand));
+            procClass(typeof(DeclareTermTypeCommand));
+            procClass(typeof(FunctionDefinitionCommands));
+            procClass(typeof(ConstraintCommand));
+            procClass(typeof(CheckSynthCommand));
+
+            ServiceCollection services = new ServiceCollection();
+            services.AddSingleton<SmtConverter>();
+            services.AddSingleton<DestructuringHelper>();
+            services.AddScoped<ISmtContextProvider, SmtContextProvider>();
+            services.AddScoped<ISmtScopeProvider, SmtScopeProvider>();
+            services.AddScoped<ISemgusContextProvider, SemgusContextProvider>();
+            services.AddLogging(config =>
+            {
+                config.AddProvider(new ReaderLoggerProvider(Console.Error));
+            });
+
+            return services.BuildServiceProvider();
         }
 
         /// <summary>
@@ -63,9 +96,9 @@ namespace Semgus.Parser
         /// <param name="problem">The parsed problem</param>
         /// <param name="errorStream">TextWriter for errors. Defaults to Console.Error</param>
         /// <returns>True if successfully parsed, false if one or more errors encountered</returns>
-        public bool TryParse(out SemgusProblem problem, TextWriter errorStream = default)
+        public bool TryParse(ISemgusProblemHandler handler, TextWriter errorStream = default)
         {
-            return TryParse(out problem, out int _, errorStream);
+            return TryParse(handler, out int _, errorStream);
         }
 
         /// <summary>
@@ -75,69 +108,90 @@ namespace Semgus.Parser
         /// <param name="errCount">Count of encountered errors</param>
         /// <param name="errorStream">TextWriter for errors. Defaults to Console.Error</param>
         /// <returns>True if successfully parsed, false if one or more errors encountered</returns>
-        public bool TryParse(out SemgusProblem problem, out int errCount, TextWriter errorStream = default)
+        public bool TryParse(ISemgusProblemHandler handler, out int errCount, TextWriter errorStream = default)
         {
             if (default == errorStream)
             {
                 errorStream = Console.Error;
             }
 
-            LanguageEnvironment langEnv = new();
-
-            VariableClosure startingClosure = new(default, Array.Empty<VariableDeclaration>());
-
-            problem = new(default, startingClosure, langEnv, new List<Constraint>());
-            SemgusToken sexpr;
-            errCount = 0;
-            while (_reader.EndOfFileSentinel != (sexpr = _reader.Read(errorOnEndOfStream: false)))
+            using (_serviceProvider.CreateScope())
             {
-                if (sexpr is not ConsToken cons)
+                var destructuringHelper = _serviceProvider.GetRequiredService<DestructuringHelper>();
+                _serviceProvider.GetRequiredService<ISmtContextProvider>().Context = new SmtContext();
+                _serviceProvider.GetRequiredService<ISemgusContextProvider>().Context = new SemgusContext();
+                using var scope = _serviceProvider.GetRequiredService<ISmtScopeProvider>().CreateNewScope();
+
+                LanguageEnvironment langEnv = new();
+
+                VariableClosure startingClosure = new(default, Array.Empty<VariableDeclaration>());
+
+                //problem = new(default, startingClosure, langEnv, new List<Constraint>());
+                SemgusToken sexpr;
+                errCount = 0;
+                while (_reader.EndOfFileSentinel != (sexpr = _reader.Read(errorOnEndOfStream: false)))
                 {
-                    // Error: top-level symbols and literals not allowed
-                    errorStream.WriteParseError("Top-level atoms not allowed: found " + sexpr.ToString(), sexpr.Position);
-                    errCount += 1;
-                    continue;
-                }
-                else
-                {
-                    //
-                    // The first element should be a symbol telling us what it is
-                    //
-                    var head = cons.Head;
-                    if (head is not SymbolToken commandName)
+                    if (sexpr is not ConsToken cons)
                     {
-                        errorStream.WriteParseError("Expected command name, but got: " + sexpr.ToString(), sexpr.Position);
-                        errCount += 1;
-                        continue;
-                    }
-                    else if (!_commandDispatch.TryGetValue(commandName.Name, out var command))
-                    {
-                        errorStream.WriteParseError("Unknown top-level command: " + commandName.Name, commandName.Position);
+                        // Error: top-level symbols and literals not allowed
+                        errorStream.WriteParseError("Top-level atoms not allowed: found " + sexpr.ToString(), sexpr.Position);
                         errCount += 1;
                         continue;
                     }
                     else
                     {
-                        try
+                        //
+                        // The first element should be a symbol telling us what it is
+                        //
+                        var head = cons.Head;
+                        if (head is not SymbolToken commandName)
                         {
-                            problem = command.Process(problem, cons, errorStream, ref errCount);
-                        }
-                        catch (InvalidOperationException ioe)
-                        {
-                            errorStream.WriteLine("Fatal error during parsing: " + ioe.Message);
-                            errorStream.WriteLine("Full stack trace: \n" + ioe.ToString());
+                            errorStream.WriteParseError("Expected command name, but got: " + sexpr.ToString(), sexpr.Position);
                             errCount += 1;
-                            problem = default;
+                            continue;
                         }
+                        else if (!_commandDispatch.TryGetValue(commandName.Name, out var command))
+                        {
+                            errorStream.WriteParseError("Unknown top-level command: " + commandName.Name, commandName.Position);
+                            errCount += 1;
+                            continue;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                object? instance = null;
+                                if (!command.IsStatic)
+                                {
+                                    instance = ActivatorUtilities.CreateInstance(_serviceProvider, command.DeclaringType!, handler);
+                                    if (instance is null)
+                                    {
+                                        throw new InvalidOperationException("Cannot instantiate command class: " + command.DeclaringType!.Name);
+                                    }
+                                }
+
+                                if (!destructuringHelper.TryDestructureAndInvoke(command, ((IConsOrNil)cons).Rest(), instance))
+                                {
+                                    errorStream.WriteLine("Failed to find matching command signature for: " + commandName.Name);
+                                }
+                            }
+                            catch (InvalidOperationException ioe)
+                            {
+                                errorStream.WriteLine("Fatal error during parsing: " + ioe.Message);
+                                errorStream.WriteLine("Full stack trace: \n" + ioe.ToString());
+                                errCount += 1;
+                                //problem = default;
+                            }/*
                         if (problem is null)
                         {
                             errorStream.WriteLine("Terminating due to fatal error encountered while parsing command: " + commandName.Name);
                             return false;
+                        }*/
                         }
                     }
                 }
+                return true;
             }
-            return true;
         }
 
         /// <summary>

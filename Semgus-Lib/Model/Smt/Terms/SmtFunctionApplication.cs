@@ -18,5 +18,17 @@ namespace Semgus.Model.Smt.Terms
             Rank = rank;
             Arguments = arguments.ToList();
         }
+
+        public override string ToString()
+        {
+            if (Arguments.Count == 0)
+            {
+                return Definition.Name.ToString();
+            }
+            else
+            {
+                return $"({Definition.Name} {string.Join(' ', Arguments.Select(a => a.ToString()))})";
+            }
+        }
     }
 }

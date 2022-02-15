@@ -27,7 +27,14 @@ namespace Semgus.Model.Smt.Theories
             void cf(string name, SmtSort ret, params SmtSort[] args)
             {
                 SmtIdentifier id = new(name);
-                fd.Add(id, new SmtFunction(id, this, new SmtFunctionRank(ret, args)));
+                if (fd.TryGetValue(id, out SmtFunction? fun))
+                {
+                    fun.AddRankTemplate(new SmtFunctionRank(ret, args));
+                }
+                else
+                {
+                    fd.Add(id, new SmtFunction(id, this, new SmtFunctionRank(ret, args)));
+                }
             }
 
             _boolSortList = new Dictionary<SmtIdentifier, SmtSort>() { { b.Name, b } };
@@ -35,8 +42,21 @@ namespace Semgus.Model.Smt.Theories
             cf("true", b);
             cf("false", b);
             cf("not", b, b);
+
             cf("and", b, b, b);
+            cf("and", b, b, b, b);
+            cf("and", b, b, b, b, b);
+            cf("and", b, b, b, b, b, b);
+            cf("and", b, b, b, b, b, b, b);
+            cf("and", b, b, b, b, b, b, b, b);
+
             cf("or", b, b, b);
+            cf("or", b, b, b, b);
+            cf("or", b, b, b, b, b);
+            cf("or", b, b, b, b, b, b);
+            cf("or", b, b, b, b, b, b, b);
+            cf("or", b, b, b, b, b, b, b, b);
+
             cf("xor", b, b, b);
             cf("=>", b, b, b);
             cf("=", b, usf.Sort, usf.Sort);

@@ -21,6 +21,11 @@ namespace Semgus.Model.Smt.Terms
         {
             Value = value;
         }
+
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
     }
 
     public class SmtDecimalLiteral : SmtLiteral
@@ -31,6 +36,11 @@ namespace Semgus.Model.Smt.Terms
         {
             Value = value;
         }
+
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
     }
 
     public class SmtStringLiteral : SmtLiteral
@@ -40,6 +50,11 @@ namespace Semgus.Model.Smt.Terms
         public SmtStringLiteral(SmtContext ctx, string value) : base(ctx.GetSortDeclaration(new SmtIdentifier("String")))
         {
             Value = value;
+        }
+
+        public override string ToString()
+        {
+            return Value.ToString();
         }
     }
     

@@ -10,10 +10,21 @@ namespace Semgus.Parser.Commands
 {
     internal class CheckSynthCommand
     {
-        [Command("check-synth")]
-        public static void CheckSynth()
+        private readonly ISemgusProblemHandler _handler;
+        private readonly ISmtContextProvider _smtCtxProvider;
+        private readonly ISemgusContextProvider _semgusCtxProvider;
+
+        public CheckSynthCommand(ISemgusProblemHandler handler, ISmtContextProvider smtCtxProvider, ISemgusContextProvider semgusCtxProvider)
         {
-            Console.WriteLine("Check Synth!!!");
+            _handler = handler;
+            _smtCtxProvider = smtCtxProvider;
+            _semgusCtxProvider = semgusCtxProvider;
+        }
+
+        [Command("check-synth")]
+        public void CheckSynth()
+        {
+            _handler.OnCheckSynth(_smtCtxProvider.Context, _semgusCtxProvider.Context);
         }
     }
 }
