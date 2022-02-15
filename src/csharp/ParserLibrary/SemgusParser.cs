@@ -10,7 +10,6 @@ using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Parser.Commands;
 using Semgus.Parser.Reader;
-using Semgus.Syntax;
 
 namespace Semgus.Parser
 {
@@ -122,11 +121,6 @@ namespace Semgus.Parser
                 _serviceProvider.GetRequiredService<ISemgusContextProvider>().Context = new SemgusContext();
                 using var scope = _serviceProvider.GetRequiredService<ISmtScopeProvider>().CreateNewScope();
 
-                LanguageEnvironment langEnv = new();
-
-                VariableClosure startingClosure = new(default, Array.Empty<VariableDeclaration>());
-
-                //problem = new(default, startingClosure, langEnv, new List<Constraint>());
                 SemgusToken sexpr;
                 errCount = 0;
                 while (_reader.EndOfFileSentinel != (sexpr = _reader.Read(errorOnEndOfStream: false)))
@@ -180,13 +174,7 @@ namespace Semgus.Parser
                                 errorStream.WriteLine("Fatal error during parsing: " + ioe.Message);
                                 errorStream.WriteLine("Full stack trace: \n" + ioe.ToString());
                                 errCount += 1;
-                                //problem = default;
-                            }/*
-                        if (problem is null)
-                        {
-                            errorStream.WriteLine("Terminating due to fatal error encountered while parsing command: " + commandName.Name);
-                            return false;
-                        }*/
+                            }
                         }
                     }
                 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 
-using Semgus.Syntax;
 
 namespace Semgus.Parser.Example {
     class Program {

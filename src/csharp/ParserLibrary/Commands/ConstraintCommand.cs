@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-using Semgus.Parser.Forms;
 using Semgus.Parser.Reader;
-using Semgus.Sexpr.Reader;
-using Semgus.Syntax;
 
 using Semgus.Model.Smt.Terms;
 

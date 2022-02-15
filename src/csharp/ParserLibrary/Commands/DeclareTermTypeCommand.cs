@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Parser.Reader;
-using Semgus.Sexpr.Reader;
-using Semgus.Syntax;
 
 namespace Semgus.Parser.Commands
 {
