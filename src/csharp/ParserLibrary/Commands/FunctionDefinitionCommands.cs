@@ -137,7 +137,7 @@ namespace Semgus.Parser.Commands
             }
 
             // Rule: first arg is a term type TODO: relax to having one anywhere
-            if (rank.Arity < 1 || rank.ArgumentSorts[0] is not TermType tt)
+            if (rank.Arity < 1 || rank.ArgumentSorts[0] is not SemgusTermType tt)
             {
                 return; // Not a semantic relation (probably)
             }
@@ -195,7 +195,7 @@ namespace Semgus.Parser.Commands
                     if (c is SmtFunctionApplication cAppl)
                     {
                         var cRank = cAppl.Rank;
-                        if (cRank.ReturnSort == boolSort && cRank.Arity > 0 && cRank.ArgumentSorts[0] is TermType && cAppl.Arguments.All(a => a is SmtVariable))
+                        if (cRank.ReturnSort == boolSort && cRank.Arity > 0 && cRank.ArgumentSorts[0] is SemgusTermType && cAppl.Arguments.All(a => a is SmtVariable))
                         {
                             // Semantic relation. Probably.
                             relList.Add(new(cAppl.Definition, cRank, cAppl.Arguments.Select(a => (a as SmtVariable)!).ToList()));

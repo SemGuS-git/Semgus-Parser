@@ -17,7 +17,7 @@ namespace Semgus.Parser
     /// </summary>
     public interface ISemgusProblemHandler
     {
-        public void OnTermTypes(IReadOnlyList<TermType> termTypes);
+        public void OnTermTypes(IReadOnlyList<SemgusTermType> termTypes);
 
         public void OnSynthFun(SmtContext ctx, SmtIdentifier name, IList<SmtConstant> args, SmtSort sort);
 

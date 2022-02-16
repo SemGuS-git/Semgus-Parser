@@ -8,9 +8,9 @@ using Semgus.Model.Smt;
 
 namespace Semgus.Model
 {
-    public class TermType : SmtSort
+    public class SemgusTermType : SmtSort
     {
-        public TermType(SmtIdentifier termname) : base(termname) { }
+        public SemgusTermType(SmtIdentifier termname) : base(termname) { }
         public IList<Constructor> Constructors { get; } = new List<Constructor>();
         public void AddConstructor(Constructor constructor)
         {

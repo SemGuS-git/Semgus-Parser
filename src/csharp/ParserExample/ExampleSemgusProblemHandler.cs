@@ -12,7 +12,7 @@ namespace Semgus.Parser.Example
 {
     internal class ExampleSemgusProblemHandler : ISemgusProblemHandler
     {
-        public void OnTermTypes(IReadOnlyList<TermType> termTypes)
+        public void OnTermTypes(IReadOnlyList<SemgusTermType> termTypes)
         {
             Console.WriteLine("declare-term-types: ");
             foreach (var tt in termTypes)
@@ -71,6 +71,21 @@ namespace Semgus.Parser.Example
             foreach (var chc in semgusCtx.Chcs)
             {
                 Console.WriteLine("CHC: " + chc.Head + " <= " + (chc.BodyRelations.Any() ? String.Join(" ^ ", chc.BodyRelations) + " ^ " : "") + chc.Constraint);
+            }
+
+            foreach (var constraint in semgusCtx.Constraints)
+            {
+                Console.WriteLine("Constraint: " + constraint);
+            }
+
+            foreach (var sf in semgusCtx.SynthFuns)
+            {
+                Console.WriteLine("Function to Synthesize: " + sf.Relation);
+                Console.WriteLine("Grammar: " + string.Join(' ', sf.Grammar.NonTerminals));
+                foreach (var p in sf.Grammar.Productions)
+                {
+                    Console.WriteLine(p);
+                }
             }
         }
     }

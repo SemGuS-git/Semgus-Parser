@@ -36,14 +36,14 @@ namespace Semgus.Parser.Commands
                 throw new InvalidOperationException("Term names and constructor lists must be matched.");
             }
 
-            List<TermType> termTypes = new();
+            List<SemgusTermType> termTypes = new();
             foreach (var decl in sortDecls)
             {
                 if (decl.Arity != 0)
                 {
                     throw new InvalidOperationException("Only arity 0 term types allowed.");
                 }
-                TermType tt = new(decl.Identifier);
+                SemgusTermType tt = new(decl.Identifier);
                 _context.Context.AddSortDeclaration(tt);
                 termTypes.Add(tt);
             }

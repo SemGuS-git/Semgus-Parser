@@ -160,7 +160,7 @@ namespace Semgus.Parser.Reader.Converters
                                 if (_converter.TryConvert(form, out MatchForm? mf))
                                 {
                                     SmtSort argSort = mf.TermToMatch.Sort;
-                                    if (argSort is not TermType tt)
+                                    if (argSort is not SemgusTermType tt)
                                     {
                                         to = new ErrorTerm("Unsupported match expression. Only valid on terms of type term type.");
                                         _logger.LogParseError("Unsupported match expression. Only valid on terms of type term type.", form.Position);
