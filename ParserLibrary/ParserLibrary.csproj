@@ -21,8 +21,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Semgus-Lib\Semgus-Lib.csproj" />
     <ProjectReference Include="..\S-Expressions\S-Expressions.csproj" />
+    <ProjectReference Include="..\Semgus-Lib\Semgus-Lib.csproj" />
   </ItemGroup>
   
 </Project>

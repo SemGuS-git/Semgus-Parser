@@ -3,7 +3,7 @@
     "ParserExample": {
       "commandName": "Project",
       "commandLineArgs": "sexpr/max-exp.sem",
-      "workingDirectory": "$(SolutionDir)/src/test/resources/examples/"
+      "workingDirectory": "$(SolutionDir)/Examples/"
     }
   }
 }
