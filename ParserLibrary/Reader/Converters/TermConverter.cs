@@ -34,7 +34,9 @@ namespace Semgus.Parser.Reader.Converters
 
         public override bool CanConvert(Type from, Type to)
         {
-            return to == typeof(SmtTerm); // Converting to specific term types not supported...I think
+            // Converting to specific term types not supported...I think
+            // ...but there are some situations where we want to convert to a literal
+            return to == typeof(SmtTerm) || to.IsAssignableTo(typeof(SmtLiteral));
         }
 
         // Note on return value: we only return false if we cannot convert to a term, structurally.
@@ -42,6 +44,12 @@ namespace Semgus.Parser.Reader.Converters
         // A.k.a.: False means to try another converter. True + ErrorTerm means we know that this is the right converter, but the user messed up.
         public override bool TryConvertImpl(Type tFrom, Type tTo, object from, [NotNullWhen(true)] out object? to)
         {
+            // If we're explicitly asked for a literal, do that now
+            if (tTo.IsAssignableTo(typeof(SmtLiteral)))
+            {
+                return ConvertToLiteral(from, out to);
+            }
+
             // First, try bare identifiers. These include symbols, indexed identifiers (_ ...) and sort-qualified identifiers (as ...)
             SmtIdentifier? sid = default;
             QualifiedIdentifier? qid = default;
@@ -94,9 +102,14 @@ namespace Semgus.Parser.Reader.Converters
                                 // Handle annotations by just adding the annotation
                                 if (_converter.TryConvert(form, out AnnotationForm? af))
                                 {
-                                    //af.Child.Annotations.Add(...);
-                                    to = af.Child;
-                                    return true;
+                                    if (_converter.TryConvert(af.Attributes, out IList<SmtAttribute>? attributes))
+                                    {
+                                        foreach (var attr in attributes) {
+                                            af.Child.AddAttribute(attr);
+                                        }
+                                        to = af.Child;
+                                        return true;
+                                    }
                                 }
                                 throw new InvalidOperationException("Malformed annotation.");
                             }
@@ -172,18 +185,21 @@ namespace Semgus.Parser.Reader.Converters
                                     {
                                         using var scopeCtx = _scopeProvider.CreateNewScope();
                                         IList<SmtMatchVariableBinding> bindings = new List<SmtMatchVariableBinding>();
+                                        SemgusTermType.Constructor? constructor;
                                         if (_converter.TryConvert(pattern, out SmtIdentifier? symbol))
                                         {
                                             var nullaryCons = tt.Constructors.Where(c => c.Operator == symbol).ToList();
                                             if (nullaryCons.Any())
                                             {
                                                 // Use this pattern. Nothing to bind.
+                                                constructor = nullaryCons.First();
                                             }
                                             else
                                             {
                                                 // It's just a symbol to bind to the whole term
                                                 var vb = scopeCtx.Scope.AddVariableBinding(symbol, argSort, SmtVariableBindingType.Bound);
                                                 bindings.Add(new SmtMatchVariableBinding(vb, SmtMatchVariableBinding.FullTerm));
+                                                constructor = default;
                                             }
                                         }
                                         else if (_converter.TryConvert(pattern, out IList<SmtIdentifier>? consList))
@@ -202,16 +218,16 @@ namespace Semgus.Parser.Reader.Converters
                                                 _logger.LogParseError($"No matching constructor found for type {tt.Name}: {consId}", pattern.Position);
                                                 return true;
                                             }
-                                            var cons = conses.First(); // There should only be one, since constructors cannot be overloaded
-                                            if (cons.Children.Length != consList.Count - 1)
+                                            constructor = conses.First(); // There should only be one, since constructors cannot be overloaded
+                                            if (constructor.Children.Length != consList.Count - 1)
                                             {
                                                 to = new ErrorTerm("Number of pattern arguments does not match structure definition");
                                                 _logger.LogParseError("Number of pattern arguments does not match structure definition", pattern.Position);
                                                 return true;
                                             }
-                                            for (int argIx = 0; argIx < cons.Children.Length; ++argIx)
+                                            for (int argIx = 0; argIx < constructor.Children.Length; ++argIx)
                                             {
-                                                var vb = scopeCtx.Scope.AddVariableBinding(consList[argIx + 1], cons.Children[argIx], SmtVariableBindingType.Bound);
+                                                var vb = scopeCtx.Scope.AddVariableBinding(consList[argIx + 1], constructor.Children[argIx], SmtVariableBindingType.Bound);
                                                 bindings.Add(new SmtMatchVariableBinding(vb, argIx));
                                             }
                                         }
@@ -238,7 +254,7 @@ namespace Semgus.Parser.Reader.Converters
                                         }
                                         if (convTerms.Count == 1)
                                         {
-                                            binders.Add(new SmtMatchBinder(convTerms[0], scopeCtx.Scope, bindings));
+                                            binders.Add(new SmtMatchBinder(convTerms[0], scopeCtx.Scope, tt, constructor, bindings));
                                         }
                                         else
                                         {
@@ -248,7 +264,7 @@ namespace Semgus.Parser.Reader.Converters
                                             {
                                                 throw new InvalidOperationException("Too many terms to match pattern.");
                                             }
-                                            binders.Add(new SmtMatchBinder(new SmtFunctionApplication(orf, rank, convTerms), scopeCtx.Scope, bindings));
+                                            binders.Add(new SmtMatchBinder(new SmtFunctionApplication(orf, rank, convTerms), scopeCtx.Scope, tt, constructor, bindings));
                                         }
                                     }
 
@@ -336,27 +352,32 @@ namespace Semgus.Parser.Reader.Converters
             else
             // Finally, literals.
             {
-                switch (from)
-                {
-                    case NumeralToken nt:
-                        to = new SmtNumeralLiteral(_contextProvider.Context, nt.Value);
-                        return true;
+                return ConvertToLiteral(from, out to);
+            }
+        }
 
-                    case DecimalToken dt:
-                        to = new SmtDecimalLiteral(_contextProvider.Context, dt.Value);
-                        return true;
+        private bool ConvertToLiteral(object from, out object? to)
+        {
+            switch (from)
+            {
+                case NumeralToken nt:
+                    to = new SmtNumeralLiteral(_contextProvider.Context, nt.Value);
+                    return true;
 
-                    case StringToken st:
-                        to = new SmtStringLiteral(_contextProvider.Context, st.Value);
-                        return true;
+                case DecimalToken dt:
+                    to = new SmtDecimalLiteral(_contextProvider.Context, dt.Value);
+                    return true;
 
-                    case BitVectorToken bvt:
-                        throw new NotImplementedException("Literal bit vectors not yet supported.");
+                case StringToken st:
+                    to = new SmtStringLiteral(_contextProvider.Context, st.Value);
+                    return true;
 
-                    default:
-                        to = default;
-                        return false;
-                }            
+                case BitVectorToken bvt:
+                    throw new NotImplementedException("Literal bit vectors not yet supported.");
+
+                default:
+                    to = default;
+                    return false;
             }
         }
 

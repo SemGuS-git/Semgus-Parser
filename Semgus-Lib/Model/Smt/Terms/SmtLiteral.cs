@@ -26,6 +26,11 @@ namespace Semgus.Model.Smt.Terms
         {
             return Value.ToString();
         }
+
+        public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
+        {
+            return visitor.VisitNumeralLiteral(this);
+        }
     }
 
     public class SmtDecimalLiteral : SmtLiteral
@@ -41,6 +46,11 @@ namespace Semgus.Model.Smt.Terms
         {
             return Value.ToString();
         }
+
+        public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
+        {
+            return visitor.VisitDecimalLiteral(this);
+        }
     }
 
     public class SmtStringLiteral : SmtLiteral
@@ -55,6 +65,11 @@ namespace Semgus.Model.Smt.Terms
         public override string ToString()
         {
             return Value.ToString();
+        }
+
+        public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
+        {
+            return visitor.VisitStringLiteral(this);
         }
     }
     

@@ -9,9 +9,18 @@ namespace Semgus.Model.Smt.Terms
     public class SmtMatchBinder : SmtBinder
     {
         public IReadOnlyList<SmtMatchVariableBinding> Bindings { get; }
-        public SmtMatchBinder(SmtTerm child, SmtScope newScope, IEnumerable<SmtMatchVariableBinding> bindings) : base(child, newScope)
+        public SemgusTermType.Constructor? Constructor { get; }
+        public SemgusTermType ParentType { get; }
+        public SmtMatchBinder(SmtTerm child, SmtScope newScope, SemgusTermType parentType, SemgusTermType.Constructor? constructor, IEnumerable<SmtMatchVariableBinding> bindings) : base(child, newScope)
         {
             Bindings = bindings.ToList();
+            Constructor = constructor;
+            ParentType = parentType;
+        }
+
+        public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -28,6 +37,11 @@ namespace Semgus.Model.Smt.Terms
         {
             Binders = patterns.ToList();
             Term = term;
+        }
+
+        public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
+        {
+            throw new NotImplementedException();
         }
     }
 }

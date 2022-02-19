@@ -164,6 +164,73 @@ namespace Semgus.Parser.Commands
             }
             var head = new SemgusChc.SemanticRelation(decl, rank, headBindings.Select(b => new SmtVariable(b.Id, b)).ToList());
 
+            List<SmtVariable>? inputs = default;
+            List<SmtVariable>? outputs = default;
+
+            var inputAttr = defn.Child.Annotations?.FirstOrDefault(a => a.Keyword.Name == "input");
+            if (inputAttr is not null)
+            {
+                if (inputAttr.Value.ListValue is not null)
+                {
+                    inputs = new();
+                    foreach (var v in inputAttr.Value.ListValue)
+                    {
+                        if (v.IdentifierValue is not null)
+                        {
+                            var vv = head.Arguments.FirstOrDefault(a => a.Name == v.IdentifierValue);
+                            if (vv is null)
+                            {
+                                _logger.LogParseError($"Malformed input annotation for relation {decl.Name}: {v.IdentifierValue} not in parameter list.", default);
+                            }
+                            else
+                            {
+                                inputs.Add(vv);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogParseError($"Malformed input annotation for relation {decl.Name}: expecting list of identifiers, but got type: {v.Type}", default);
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.LogParseError($"Malformed input annotation for relation {decl.Name}: expecting list of variable identifiers.", default);
+                }
+            }
+
+            var outputAttr = defn.Child.Annotations?.FirstOrDefault(a => a.Keyword.Name == "output");
+            if (outputAttr is not null)
+            {
+                if (outputAttr.Value.ListValue is not null)
+                {
+                    outputs = new();
+                    foreach (var v in outputAttr.Value.ListValue)
+                    {
+                        if (v.IdentifierValue is not null)
+                        {
+                            var vv = head.Arguments.FirstOrDefault(a => a.Name == v.IdentifierValue);
+                            if (vv is null)
+                            {
+                                _logger.LogParseError($"Malformed output annotation for relation {decl.Name}: {v.IdentifierValue} not in parameter list.", default);
+                            }
+                            else
+                            {
+                                outputs.Add(vv);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogParseError($"Malformed output annotation for relation {decl.Name}: expecting list of identifiers, but got type: {v.Type}", default);
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.LogParseError($"Malformed output annotation for relation {decl.Name}: expecting list of variable identifiers.", default);
+                }
+            }
+
             // Each pattern is one or more CHC
             void procCHC(SmtMatchBinder binder, SmtTerm term)
             {
@@ -209,7 +276,8 @@ namespace Semgus.Parser.Commands
                     // TODO: check to make sure this doesn't contain semantic relations.
                     constraint = c;
                 }
-                _semgusCtxProvider.Context.AddChc(new SemgusChc(head, relList, constraint!, binder, headBindings.Concat(bodyBindings)));
+
+                _semgusCtxProvider.Context.AddChc(new SemgusChc(head, relList, constraint!, binder, headBindings.Concat(bodyBindings), inputs, outputs));
             }
 
             foreach (var pat in grouper.Binders)

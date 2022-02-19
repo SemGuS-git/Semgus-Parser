@@ -13,8 +13,20 @@ namespace Semgus.Model.Smt.Terms
             Sort = sort;
         }
 
-        public ISet<SmtAnnotation>? Annotations { get; }
+        public void AddAttribute(SmtAttribute attr)
+        {
+            if (_attributes == null)
+            {
+                _attributes = new();
+            }
+            _attributes.Add(attr);
+        }
+
+        private HashSet<SmtAttribute>? _attributes;
+        public IReadOnlySet<SmtAttribute>? Annotations => _attributes;
 
         public SmtSort Sort { get; }
+
+        public abstract TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor);
     }
 }

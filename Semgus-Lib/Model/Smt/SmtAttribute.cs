@@ -8,15 +8,15 @@ using Semgus.Model.Smt.Terms;
 
 namespace Semgus.Model.Smt
 {
-    public class SmtAnnotation
+    public class SmtAttribute
     {
-        public SmtAnnotation(SmtKeyword keyword, SmtTerm value)
+        public SmtAttribute(SmtKeyword keyword, SmtAttributeValue value)
         {
             Keyword = keyword;
             Value = value;
         }
 
         public SmtKeyword Keyword { get; }
-        public SmtTerm Value { get; }
+        public SmtAttributeValue Value { get; }
     }
 }

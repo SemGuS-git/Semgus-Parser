@@ -21,10 +21,13 @@ namespace Semgus.Model.Smt
             _assertionStack.Push(new AssertionLevel());
 
             var core = new Theories.SmtCoreTheory();
+            var ints = new Theories.SmtIntsTheory(core);
+            var strings = new Theories.SmtStringsTheory(core, ints);
             _theories = new HashSet<SmtTheory>()
             {
                 core,
-                new Theories.SmtIntsTheory(core)
+                ints,
+                strings
             };
         }
 

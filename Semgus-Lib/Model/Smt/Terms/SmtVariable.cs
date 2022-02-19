@@ -17,6 +17,11 @@ namespace Semgus.Model.Smt.Terms
         public SmtIdentifier Name { get; }
         public SmtVariableBinding Binding { get; }
 
+        public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
+        {
+            return visitor.VisitVariable(this);
+        }
+
         public override string ToString()
         {
             return Name.ToString();

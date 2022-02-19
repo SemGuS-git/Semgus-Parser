@@ -17,5 +17,10 @@ namespace Semgus.Parser.Reader
             Message = message;
             Console.WriteLine(message);
         }
+
+        public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
+        {
+            throw new InvalidOperationException("Visiting an error term.");
+        }
     }
 }

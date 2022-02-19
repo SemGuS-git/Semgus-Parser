@@ -17,14 +17,41 @@ namespace Semgus.Parser
     /// </summary>
     public interface ISemgusProblemHandler
     {
+        /// <summary>
+        /// Called when new term types are declared
+        /// </summary>
+        /// <param name="termTypes">The declared term types</param>
         public void OnTermTypes(IReadOnlyList<SemgusTermType> termTypes);
 
+        /// <summary>
+        /// Called when a synth-fun command is encountered. NOTE: this doesn't have SemGuS-specific information yet.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="name"></param>
+        /// <param name="args"></param>
+        /// <param name="sort"></param>
         public void OnSynthFun(SmtContext ctx, SmtIdentifier name, IList<SmtConstant> args, SmtSort sort);
 
-        public void OnSetInfo(SmtContext ctx, SmtKeyword keyword);
+        /// <summary>
+        /// Called when metadata is set via the set-info command
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="attr"></param>
+        public void OnSetInfo(SmtContext ctx, SmtAttribute attr);
 
+        /// <summary>
+        /// Called when a constraint is encountered
+        /// </summary>
+        /// <param name="smtCtx"></param>
+        /// <param name="semgusCxt"></param>
+        /// <param name="constraint"></param>
         public void OnConstraint(SmtContext smtCtx, SemgusContext semgusCxt, SmtTerm constraint);
 
+        /// <summary>
+        /// Called when a check-synth command is encountered
+        /// </summary>
+        /// <param name="smtCtx"></param>
+        /// <param name="semgusCtx"></param>
         public void OnCheckSynth(SmtContext smtCtx, SemgusContext semgusCtx);
     }
 }

@@ -14,5 +14,10 @@ namespace Semgus.Model.Smt.Terms
         {
             return $"(exists ({string.Join(' ', NewScope.LocalBindings.Select(b => $"({b.Id} {b.Sort.Name})"))}) {Child})";
         }
+
+        public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
+        {
+            return visitor.VisitExistsBinder(this);
+        }
     }
 }

@@ -23,7 +23,7 @@ namespace Semgus.Parser.Reader.Converters
 
         public override bool CanConvert(Type from, Type to)
         {
-            return from.IsAssignableTo(typeof(IConsOrNil)); // All we know so far
+            return from.IsAssignableTo(typeof(IConsOrNil)) && !to.IsAbstract; // All we know so far
         }
 
         public override bool TryConvertImpl(Type tFrom, Type tTo, object from, [NotNullWhen(true)] out object? to)

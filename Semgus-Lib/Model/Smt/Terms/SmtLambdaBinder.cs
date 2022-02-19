@@ -14,5 +14,10 @@ namespace Semgus.Model.Smt.Terms
         {
             ArgumentNames = argNames.ToList();
         }
+
+        public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

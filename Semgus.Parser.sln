@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParserTests", "ParserTests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "S-Expressions", "S-Expressions\S-Expressions.csproj", "{D3DC421B-246E-483F-B393-F706E7049CC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Semgus-Lib", "Semgus-Lib\Semgus-Lib.csproj", "{C2D4820B-41CD-4B87-BBD6-C1BF2D1379DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Semgus-Lib", "Semgus-Lib\Semgus-Lib.csproj", "{C2D4820B-41CD-4B87-BBD6-C1BF2D1379DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SemgusParser", "SemgusParser\SemgusParser.csproj", "{BE83F71C-BBF6-46D7-A433-070819067EE2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{C2D4820B-41CD-4B87-BBD6-C1BF2D1379DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2D4820B-41CD-4B87-BBD6-C1BF2D1379DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2D4820B-41CD-4B87-BBD6-C1BF2D1379DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE83F71C-BBF6-46D7-A433-070819067EE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE83F71C-BBF6-46D7-A433-070819067EE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE83F71C-BBF6-46D7-A433-070819067EE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE83F71C-BBF6-46D7-A433-070819067EE2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

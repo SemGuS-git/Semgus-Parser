@@ -21,9 +21,12 @@ namespace Semgus.Parser.Commands
         }
 
         [Command("set-info")]
-        public void SetInfo(SmtKeyword key, [NotType(typeof(KeywordToken))] SemgusToken value = null)
+        public void SetInfo([Rest] IList<SmtAttribute> attrs)
         {
-            _handler.OnSetInfo(_context.Context, key);
+            foreach (var attr in attrs)
+            {
+                _handler.OnSetInfo(_context.Context, attr);
+            }
         }
     }
 }

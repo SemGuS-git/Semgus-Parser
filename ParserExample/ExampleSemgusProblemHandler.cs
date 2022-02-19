@@ -50,9 +50,9 @@ namespace Semgus.Parser.Example
             }
         }
 
-        public void OnSetInfo(SmtContext ctx, SmtKeyword keyword)
+        public void OnSetInfo(SmtContext ctx, SmtAttribute attr)
         {
-            Console.WriteLine("set-info: " + keyword.Name);
+            Console.WriteLine("set-info: " + attr.Keyword + " : " + attr.Value);
         }
 
         public void OnSynthFun(SmtContext ctx, SmtIdentifier name, IList<SmtConstant> args, SmtSort sort)
@@ -71,6 +71,18 @@ namespace Semgus.Parser.Example
             foreach (var chc in semgusCtx.Chcs)
             {
                 Console.WriteLine("CHC: " + chc.Head + " <= " + (chc.BodyRelations.Any() ? String.Join(" ^ ", chc.BodyRelations) + " ^ " : "") + chc.Constraint);
+                if (chc.InputVariables != null)
+                {
+                    Console.Write($"    (inputs: {string.Join(' ', chc.InputVariables)})");
+                }
+                if (chc.OutputVariables != null)
+                {
+                    Console.Write($"    (outputs: {string.Join(' ', chc.OutputVariables)})");
+                }
+                if (chc.InputVariables != null || chc.OutputVariables == null)
+                {
+                    Console.WriteLine();
+                }
             }
 
             foreach (var constraint in semgusCtx.Constraints)

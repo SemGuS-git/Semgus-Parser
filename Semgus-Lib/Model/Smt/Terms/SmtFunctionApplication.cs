@@ -30,5 +30,10 @@ namespace Semgus.Model.Smt.Terms
                 return $"({Definition.Name} {string.Join(' ', Arguments.Select(a => a.ToString()))})";
             }
         }
+
+        public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
+        {
+            return visitor.VisitFunctionApplication(this);
+        }
     }
 }
