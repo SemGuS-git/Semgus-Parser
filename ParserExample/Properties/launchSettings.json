@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "ParserExample": {
+      "commandName": "Project",
+      "commandLineArgs": "sexpr/max-exp.sem",
+      "workingDirectory": "$(SolutionDir)/Examples/"
+    }
+  }
+}

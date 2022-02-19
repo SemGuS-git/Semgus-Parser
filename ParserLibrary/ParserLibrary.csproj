@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <!-- Defines where the root of the repository is, so the Semgus.g4 and generated *.cs can be found -->
+  <PropertyGroup>
+    <RepositoryRoot>../../..</RepositoryRoot>
+    <AntlrOutputDir>$(RepositoryRoot)/build/generated-src/antlr/csharp</AntlrOutputDir>
+    <RootNamespace>Semgus.Parser</RootNamespace>
+    <PackageId>Semgus.Parser</PackageId>
+    <Authors>Semgus</Authors>
+    <Company>University of Wisconsin-Madison</Company>
+    <Product>Semgus</Product>
+    <Version>1.1.0</Version>
+    <Nullable>warnings</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\S-Expressions\S-Expressions.csproj" />
+    <ProjectReference Include="..\Semgus-Lib\Semgus-Lib.csproj" />
+  </ItemGroup>
+  
+</Project>
