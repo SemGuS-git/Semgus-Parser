@@ -21,9 +21,9 @@ namespace Semgus.Parser
         private readonly SemgusReader _reader;
 
         /// <summary>
-        /// Backing stream that the reader reads from
+        /// Thing that we need to dispose at the end
         /// </summary>
-        private readonly Stream _stream;
+        private readonly IDisposable _streamOrReader;
 
         /// <summary>
         /// Mapping of command names to command objects
@@ -36,19 +36,33 @@ namespace Semgus.Parser
         /// Creates a new SemGuS parser from the given file
         /// </summary>
         /// <param name="filename">Name of file to parser</param>
-        public SemgusParser(string filename)
+        public SemgusParser(string filename) : this(new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read), filename)
         {
-            _stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-            _reader = new SemgusReader(_stream);
-            _reader.SetSourceName(filename);
+        }
+
+        /// <summary>
+        /// Creates a new SemGuS parser from the given stream
+        /// </summary>
+        /// <param name="stream">Stream to parse</param>
+        /// <param name="sourceName">Informational name for reporting errors</param>
+        public SemgusParser(Stream stream, string sourceName)
+        {
+            _streamOrReader = stream;
+            _reader = new SemgusReader(stream);
+            _reader.SetSourceName(sourceName);
             _commandDispatch = new Dictionary<string, MethodInfo>();
             _serviceProvider = ProcessCommandInfo();
         }
 
-        public SemgusParser(Stream stream, string sourceName)
+        /// <summary>
+        /// Creates a new SemGuS parser from the given text reader
+        /// </summary>
+        /// <param name="reader">Text reader to parse</param>
+        /// <param name="sourceName">Informational name for reporting errors</param>
+        public SemgusParser(TextReader reader, string sourceName)
         {
-            _stream = stream;
-            _reader = new SemgusReader(_stream);
+            _streamOrReader = reader;
+            _reader = new SemgusReader(reader);
             _reader.SetSourceName(sourceName);
             _commandDispatch = new Dictionary<string, MethodInfo>();
             _serviceProvider = ProcessCommandInfo();
@@ -187,7 +201,7 @@ namespace Semgus.Parser
         /// </summary>
         public void Dispose()
         {
-            ((IDisposable)_stream).Dispose();
+            ((IDisposable)_streamOrReader).Dispose();
         }
     }
 }

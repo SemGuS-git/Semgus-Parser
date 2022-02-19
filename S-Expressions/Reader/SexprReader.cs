@@ -61,8 +61,8 @@ namespace Semgus.Sexpr.Reader
         /// </summary>
         /// <param name="sexprFactory">Factory for creating S-expressions</param>
         /// <param name="readtable">Readtable to use</param>
-        /// <param name="reader">TextReader for reading from. Must be seekable</param>
-        private SexprReader(ISexprFactory<TSexprRoot> sexprFactory, Readtable<TSexprRoot> readtable, TextReader reader)
+        /// <param name="reader">TextReader for reading from</param>
+        public SexprReader(ISexprFactory<TSexprRoot> sexprFactory, Readtable<TSexprRoot> readtable, TextReader reader)
         {
             _readtable = readtable ?? Readtable<TSexprRoot>.GetDefaultReadtable();
             _sexprFactory = sexprFactory;
@@ -72,33 +72,13 @@ namespace Semgus.Sexpr.Reader
         }
 
         /// <summary>
-        /// Creates a TextReader from the given stream, ensuring that it is seekable. If it is not seekable,
-        /// then it reads the stream, in its entirety, into a MemoryStream and uses that instead.
-        /// </summary>
-        /// <param name="stream">The stream to ensure is seekable</param>
-        /// <returns>A seekable stream wrapped in a TextReader</returns>
-        private static TextReader EnsureSeekableReaderFromStream(Stream stream)
-        {
-            if (stream.CanSeek)
-            {
-                return new StreamReader(stream);
-            }
-            else
-            {
-                var ms = new MemoryStream();
-                stream.CopyTo(ms);
-                return new StreamReader(ms);
-            }
-        }
-
-        /// <summary>
         /// Constructs a new reader from a stream
         /// </summary>
         /// <param name="sexprFactory">Factory for creating S-expressions</param>
         /// <param name="readtable">Readtable to use</param>
-        /// <param name="stream">Stream to read from. If not seekable, gets fully read into an internal buffer first</param>
+        /// <param name="stream">Stream to read from</param>
         public SexprReader(ISexprFactory<TSexprRoot> sexprFactory, Readtable<TSexprRoot> readtable, Stream stream)
-            : this(sexprFactory, readtable, EnsureSeekableReaderFromStream(stream))
+            : this(sexprFactory, readtable, new StreamReader(stream))
         {
         }
 
@@ -150,7 +130,16 @@ namespace Semgus.Sexpr.Reader
         /// <returns>True if successfully read, false if at end of stream</returns>
         public bool TryReadCharacter(out char c, out SyntaxType syntaxType)
         {
-            int read = _reader.Read();
+            int read;
+            if (_peekedCharacter >= 0)
+            {
+                read = _peekedCharacter;
+                _peekedCharacter = -1;
+            }
+            else
+            {
+                read = _reader.Read();
+            }
             if (-1 == read)
             {
                 c = default;
@@ -167,6 +156,11 @@ namespace Semgus.Sexpr.Reader
         }
 
         /// <summary>
+        /// If >= 0, we "peeked" this character (but actually read it)
+        /// </summary>
+        private int _peekedCharacter = -1;
+
+        /// <summary>
         /// Tries to get the next character from the stream, without advancing
         /// </summary>
         /// <param name="c">The peeked character</param>
@@ -174,7 +168,17 @@ namespace Semgus.Sexpr.Reader
         /// <returns>True if successfully peeked, false if at end of stream</returns>
         public bool TryPeekCharacter(out char c, out SyntaxType syntaxType)
         {
-            int read = _reader.Peek();
+            int read;
+            if (_peekedCharacter >= 0)
+            {
+                // Double peek. Return what we already have.
+                read = _peekedCharacter;
+            }
+            else
+            {
+                read = _reader.Read();
+                _peekedCharacter = read;
+            }
             if (-1 == read)
             {
                 c = default;

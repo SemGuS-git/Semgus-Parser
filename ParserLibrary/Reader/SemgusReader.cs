@@ -33,6 +33,15 @@ namespace Semgus.Parser.Reader
         }
 
         /// <summary>
+        /// Constructs a new SemgusReader over the given text reader
+        /// </summary>
+        /// <param name="reader">The text reader to read from</param>
+        public SemgusReader(TextReader reader)
+        {
+            _reader = new(new SemgusSexprFactory(), SemgusReadtableFactory.CreateSemgusReadtable(), reader);
+        }
+
+        /// <summary>
         /// Updates the source name associated with reported positions
         /// </summary>
         /// <param name="source">Source name to use</param>
