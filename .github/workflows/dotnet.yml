@@ -40,7 +40,7 @@ jobs:
         name: semgus-parser-win
         path: output/win
     - name: Publish (macOS)
-      run: dotnet publish -c Release -o ../build/osx -r osx-x64 --self-contained true -p:PublishSingleFile=true
+      run: dotnet publish -c Release -o ../output/osx -r osx-x64 --self-contained true -p:PublishSingleFile=true
       working-directory: SemgusParser
     - name: Upload (macOS)
       uses: actions/upload-artifact@v2
