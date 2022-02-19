@@ -24,16 +24,26 @@ jobs:
       run: dotnet build --no-restore --configuration Release
       working-directory: SemgusParser
     - name: Publish (Linux)
-      run: dotnet publish -c Release -o ../output/linux -r linux-x64 --self-contained true
+      run: dotnet publish -c Release -o ../output/linux -r linux-x64 --self-contained true -p:PublishSingleFile=true
       working-directory: SemgusParser
-    - name: Publish (Windows)
-      run: dotnet publish -c Release -o ../output/win -r win-x64 --self-contained true
-      working-directory: SemgusParser
-    - name: Publish (macOS)
-      run: dotnet publish -c Release -o ../build/osx -r osx-x64 --self-contained true
-      working-directory: SemgusParser
-    - name: Upload Output
+    - name: Upload (Linux)
       uses: actions/upload-artifact@v2
       with:
-        name: semgus-parser
-        path: output
+        name: semgus-parser-linux
+        path: output/linux
+    - name: Publish (Windows)
+      run: dotnet publish -c Release -o ../output/win -r win-x64 --self-contained true -p:PublishSingleFile=true
+      working-directory: SemgusParser
+    - name: Upload (Windows)
+      uses: actions/upload-artifact@v2
+      with:
+        name: semgus-parser-win
+        path: output/win
+    - name: Publish (macOS)
+      run: dotnet publish -c Release -o ../build/osx -r osx-x64 --self-contained true -p:PublishSingleFile=true
+      working-directory: SemgusParser
+    - name: Upload (macOS)
+      uses: actions/upload-artifact@v2
+      with:
+        name: semgus-parser-osx
+        path: output/osx
