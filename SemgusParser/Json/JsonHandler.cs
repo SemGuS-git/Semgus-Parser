@@ -39,9 +39,9 @@ namespace Semgus.Parser.Json
 
         public void Dispose()
         {
+            _writer.WriteLine(@"{""$type"":""meta"",""$event"":""end-of-stream""}");
             if (_processingMode == Program.ProcessingMode.Batch)
             {
-                _writer.WriteLine(@"{""$type"":""meta"",""$event"":""end-of-stream""}");
                 _writer.WriteLine("]");
             }
             _writer.Flush();
