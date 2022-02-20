@@ -1,16 +1,62 @@
 # SemGuS-Parser
-Grammar and examples for parsing SemGuS specifications.
+A C# parsing library for SemGuS problems.
 
-## The Grammar
-The SemGuS grammar described in [Semgus-Lang](https://github.com/SemGuS-git/Semgus-Lang) is implemented in the [Semgus.g4](Semgus.g4) grammar file.
-If you find any issues with this implementation, please submit an issue to this repository. A minimally-reproducible SemGuS file that exhibits the issue would be appreciated.
+# JSON Converter
+The `SemgusParser` project contains a utility that reads in a SemGuS file and produces JSON data representing
+the problem, usable by other non-.NET tools that cannot directly link with this library.
 
-## Testing
-This repository contains some rudimentary automated testing. Any files in the [src/test/resources/examples/](src/test/resources/examples/)\[[valid](src/test/resources/examples/valid/)|[invalid](src/test/resources/examples/invalid/)] directory 
-are loaded into JUnit tests, which attempt to parse them to check for syntactic validity or invalidity.
+## Usage
 
-For checking your own SemGuS files, a convenience task to run the ANTLR GUI test rig is included. Either:
-* run: `./check-tree.sh <your-file.sem>` from the repository root, or 
-* run the Gradle task directly: `./gradlew checkGuiTree -Pfilename="<your-file.sem>`. 
+```
+SemgusParser [--format json] [--mode stream|batch] [--output <filename.json>] -- <input.sl> ...
+```
+Passing `-` as the input filename (or not supplying any filenames) makes the tool read from standard input.
 
-Installation and setup of the ANTLR libraries happens automatically through Gradle when running these tasks.
+The two modes, `stream` and `batch`, alter the output format of this tool. In `stream` mode (the default),
+the output is a stream of newline-delimited JSON objects representing parsing events. This is suitable for
+interactive mode, or when the output of this tool is being directly piped to the consuming process. In
+`batch` mode, the output is a JSON array, with each item in the array being a parsing event object. This format
+is suitable for outputting to a file as a complete JSON datatype. Note that the event object format is identical
+between these two modes; only the output structure differs.
+
+In stream mode:
+```
+{ ...event 1... }
+{ ...event 2... }
+{ ...event 3... }
+.
+.
+.
+```
+
+In batch mode:
+```
+[
+  { ...event 1... },
+  { ...event 2... },
+  { ...event 3... },
+  .
+  .
+  .
+]
+```
+
+## Event object format
+Each event object has two fields that denote what type of event it represents: `$event` and `$type`. The `$event`
+field holds the name of the particular event. The `$type` field denotes the general type of event: currently, either
+
+* `semgus`, for a SemGuS-specific event
+* `smt`, for a general SMT-LIB2 event
+* `meta`, for metadata about the problem
+
+### `meta` events
+#### `set-info`
+Holds general metadata about the problem. The `<value>` is either a string, number, or list of values (which might be lists, strings, numbers, etc.).
+```
+{ "$event": "set-info", "$type": "meta", "keyword": "<key>", "value": <value> }
+```
+#### `set-info`
+Sent at the end of the event stream.
+```
+{ "$event": "end-of-stream", "$type": "meta" }
+```

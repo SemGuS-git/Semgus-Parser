@@ -220,8 +220,7 @@ namespace Semgus.Parser
             using var handler = new JsonHandler(outputWriter, mode);
             foreach (var input in inputs)
             {
-                using Stream inputStream = (input == "-") ? Console.OpenStandardInput() : File.OpenRead(input);
-                SemgusParser parser = new(inputStream, input);
+                using SemgusParser parser = (input == "-") ? new(Console.In, "stdin") : new(input);
                 if (!parser.TryParse(handler))
                 {
                     Console.Error.WriteLine("error: fatal error reported while parsing " + (input == "-" ? "standard input" : input));
