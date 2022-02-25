@@ -39,19 +39,26 @@ namespace Semgus.Model.Smt.Theories
             }
 
             _stringSortList = new Dictionary<SmtIdentifier, SmtSort>() { { s.Name, s } };
-            /*
-            cf("-", i, i); // Negation
-            cf("-", i, i, i); // Subtraction
-            cf("+", i, i, i);
-            cf("*", i, i, i);
-            cf("div", i, i, i);
-            cf("mod", i, i, i);
-            cf("abs", i, i);
-            cf("<=", b, i, i);
-            cf("<", b, i, i);
-            cf(">=", b, i, i);
-            cf(">", b, i, i);
-            */
+
+            // TODO: regular expression functions
+            cf("str.++", s, s, s);
+            cf("str.len", i, s);
+            cf("str.<", b, s, s);
+            cf("str.<=", b, s, s);
+            cf("str.at", s, s, i);
+            cf("str.substr", s, s, i, i);
+            cf("str.prefixof", b, s, s);
+            cf("str.suffixof", b, s, s);
+            cf("str.contains", b, s, s);
+            cf("str.indexof", i, s, s, i);
+            cf("str.replace", s, s, s, s);
+            cf("str.replace_all", s, s, s, s);
+            cf("str.is_digit", b, s);
+            cf("str.to_code", i, s);
+            cf("str.from_code", s, i);
+            cf("str.to_int", i, s);
+            cf("str.from_int", s, i);
+
             _functions = fd;
         }
 
