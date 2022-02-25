@@ -2,7 +2,7 @@
   "profiles": {
     "SemgusParser": {
       "commandName": "Project",
-      "commandLineArgs": "--mode stream -- $(SolutionDir)/Examples/max2-exp.sl"
+      "commandLineArgs": "--format verify --mode stream -- $(SolutionDir)/Examples/max2-exp.sl"
     }
   }
 }

@@ -34,11 +34,11 @@ namespace Semgus.Model
             {
                 if (Constructor.Children.Length == 0)
                 {
-                    return $"{Instance} -> {Constructor.Operator}";
+                    return $"{Instance.Name} --> {Constructor.Operator}";
                 }
                 else
                 {
-                    return $"{Instance.Name} -> ({Constructor.Operator} {string.Join(' ', Occurrences.Select(o => o?.Name))})";
+                    return $"{Instance.Name} --> ({Constructor.Operator} {string.Join(' ', Occurrences.Select(o => o?.Name))})";
                 }
             }
         }

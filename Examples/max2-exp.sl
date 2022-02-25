@@ -16,7 +16,7 @@
 
  ;; Productions
  ((($x); E productions
-  ($y)
+   ($y)
    ($0)
    ($1)
    ($+ ($+_1 E) ($+_2 E))
@@ -47,7 +47,7 @@
          (exists ((r1 Int) (r2 Int))
              (and
               (E.Sem et1 x y r1)
-              (E.Sem et2 x y r1)
+              (E.Sem et2 x y r2)
               (= r (+ r1 r2)))))
         (($ite bt etc eta)
          (exists ((rb Bool) (rc Int) (ra Int))

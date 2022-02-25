@@ -55,5 +55,17 @@ namespace Semgus.Model.Smt
         public SmtIdentifier? IdentifierValue { get; }
         public SmtKeyword? KeywordValue { get; }
         public IReadOnlyList<SmtAttributeValue>? ListValue { get; }
+
+        public override string ToString()
+        {
+            switch (Type)
+            {
+                case AttributeType.Literal: return LiteralValue!.ToString() ?? "";
+                case AttributeType.Identifier: return IdentifierValue!.ToString();
+                case AttributeType.Keyword: return KeywordValue!.ToString();
+                case AttributeType.List: return $"({string.Join(' ', ListValue!)})";
+                default: throw new InvalidOperationException("Not a valid attribute type: " + Type);
+            }
+        }
     }
 }

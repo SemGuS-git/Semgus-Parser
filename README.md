@@ -1,5 +1,18 @@
 # SemGuS-Parser
-A C# parsing library for SemGuS problems.
+A C# parsing library for SemGuS problems. We also provide a standalone tool for verifying and converting
+SemGuS files.
+
+## Usage
+
+```
+SemgusParser [--format <format>] [--mode <mode>] [--output <filename>] -- <input.sem> ...
+```
+Passing `-` as the input filename (or not supplying any filenames) makes the tool read from standard input.
+
+# Format Verification
+Run the tool with a format of `verify` to perform a syntax verification. Note that this option is the default.
+It will additionally print out the problem information, which can be checked for correctness. This output
+format is not designed to be machine readable; use the JSON output format instead.
 
 # JSON Converter
 The `SemgusParser` project contains a utility that reads in a SemGuS file and produces JSON data representing
@@ -8,7 +21,7 @@ the problem, usable by other non-.NET tools that cannot directly link with this 
 ## Usage
 
 ```
-SemgusParser [--format json] [--mode stream|batch] [--output <filename.json>] -- <input.sl> ...
+SemgusParser --format json [--mode stream|batch] [--output <filename.json>] -- <input.sem> ...
 ```
 Passing `-` as the input filename (or not supplying any filenames) makes the tool read from standard input.
 

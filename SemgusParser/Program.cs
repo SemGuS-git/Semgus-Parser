@@ -1,4 +1,5 @@
 ﻿using Semgus.Parser.Json;
+using Semgus.Parser.Verifier;
 
 using System;
 using System.Collections.Generic;
@@ -132,7 +133,8 @@ namespace Semgus.Parser
         public enum OutputFormat
         {
             None,
-            Json
+            Json,
+            Verification
         }
 
         public enum ProcessingMode
@@ -153,16 +155,24 @@ namespace Semgus.Parser
                 switch (args[argIx].ToLowerInvariant())
                 {
                     case "--format":
-                        if (args[++argIx].ToLowerInvariant() == "json")
+                        switch (args[++argIx].ToLowerInvariant())
                         {
-                            format = OutputFormat.Json;
-                        }
-                        else
-                        {
-                            Console.Error.WriteLine($"error: unsupported format: {args[argIx]}. Only json is supported.");
-                            return 1;
+                            case "json":
+                                format = OutputFormat.Json;
+                                break;
+
+                            case "verify":
+                                format = OutputFormat.Verification;
+                                break;
+
+                            default:
+                                {
+                                    Console.Error.WriteLine($"error: unsupported format: {args[argIx]}. Only json is supported.");
+                                    return 1;
+                                }
                         }
                         argIx += 1;
+
                         break;
                     case "--mode":
                         if (args[++argIx].ToLowerInvariant() == "batch")
@@ -216,8 +226,8 @@ namespace Semgus.Parser
                 return 0;
             }
 
-            using TextWriter outputWriter = output is not null ? File.CreateText(output) : Console.Out;
-            using var handler = new JsonHandler(outputWriter, mode);
+            using var writerDisposable = GetOutputWriter(output, out var writer);
+            using var handlerDisposable = GetHandler(writer, mode, format, out var handler);
             foreach (var input in inputs)
             {
                 using SemgusParser parser = (input == "-") ? new(Console.In, "stdin") : new(input);
@@ -229,6 +239,38 @@ namespace Semgus.Parser
             }
 
             return 0;
+        }
+
+        private static IDisposable? GetOutputWriter(string? output, out TextWriter writer)
+        {
+            if (output is not null)
+            {
+                writer = File.CreateText(output);
+            }
+            else
+            {
+                writer = Console.Out;
+            }
+            return writer as IDisposable;
+        }
+
+        private static IDisposable? GetHandler(TextWriter writer, ProcessingMode mode, OutputFormat format, out ISemgusProblemHandler handler)
+        {
+            switch (format)
+            {
+                case OutputFormat.None or OutputFormat.Verification:
+                    handler = new VerificationHandler(writer);
+                    break;
+
+                case OutputFormat.Json:
+                    handler = new JsonHandler(writer, mode);
+                    break;
+
+                default:
+                    // This should be caught by argument validation before this point
+                    throw new InvalidOperationException("Not a valid format: " + format);
+            }
+            return handler as IDisposable;
         }
 
         private static void Test(ProcessingMode mode)

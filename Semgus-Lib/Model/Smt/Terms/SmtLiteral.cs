@@ -64,7 +64,7 @@ namespace Semgus.Model.Smt.Terms
 
         public override string ToString()
         {
-            return Value.ToString();
+            return $"\"{Value}\"";
         }
 
         public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
