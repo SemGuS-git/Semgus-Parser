@@ -1,6 +1,9 @@
 ;;;; -*- mode: lisp -*-
 ;;;;
-;;;; max2-exp.sl - The max2 example problem encoded in SemGuS
+;;;; ring-mod.sem - a non-deterministic ring modulator function
+;;;;
+;;;; For a carrier frequency (fc) and modulating frequency (fx),
+;;;; non-deterministically return (fc - fx) or (fc + fx)
 ;;;;
 
 ;;; Metadata
@@ -74,6 +77,6 @@
                        (= (- fc fx) r)))))
 
 ;;;
-;;; Instruct the solver to find max2
+;;; Instruct the solver to find ring
 ;;;
 (check-synth)
