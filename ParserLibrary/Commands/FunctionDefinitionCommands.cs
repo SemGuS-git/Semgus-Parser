@@ -276,7 +276,7 @@ namespace Semgus.Parser.Commands
                     }
                     if (constraint is not null)
                     {
-                        throw new InvalidOperationException("Multiple constraints in CHC.");
+                        throw new FatalParseException($"Multiple constraints in CHC for {binder.Constructor!.Operator} in {decl.Name}. Only one first-order logic constraint is allowed.");
                     }
                     // TODO: check to make sure this doesn't contain semantic relations.
                     constraint = c;

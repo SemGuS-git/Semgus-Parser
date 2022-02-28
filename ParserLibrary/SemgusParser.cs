@@ -193,6 +193,7 @@ namespace Semgus.Parser
                                 errorStream.WriteLine($"while parsing {commandName.Name} command:");
                                 errorStream.WriteLine("  " + fpe.Message);
                                 errorStream.WriteLine("--------------------\n");
+                                errCount += 1;
                             }
                             catch (InvalidOperationException ioe)
                             {
@@ -203,7 +204,7 @@ namespace Semgus.Parser
                         }
                     }
                 }
-                return true;
+                return errCount == 0;
             }
         }
 

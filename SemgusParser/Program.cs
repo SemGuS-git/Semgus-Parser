@@ -228,17 +228,25 @@ namespace Semgus.Parser
 
             using var writerDisposable = GetOutputWriter(output, out var writer);
             using var handlerDisposable = GetHandler(writer, mode, format, out var handler);
+            int errCount = 0;
             foreach (var input in inputs)
             {
                 using SemgusParser parser = (input == "-") ? new(Console.In, "stdin") : new(input);
-                if (!parser.TryParse(handler))
+                if (!parser.TryParse(handler, out errCount))
                 {
                     Console.Error.WriteLine("error: fatal error reported while parsing " + (input == "-" ? "standard input" : input));
-                    return 2;
                 }
             }
 
-            return 0;
+            if (errCount == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                Console.Error.WriteLine($"Encountered {errCount} fatal error{(errCount == 1 ? "" : "s")} while parsing.");
+                return 7;
+            }
         }
 
         private static IDisposable? GetOutputWriter(string? output, out TextWriter writer)
