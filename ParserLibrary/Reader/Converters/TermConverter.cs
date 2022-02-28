@@ -193,6 +193,15 @@ namespace Semgus.Parser.Reader.Converters
                                             {
                                                 // Use this pattern. Nothing to bind.
                                                 constructor = nullaryCons.First();
+
+                                                // Verify that it is actually a nullary constructor
+                                                if (constructor.Children.Length != 0)
+                                                {
+                                                    string msg = $"Constructor '{constructor.Operator}' in match expression expects {constructor.Children.Length} children, but written as nullary (with 0 children)";
+                                                    _logger.LogParseError(msg, pattern.Position);
+                                                    to = new ErrorTerm(msg);
+                                                    return true;
+                                                }
                                             }
                                             else
                                             {

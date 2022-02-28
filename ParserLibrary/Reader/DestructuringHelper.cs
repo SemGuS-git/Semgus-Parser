@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,7 +31,18 @@ namespace Semgus.Parser.Reader
                 return false;
             }
 
-            method.Invoke(instance, parameters);
+            try
+            {
+                method.Invoke(instance, parameters);
+            }
+            catch (TargetInvocationException tie)
+            {
+                if (tie.InnerException is FatalParseException fpe)
+                {
+                    ExceptionDispatchInfo.Capture(fpe).Throw();
+                }
+                throw;
+            }
             return true;
         }
 
