@@ -222,7 +222,7 @@ namespace Semgus.Parser
 
             if (test)
             {
-                Test(mode);
+                Test(mode, format);
                 return 0;
             }
 
@@ -281,7 +281,7 @@ namespace Semgus.Parser
             return handler as IDisposable;
         }
 
-        private static void Test(ProcessingMode mode)
+        private static void Test(ProcessingMode mode, OutputFormat format)
         {
             var stream = new MemoryStream();
             var writer = new StreamWriter(stream);
@@ -289,7 +289,7 @@ namespace Semgus.Parser
             writer.Flush();
             stream.Position = 0;
             SemgusParser parser = new(stream, "string");
-            using var handler = new JsonHandler(Console.Out, mode);
+            using var _ = GetHandler(Console.Out, mode, format, out var handler);
             parser.TryParse(handler);
         }
     }
