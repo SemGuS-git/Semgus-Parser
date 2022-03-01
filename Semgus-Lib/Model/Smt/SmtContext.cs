@@ -73,6 +73,12 @@ namespace Semgus.Model.Smt
             CurrentLevel.Sorts.Add(sort.Name, sort);
         }
 
+        /// <summary>
+        /// Try to get a function declaration associated with the given ID
+        /// </summary>
+        /// <param name="id">The id to get a function declaration for</param>
+        /// <param name="function">The function declaration if found</param>
+        /// <returns>True if found a definition, false if name not in scope</returns>
         public bool TryGetFunctionDeclaration(SmtIdentifier id, [NotNullWhen(true)] out SmtFunction? function)
         {
             foreach (var level in _assertionStack)
@@ -94,6 +100,85 @@ namespace Semgus.Model.Smt
             }
             function = default;
             return false;
+        }
+
+        /// <summary>
+        /// Returns a list of in-scope identifiers that are similar to the given id.
+        /// This can be used to drive a "did-you-mean?"-type functionality.
+        /// </summary>
+        /// <param name="id">Identifier to check against</param>
+        /// <returns>Enumeration of similar identifiers</returns>
+        public IEnumerable<SmtIdentifier> GetSimilarFunctionNames(SmtIdentifier id)
+        {
+            foreach (var level in _assertionStack)
+            {
+                foreach (var candidate in level.Functions.Keys)
+                {
+                    if (IsIdSimilar(candidate, id))
+                    {
+                        yield return candidate;
+                    }
+                }
+            }
+
+            foreach (var theory in _theories)
+            {
+                foreach (var candidate in theory.Functions.Keys)
+                {
+                    if (IsIdSimilar(candidate, id))
+                    {
+                        yield return candidate;
+                    }
+                }
+            }
+        }
+
+        private bool IsIdSimilar(SmtIdentifier a, SmtIdentifier b)
+        {
+            return string.Equals(a.Symbol.ToLowerInvariant(), b.Symbol.ToLowerInvariant())
+                || ComputeEditDistance(a.Symbol, b.Symbol) <= MaxEditDistanceForSimilarity;
+        }
+
+        private const int MaxEditDistanceForSimilarity = 3;
+
+        /// <summary>
+        /// Computes the edit distance between two strings.
+        /// Based on the Wagner-Fischer algorithm: https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm
+        /// </summary>
+        /// <param name="a">First string</param>
+        /// <param name="b">Second string</param>
+        /// <returns>Edit distance between strings</returns>
+        private int ComputeEditDistance(string a, string b)
+        {
+            var distances = new int[a.Length + 1, b.Length + 1];
+            for (int i = 0; i < a.Length; ++i)
+            {
+                distances[i + 1, 0] = i + 1;
+            }
+            for (int j = 0; j < b.Length; ++j)
+            {
+                distances[0, j + 1] = j + 1;
+            }
+            for (int j = 0; j < b.Length; ++j)
+            {
+                for (int i = 0; i < a.Length; ++i)
+                {
+                    int substCost;
+                    if (a[i] == b[j])
+                    {
+                        substCost = 0;
+                    }
+                    else
+                    {
+                        substCost = 1;
+                    }
+
+                    distances[i + 1, j + 1] = Math.Min(distances[i, j + 1] + 1,
+                                                   Math.Min(distances[i + 1, j] + 1,
+                                                        distances[i, j] + substCost));
+                }
+            }
+            return distances[a.Length, b.Length];
         }
 
         public SmtSort GetSortDeclaration(SmtIdentifier id)

@@ -78,8 +78,14 @@ namespace Semgus.Parser.Reader.Converters
                 }
                 else
                 {
-                    to = new ErrorTerm("Unable to resolve function or variable: " + qid.Id);
-                    _logger.LogParseError("Unable to resolve function or variable: " + qid.Id, (from as SemgusToken)?.Position);
+                    string msg = "Unable to resolve function or variable: " + qid.Id;
+                    to = new ErrorTerm(msg);
+                    msg += "\n    Did you mean:\n";
+                    foreach (var candidate in _contextProvider.Context.GetSimilarFunctionNames(qid.Id))
+                    {
+                        msg += $"     - {candidate}\n";
+                    }
+                    _logger.LogParseError(msg, (from as SemgusToken)?.Position);
                 }
                 return true;
             }
@@ -379,8 +385,14 @@ namespace Semgus.Parser.Reader.Converters
                         }
                         else
                         {
-                            to = new ErrorTerm("Cannot find function definition for: " + af.Id.Id);
-                            _logger.LogParseError("Cannot find function definition for: " + af.Id.Id, form.Position);
+                            string msg = "Cannot find function definition for: " + af.Id.Id;
+                            to = new ErrorTerm(msg);
+                            msg += "\n    Did you mean:\n";
+                            foreach (var candidate in _contextProvider.Context.GetSimilarFunctionNames(af.Id.Id))
+                            {
+                                msg += $"     - {candidate}\n";
+                            }
+                            _logger.LogParseError(msg, form.Position);
                         }
                     }
                     else
