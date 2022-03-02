@@ -165,7 +165,7 @@ namespace Semgus.Parser.Reader.Converters
                                     }
                                     if (_converter.TryConvert(ff.Child, out SmtTerm? child))
                                     {
-                                        to = new SmtExistsBinder(child, scopeCx.Scope);
+                                        to = new SmtForallBinder(child, scopeCx.Scope);
                                         return true;
                                     }
                                 }
