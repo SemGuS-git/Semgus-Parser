@@ -222,23 +222,31 @@ namespace Semgus.Parser
 
             if (test)
             {
-                Test(mode);
+                Test(mode, format);
                 return 0;
             }
 
             using var writerDisposable = GetOutputWriter(output, out var writer);
             using var handlerDisposable = GetHandler(writer, mode, format, out var handler);
+            int errCount = 0;
             foreach (var input in inputs)
             {
                 using SemgusParser parser = (input == "-") ? new(Console.In, "stdin") : new(input);
-                if (!parser.TryParse(handler))
+                if (!parser.TryParse(handler, out errCount))
                 {
                     Console.Error.WriteLine("error: fatal error reported while parsing " + (input == "-" ? "standard input" : input));
-                    return 2;
                 }
             }
 
-            return 0;
+            if (errCount == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                Console.Error.WriteLine($"Encountered {errCount} fatal error{(errCount == 1 ? "" : "s")} while parsing.");
+                return 7;
+            }
         }
 
         private static IDisposable? GetOutputWriter(string? output, out TextWriter writer)
@@ -273,7 +281,7 @@ namespace Semgus.Parser
             return handler as IDisposable;
         }
 
-        private static void Test(ProcessingMode mode)
+        private static void Test(ProcessingMode mode, OutputFormat format)
         {
             var stream = new MemoryStream();
             var writer = new StreamWriter(stream);
@@ -281,7 +289,7 @@ namespace Semgus.Parser
             writer.Flush();
             stream.Position = 0;
             SemgusParser parser = new(stream, "string");
-            using var handler = new JsonHandler(Console.Out, mode);
+            using var _ = GetHandler(Console.Out, mode, format, out var handler);
             parser.TryParse(handler);
         }
     }

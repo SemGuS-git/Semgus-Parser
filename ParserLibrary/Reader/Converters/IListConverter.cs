@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -12,10 +14,12 @@ namespace Semgus.Parser.Reader.Converters
     internal class IListConverter : AbstractConverter
     {
         private readonly SmtConverter _converter;
+        private readonly ILogger<IListConverter> _logger;
 
-        public IListConverter(SmtConverter converter)
+        public IListConverter(SmtConverter converter, ILogger<IListConverter> logger)
         {
             _converter = converter;
+            _logger = logger;
         }
 
         public override bool CanConvert(Type from, Type to)
@@ -36,7 +40,12 @@ namespace Semgus.Parser.Reader.Converters
                 }
                 else
                 {
-                    Console.WriteLine($"Cannot convert {token.GetType().Name} to {resolvedType.Name} in list");
+                    string toTypeMsg = resolvedType.Name;
+                    if (tTo.IsGenericType)
+                    {
+                        toTypeMsg += $"[{string.Join(", ", resolvedType.GetGenericArguments().Select(t => t.Name))}]";
+                    }
+                    _logger.LogParseError($"Cannot convert {token.GetType().Name} [{token.ToString()}] to {toTypeMsg} while converting list.", token.Position);
                     to = default;
                     return false;
                 }

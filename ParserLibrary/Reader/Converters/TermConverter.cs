@@ -78,8 +78,14 @@ namespace Semgus.Parser.Reader.Converters
                 }
                 else
                 {
-                    to = new ErrorTerm("Unable to resolve function or variable: " + qid.Id);
-                    _logger.LogParseError("Unable to resolve function or variable: " + qid.Id, (from as SemgusToken)?.Position);
+                    string msg = "Unable to resolve function or variable: " + qid.Id;
+                    to = new ErrorTerm(msg);
+                    msg += "\n    Did you mean:\n";
+                    foreach (var candidate in _contextProvider.Context.GetSimilarFunctionNames(qid.Id))
+                    {
+                        msg += $"     - {candidate}\n";
+                    }
+                    _logger.LogParseError(msg, (from as SemgusToken)?.Position);
                 }
                 return true;
             }
@@ -143,7 +149,7 @@ namespace Semgus.Parser.Reader.Converters
                                         return true;
                                     }
                                 }
-                                _logger.LogParseError("Invalid `exists` form.", form.Position);
+                                _logger.LogParseError("Invalid `exists` form. Expected syntax: `(exists ((<var> <sort>)*) <term>)`.", form.Position);
                                 to = new ErrorTerm("Invalid exists form.");
                                 return true;
                             }
@@ -159,12 +165,12 @@ namespace Semgus.Parser.Reader.Converters
                                     }
                                     if (_converter.TryConvert(ff.Child, out SmtTerm? child))
                                     {
-                                        to = new SmtExistsBinder(child, scopeCx.Scope);
+                                        to = new SmtForallBinder(child, scopeCx.Scope);
                                         return true;
                                     }
                                 }
                                 to = new ErrorTerm("Invalid forall form.");
-                                _logger.LogParseError("Invalid `forall` form.", form.Position);
+                                _logger.LogParseError("Invalid `forall` form. Expected syntax: `(forall ((<var> <sort>)*) <term>)`.", form.Position);
                                 return true;
                             }
 
@@ -193,6 +199,15 @@ namespace Semgus.Parser.Reader.Converters
                                             {
                                                 // Use this pattern. Nothing to bind.
                                                 constructor = nullaryCons.First();
+
+                                                // Verify that it is actually a nullary constructor
+                                                if (constructor.Children.Length != 0)
+                                                {
+                                                    string msg = $"Constructor '{constructor.Operator}' in match expression expects {constructor.Children.Length} children, but written as nullary (with 0 children)";
+                                                    _logger.LogParseError(msg, pattern.Position);
+                                                    to = new ErrorTerm(msg);
+                                                    return true;
+                                                }
                                             }
                                             else
                                             {
@@ -252,6 +267,15 @@ namespace Semgus.Parser.Reader.Converters
                                                 return true;
                                             }
                                         }
+
+                                        // Make sure all terms are of type bool
+                                        if (convTerms.Any(t => t.Sort == ErrorSort.Instance))
+                                        {
+                                            string msg = $"Pattern {constructor!.Operator.Symbol} in match expression has error terms.";
+                                            to = new ErrorTerm(msg);
+                                            return true;
+                                        }
+
                                         if (convTerms.Count == 1)
                                         {
                                             binders.Add(new SmtMatchBinder(convTerms[0], scopeCtx.Scope, tt, constructor, bindings));
@@ -260,6 +284,16 @@ namespace Semgus.Parser.Reader.Converters
                                         {
                                             _contextProvider.Context.TryGetFunctionDeclaration(new("or"), out SmtFunction? orf);
                                             var boolsort = _contextProvider.Context.GetSortDeclaration(new("Bool"));
+
+                                            // Make sure all terms are of type bool
+                                            if (convTerms.Any(t => t.Sort != boolsort))
+                                            {
+                                                string msg = $"Not all terms in pattern {constructor!.Operator.Symbol} are of sort Bool.";
+                                                to = new ErrorTerm(msg);
+                                                _logger.LogParseError(msg, pattern.Position);
+                                                return true;
+                                            }
+
                                             if (!orf!.TryResolveRank(out var rank, boolsort, Enumerable.Repeat(boolsort, convTerms.Count).ToArray()))
                                             {
                                                 throw new InvalidOperationException("Too many terms to match pattern.");
@@ -325,20 +359,40 @@ namespace Semgus.Parser.Reader.Converters
                                 }
                             }).ToList();
 
-                            if (defn.TryResolveRank(out var rank, af.Id.Sort, args.Select(a => a.Sort).ToArray()))
+                            SmtSort[] argSorts = args.Select(a => a.Sort).ToArray();
+                            if (argSorts.Any(s => s == ErrorSort.Instance))
+                            {
+                                to = new ErrorTerm("Error in function application arguments.");
+                                return true;
+                            }
+
+                            if (defn.TryResolveRank(out var rank, af.Id.Sort, argSorts))
                             {
                                 to = new SmtFunctionApplication(defn, rank, args);
                             }
                             else
                             {
-                                to = new ErrorTerm("Unable to resolve rank for: " + af.Id.Id.Symbol);
-                                _logger.LogParseError("Unable to resolve rank for: " + af.Id.Id.Symbol, form.Position);
+                                string msg = "Unable to resolve rank for: " + af.Id.Id.Symbol;
+                                to = new ErrorTerm(msg);
+                                msg += $"\n  Looking for signature ({string.Join(' ', argSorts.Select(s => s.Name))}) -> {af.Id.Sort?.Name.ToString() ?? "TBD"}";
+                                msg += $"\n  Available signatures: \n";
+                                foreach (var rankTemplate in defn.RankTemplates)
+                                {
+                                    msg += $"    - ({string.Join(' ', rankTemplate.ArgumentSorts.Select(s => s.Name))}) -> {rankTemplate.ReturnSort.Name}\n";
+                                }
+                                _logger.LogParseError(msg, form.Position);
                             }
                         }
                         else
                         {
-                            to = new ErrorTerm("Cannot find matching definition for: " + af.Id.Id);
-                            _logger.LogParseError("Cannot find matching definition for: " + af.Id.Id, form.Position);
+                            string msg = "Cannot find function definition for: " + af.Id.Id;
+                            to = new ErrorTerm(msg);
+                            msg += "\n    Did you mean:\n";
+                            foreach (var candidate in _contextProvider.Context.GetSimilarFunctionNames(af.Id.Id))
+                            {
+                                msg += $"     - {candidate}\n";
+                            }
+                            _logger.LogParseError(msg, form.Position);
                         }
                     }
                     else

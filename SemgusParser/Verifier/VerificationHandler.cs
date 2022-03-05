@@ -80,6 +80,7 @@ namespace Semgus.Parser.Verifier
             foreach (var chc in semgusCtx.Chcs)
             {
                 _writer.WriteLine("CHC: " + chc.Head + " <= " + (chc.BodyRelations.Any() ? String.Join(" ^ ", chc.BodyRelations) + " ^ " : "") + chc.Constraint);
+                _writer.Write($"    [constructor: ({string.Join(' ', chc.Binder.Bindings.Select(b => b.Binding.Id).Prepend(chc.Binder.Constructor!.Operator))})]");
                 if (chc.InputVariables != null)
                 {
                     _writer.Write($"     [inputs: {string.Join(' ', chc.InputVariables)}]");

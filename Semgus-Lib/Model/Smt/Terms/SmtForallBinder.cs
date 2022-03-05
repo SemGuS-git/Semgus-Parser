@@ -10,6 +10,11 @@ namespace Semgus.Model.Smt.Terms
     {
         public SmtForallBinder(SmtTerm child, SmtScope newScope) : base(child, newScope) { }
 
+        public override string ToString()
+        {
+            return $"(forall ({string.Join(' ', NewScope.LocalBindings.Select(b => $"({b.Id} {b.Sort.Name})"))}) {Child})";
+        }
+
         public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
         {
             return visitor.VisitForallBinder(this);
