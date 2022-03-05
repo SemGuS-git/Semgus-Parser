@@ -21,3 +21,6 @@ build
 
 # Ignore published files
 publish/
+
+# Ignore integration test results
+IntegrationTests/tests/*.out
