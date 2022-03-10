@@ -11,7 +11,7 @@ namespace Semgus.Model.Smt
     {
         private readonly Stack<AssertionLevel> _assertionStack;
 
-        private readonly HashSet<SmtTheory> _theories;
+        private readonly HashSet<ISmtTheory> _theories;
 
         private AssertionLevel CurrentLevel => _assertionStack.Peek();
 
@@ -20,14 +20,11 @@ namespace Semgus.Model.Smt
             _assertionStack = new Stack<AssertionLevel>();
             _assertionStack.Push(new AssertionLevel());
 
-            var core = new Theories.SmtCoreTheory();
-            var ints = new Theories.SmtIntsTheory(core);
-            var strings = new Theories.SmtStringsTheory(core, ints);
-            _theories = new HashSet<SmtTheory>()
+            _theories = new HashSet<ISmtTheory>()
             {
-                core,
-                ints,
-                strings
+                Theories.SmtCoreTheory.Instance,
+                Theories.SmtIntsTheory.Instance,
+                Theories.SmtStringsTheory.Instance,
             };
         }
 

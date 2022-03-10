@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt.Theories
 {
-    internal class SmtStringsTheory : SmtTheory
+    internal class SmtStringsTheory : ISmtTheory
     {
+        public static SmtStringsTheory Instance { get; } = new(SmtCoreTheory.Instance, SmtIntsTheory.Instance);
         private class StringSort : SmtSort
         {
             private StringSort() : base(new SmtIdentifier("String")) { }
             public static StringSort Instance { get; } = new();
         }
 
-        private readonly IReadOnlyDictionary<SmtIdentifier, SmtSort> _stringSortList;
+        public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
+        public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
 
-        private readonly IReadOnlyDictionary<SmtIdentifier, SmtFunction> _functions;
-
-        public SmtStringsTheory(SmtCoreTheory core, SmtIntsTheory ints)
+        private SmtStringsTheory(SmtCoreTheory core, SmtIntsTheory ints)
         {
             SmtSort s = StringSort.Instance;
             SmtSort i = ints.Sorts[new SmtIdentifier("Int")];
@@ -34,11 +34,12 @@ namespace Semgus.Model.Smt.Theories
                 }
                 else
                 {
-                    fd.Add(id, new SmtFunction(id, this, new SmtFunctionRank(ret, args)));
+                    fd.Add(id, new SmtFunction(id, new SmtFunctionRank(ret, args)));
                 }
             }
 
-            _stringSortList = new Dictionary<SmtIdentifier, SmtSort>() { { s.Name, s } };
+            // TODO: Should this also include the int and bool sorts?
+            Sorts = new Dictionary<SmtIdentifier, SmtSort>() { { s.Name, s } };
 
             // TODO: regular expression functions
             cf("str.++", s, s, s);
@@ -59,11 +60,7 @@ namespace Semgus.Model.Smt.Theories
             cf("str.to_int", i, s);
             cf("str.from_int", s, i);
 
-            _functions = fd;
+            Functions = fd;
         }
-
-        public override IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions => _functions;
-
-        public override IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts => _stringSortList;
     }
 }

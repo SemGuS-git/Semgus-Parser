@@ -6,19 +6,17 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt.Theories
 {
-    internal class SmtCoreTheory : SmtTheory
-    {
-        private class BoolSort : SmtSort
-        {
+    internal class SmtCoreTheory : ISmtTheory {
+        public static SmtCoreTheory Instance { get; } = new();
+
+        private class BoolSort : SmtSort {
             private BoolSort() : base(new SmtIdentifier("Bool")) { }
             public static BoolSort Instance { get; } = new();
         }
+        public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
+        public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
 
-        private readonly IReadOnlyDictionary<SmtIdentifier, SmtSort> _boolSortList;
-
-        private readonly IReadOnlyDictionary<SmtIdentifier, SmtFunction> _functions;
-
-        public SmtCoreTheory()
+        private SmtCoreTheory()
         {
             SmtSort b = BoolSort.Instance;
             SmtSort.UniqueSortFactory usf = new();
@@ -33,11 +31,11 @@ namespace Semgus.Model.Smt.Theories
                 }
                 else
                 {
-                    fd.Add(id, new SmtFunction(id, this, new SmtFunctionRank(ret, args)));
+                    fd.Add(id, new SmtFunction(id, new SmtFunctionRank(ret, args)));
                 }
             }
 
-            _boolSortList = new Dictionary<SmtIdentifier, SmtSort>() { { b.Name, b } };
+            Sorts = new Dictionary<SmtIdentifier, SmtSort>() { { b.Name, b } };
 
             cf("true", b);
             cf("false", b);
@@ -63,11 +61,8 @@ namespace Semgus.Model.Smt.Theories
             cf("distinct", b, usf.Next(), usf.Sort);
             cf("ite", usf.Next(), b, usf.Sort, usf.Sort);
 
-            _functions = fd;
+            Functions = fd;
         }
 
-        public override IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions => _functions;
-
-        public override IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts => _boolSortList;
     }
 }
