@@ -10,7 +10,7 @@ namespace Semgus.Model.Smt.Theories
         public static SmtCoreTheory Instance { get; } = new();
 
         private class BoolSort : SmtSort {
-            private BoolSort() : base(new SmtIdentifier("Bool")) { }
+            private BoolSort() : base(SmtCommonIdentifiers.SORT_BOOL) { }
             public static BoolSort Instance { get; } = new();
         }
         public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
@@ -22,9 +22,8 @@ namespace Semgus.Model.Smt.Theories
             SmtSort.UniqueSortFactory usf = new();
 
             Dictionary<SmtIdentifier, SmtFunction> fd = new();
-            void cf(string name, SmtSort ret, params SmtSort[] args)
+            void cf(SmtIdentifier id, SmtSort ret, params SmtSort[] args)
             {
-                SmtIdentifier id = new(name);
                 if (fd.TryGetValue(id, out SmtFunction? fun))
                 {
                     fun.AddRankTemplate(new SmtFunctionRank(ret, args));
@@ -37,29 +36,33 @@ namespace Semgus.Model.Smt.Theories
 
             Sorts = new Dictionary<SmtIdentifier, SmtSort>() { { b.Name, b } };
 
-            cf("true", b);
-            cf("false", b);
-            cf("not", b, b);
+            var id_and = SmtCommonIdentifiers.FN_AND;
+            var id_or = SmtCommonIdentifiers.FN_OR;
+            var id_eq = SmtCommonIdentifiers.FN_EQ;
 
-            cf("and", b, b, b);
-            cf("and", b, b, b, b);
-            cf("and", b, b, b, b, b);
-            cf("and", b, b, b, b, b, b);
-            cf("and", b, b, b, b, b, b, b);
-            cf("and", b, b, b, b, b, b, b, b);
+            cf(new("true"), b);
+            cf(new("false"), b);
+            cf(new("not"), b, b);
 
-            cf("or", b, b, b);
-            cf("or", b, b, b, b);
-            cf("or", b, b, b, b, b);
-            cf("or", b, b, b, b, b, b);
-            cf("or", b, b, b, b, b, b, b);
-            cf("or", b, b, b, b, b, b, b, b);
+            cf(id_and, b, b, b);
+            cf(id_and, b, b, b, b);
+            cf(id_and, b, b, b, b, b);
+            cf(id_and, b, b, b, b, b, b);
+            cf(id_and, b, b, b, b, b, b, b);
+            cf(id_and, b, b, b, b, b, b, b, b);
 
-            cf("xor", b, b, b);
-            cf("=>", b, b, b);
-            cf("=", b, usf.Sort, usf.Sort);
-            cf("distinct", b, usf.Next(), usf.Sort);
-            cf("ite", usf.Next(), b, usf.Sort, usf.Sort);
+            cf(id_or, b, b, b);
+            cf(id_or, b, b, b, b);
+            cf(id_or, b, b, b, b, b);
+            cf(id_or, b, b, b, b, b, b);
+            cf(id_or, b, b, b, b, b, b, b);
+            cf(id_or, b, b, b, b, b, b, b, b);
+
+            cf(new("xor"), b, b, b);
+            cf(new("=>"), b, b, b);
+            cf(id_eq, b, usf.Sort, usf.Sort);
+            cf(new("distinct"), b, usf.Next(), usf.Sort);
+            cf(new("ite"), usf.Next(), b, usf.Sort, usf.Sort);
 
             Functions = fd;
         }

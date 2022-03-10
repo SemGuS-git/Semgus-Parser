@@ -8,10 +8,11 @@ namespace Semgus.Model.Smt.Theories
 {
     internal class SmtIntsTheory : ISmtTheory
     {
-        public static SmtIntsTheory Instance { get; } = new(SmtCoreTheory.Instance); 
+        public static SmtIntsTheory Instance { get; } = new(SmtCoreTheory.Instance);
+
         private class IntSort : SmtSort
         {
-            private IntSort() : base(new SmtIdentifier("Int")) { }
+            private IntSort() : base(SmtCommonIdentifiers.SORT_INT) { }
             public static IntSort Instance { get; } = new();
         }
 
@@ -21,7 +22,7 @@ namespace Semgus.Model.Smt.Theories
         private SmtIntsTheory(SmtCoreTheory core)
         {
             SmtSort i = IntSort.Instance;
-            SmtSort b = core.Sorts[new SmtIdentifier("Bool")];
+            SmtSort b = core.Sorts[SmtCommonIdentifiers.SORT_BOOL];
 
             Dictionary<SmtIdentifier, SmtFunction> fd = new();
             void cf(string name, SmtSort ret, params SmtSort[] args)

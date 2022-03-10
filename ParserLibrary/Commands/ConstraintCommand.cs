@@ -5,6 +5,7 @@ using System.IO;
 using Semgus.Parser.Reader;
 
 using Semgus.Model.Smt.Terms;
+using Semgus.Model.Smt.Theories;
 
 namespace Semgus.Parser.Commands
 {
@@ -29,7 +30,7 @@ namespace Semgus.Parser.Commands
         public void Constraint(SmtTerm predicate)
         {
             // Only Boolean constraints are valid
-            var boolSort = _smtProvider.Context.GetSortDeclaration(new("Bool"));
+            var boolSort = _smtProvider.Context.GetSortDeclaration(SmtCommonIdentifiers.SORT_BOOL);
             if (predicate.Sort == boolSort)
             {
                 _semgusProvider.Context.AddConstraint(predicate);

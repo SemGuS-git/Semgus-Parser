@@ -3,6 +3,7 @@
 using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Model.Smt.Terms;
+using Semgus.Model.Smt.Theories;
 using Semgus.Parser.Reader;
 
 using System;
@@ -130,7 +131,7 @@ namespace Semgus.Parser.Commands
         private void MaybeProcessChcDefinition(SmtFunction decl, SmtFunctionRank rank, SmtLambdaBinder defn)
         {
             // Rule: must return bool
-            var boolSort = _smtCtxProvider.Context.GetSortDeclaration(new SmtIdentifier("Bool"));
+            var boolSort = _smtCtxProvider.Context.GetSortDeclaration(SmtCommonIdentifiers.SORT_BOOL);
             if (rank.ReturnSort != boolSort)
             {
                 return; // Not a semantic relation
@@ -246,7 +247,7 @@ namespace Semgus.Parser.Commands
                 }
 
                 List<SmtTerm> bodyParts = new();
-                if (term is SmtFunctionApplication appl && appl.Definition.Name == new SmtIdentifier("and"))
+                if (term is SmtFunctionApplication appl && appl.Definition.Name == SmtCommonIdentifiers.FN_AND)
                 {
                     bodyParts.AddRange(appl.Arguments);
                 }
@@ -284,7 +285,7 @@ namespace Semgus.Parser.Commands
             {
                 if (pat.Child is SmtFunctionApplication appl)
                 {
-                    if (appl.Definition.Name == new SmtIdentifier("or"))
+                    if (appl.Definition.Name == SmtCommonIdentifiers.FN_OR)
                     {
                         foreach (var t in appl.Arguments)
                         {

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Model.Smt.Terms;
+using Semgus.Model.Smt.Theories;
 
 #nullable enable
 
@@ -258,8 +259,8 @@ namespace Semgus.Parser.Reader.Converters
                                         }
                                         else
                                         {
-                                            _contextProvider.Context.TryGetFunctionDeclaration(new("or"), out SmtFunction? orf);
-                                            var boolsort = _contextProvider.Context.GetSortDeclaration(new("Bool"));
+                                            _contextProvider.Context.TryGetFunctionDeclaration(SmtCommonIdentifiers.FN_OR, out SmtFunction? orf);
+                                            var boolsort = _contextProvider.Context.GetSortDeclaration(SmtCommonIdentifiers.SORT_BOOL);
                                             if (!orf!.TryResolveRank(out var rank, boolsort, Enumerable.Repeat(boolsort, convTerms.Count).ToArray()))
                                             {
                                                 throw new InvalidOperationException("Too many terms to match pattern.");
