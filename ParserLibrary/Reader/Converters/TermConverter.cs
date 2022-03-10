@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Model.Smt.Terms;
+using Semgus.Model.Smt.Theories;
 
 #nullable enable
 
@@ -284,8 +285,8 @@ namespace Semgus.Parser.Reader.Converters
                                         }
                                         else
                                         {
-                                            _contextProvider.Context.TryGetFunctionDeclaration(new("or"), out SmtFunction? orf);
-                                            var boolsort = GetSortOrDie(new("Bool"));
+                                            _contextProvider.Context.TryGetFunctionDeclaration(SmtCommonIdentifiers.FN_OR, out SmtFunction? orf);
+                                            var boolsort = GetSortOrDie(SmtCommonIdentifiers.SORT_BOOL);
 
                                             // Make sure all terms are of type bool
                                             if (convTerms.Any(t => t.Sort != boolsort))
