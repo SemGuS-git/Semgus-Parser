@@ -14,6 +14,12 @@ namespace Semgus.Model.Smt.Terms
     public abstract class SmtLiteral : SmtTerm
     {
         /// <summary>
+        /// Loosely-typed accessor for this literal's value
+        /// </summary>
+        /// <value></value>
+        public abstract object BoxedValue { get; }
+        
+        /// <summary>
         /// Resolves the given sort for a literal
         /// </summary>
         /// <param name="ctx">SmtContext</param>
@@ -45,6 +51,8 @@ namespace Semgus.Model.Smt.Terms
         /// The literal value
         /// </summary>
         public long Value { get; }
+    
+        public override object BoxedValue => Value;
 
         /// <summary>
         /// Constructs a new numeral literal with the given value
@@ -83,6 +91,7 @@ namespace Semgus.Model.Smt.Terms
         /// The literal value
         /// </summary>
         public double Value { get; }
+<<<<<<< HEAD
 
         /// <summary>
         /// Constructs a new decimal literal with the given value
@@ -90,6 +99,10 @@ namespace Semgus.Model.Smt.Terms
         /// <param name="ctx">Current SMT context</param>
         /// <param name="value">Literal value</param>
         public SmtDecimalLiteral(SmtContext ctx, double value) : base(GetSortOrDie(ctx, new("Real")))
+=======
+        public override object BoxedValue => Value;
+        public SmtDecimalLiteral(SmtContext ctx, double value) : base(ctx.GetSortDeclaration(new SmtIdentifier("Real")))
+>>>>>>> Add BoxedValue property to literal base type
         {
             Value = value;
         }
@@ -121,6 +134,7 @@ namespace Semgus.Model.Smt.Terms
         /// The literal value
         /// </summary>
         public string Value { get; }
+<<<<<<< HEAD
 
         /// <summary>
         /// Constructs a new string literal with the given value
@@ -128,6 +142,10 @@ namespace Semgus.Model.Smt.Terms
         /// <param name="ctx">Current SMT context</param>
         /// <param name="value">Literal value</param>
         public SmtStringLiteral(SmtContext ctx, string value) : base(GetSortOrDie(ctx, new("String")))
+=======
+        public override object BoxedValue => Value;
+        public SmtStringLiteral(SmtContext ctx, string value) : base(ctx.GetSortDeclaration(new SmtIdentifier("String")))
+>>>>>>> Add BoxedValue property to literal base type
         {
             Value = value;
         }
