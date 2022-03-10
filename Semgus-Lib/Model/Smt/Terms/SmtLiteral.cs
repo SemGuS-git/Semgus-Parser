@@ -10,12 +10,15 @@ namespace Semgus.Model.Smt.Terms
 {
     public abstract class SmtLiteral : SmtTerm
     {
+        public abstract object BoxedValue { get; }
         public SmtLiteral(SmtSort sort) : base(sort) { }
     }
 
     public class SmtNumeralLiteral : SmtLiteral
     {
         public long Value { get; }
+
+        public override object BoxedValue => Value;
 
         public SmtNumeralLiteral(SmtContext ctx, long value) : base(ctx.GetSortDeclaration(new SmtIdentifier("Int")))
         {
@@ -36,7 +39,7 @@ namespace Semgus.Model.Smt.Terms
     public class SmtDecimalLiteral : SmtLiteral
     {
         public double Value { get; }
-
+        public override object BoxedValue => Value;
         public SmtDecimalLiteral(SmtContext ctx, double value) : base(ctx.GetSortDeclaration(new SmtIdentifier("Real")))
         {
             Value = value;
@@ -56,7 +59,7 @@ namespace Semgus.Model.Smt.Terms
     public class SmtStringLiteral : SmtLiteral
     {
         public string Value { get; }
-
+        public override object BoxedValue => Value;
         public SmtStringLiteral(SmtContext ctx, string value) : base(ctx.GetSortDeclaration(new SmtIdentifier("String")))
         {
             Value = value;
