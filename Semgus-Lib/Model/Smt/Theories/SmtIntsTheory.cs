@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt.Theories
 {
-    internal class SmtIntsTheory : SmtTheory
+    internal class SmtIntsTheory : ISmtTheory
     {
+        public static SmtIntsTheory Instance { get; } = new(SmtCoreTheory.Instance); 
         private class IntSort : SmtSort
         {
             private IntSort() : base(new SmtSortIdentifier("Int")) { }
             public static IntSort Instance { get; } = new();
         }
 
-        private readonly IReadOnlyDictionary<SmtIdentifier, SmtSort> _intSortList;
+        public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
+        public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
 
-        private readonly IReadOnlyDictionary<SmtIdentifier, SmtFunction> _functions;
-
-        public SmtIntsTheory(SmtCoreTheory core)
+        private SmtIntsTheory(SmtCoreTheory core)
         {
             SmtSort i = IntSort.Instance;
             SmtSort b = core.Sorts[new SmtIdentifier("Bool")];
@@ -33,11 +33,11 @@ namespace Semgus.Model.Smt.Theories
                 }
                 else
                 {
-                    fd.Add(id, new SmtFunction(id, this, new SmtFunctionRank(ret, args)));
+                    fd.Add(id, new SmtFunction(id, new SmtFunctionRank(ret, args)));
                 }
             }
 
-            _intSortList = new Dictionary<SmtIdentifier, SmtSort>() { { i.Name.Name, i } };
+            Sorts = new Dictionary<SmtIdentifier, SmtSort>() { { i.Name.Name, i } };
 
             cf("-", i, i); // Negation
             cf("-", i, i, i); // Subtraction
@@ -51,11 +51,8 @@ namespace Semgus.Model.Smt.Theories
             cf(">=", b, i, i);
             cf(">", b, i, i);
 
-            _functions = fd;
+            Functions = fd;
         }
 
-        public override IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions => _functions;
-
-        public override IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts => _intSortList;
     }
 }

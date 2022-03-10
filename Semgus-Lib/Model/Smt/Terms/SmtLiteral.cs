@@ -87,11 +87,12 @@ namespace Semgus.Model.Smt.Terms
     /// </summary>
     public class SmtDecimalLiteral : SmtLiteral
     {
+        public override object BoxedValue => Value;
+        
         /// <summary>
         /// The literal value
         /// </summary>
         public double Value { get; }
-<<<<<<< HEAD
 
         /// <summary>
         /// Constructs a new decimal literal with the given value
@@ -99,10 +100,6 @@ namespace Semgus.Model.Smt.Terms
         /// <param name="ctx">Current SMT context</param>
         /// <param name="value">Literal value</param>
         public SmtDecimalLiteral(SmtContext ctx, double value) : base(GetSortOrDie(ctx, new("Real")))
-=======
-        public override object BoxedValue => Value;
-        public SmtDecimalLiteral(SmtContext ctx, double value) : base(ctx.GetSortDeclaration(new SmtIdentifier("Real")))
->>>>>>> Add BoxedValue property to literal base type
         {
             Value = value;
         }
@@ -130,11 +127,12 @@ namespace Semgus.Model.Smt.Terms
     /// </summary>
     public class SmtStringLiteral : SmtLiteral
     {
+        public override object BoxedValue => Value;
+        
         /// <summary>
         /// The literal value
         /// </summary>
         public string Value { get; }
-<<<<<<< HEAD
 
         /// <summary>
         /// Constructs a new string literal with the given value
@@ -142,10 +140,6 @@ namespace Semgus.Model.Smt.Terms
         /// <param name="ctx">Current SMT context</param>
         /// <param name="value">Literal value</param>
         public SmtStringLiteral(SmtContext ctx, string value) : base(GetSortOrDie(ctx, new("String")))
-=======
-        public override object BoxedValue => Value;
-        public SmtStringLiteral(SmtContext ctx, string value) : base(ctx.GetSortDeclaration(new SmtIdentifier("String")))
->>>>>>> Add BoxedValue property to literal base type
         {
             Value = value;
         }

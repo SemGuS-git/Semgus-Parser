@@ -114,7 +114,7 @@ namespace Semgus.Parser.Commands
             var returnSort = _smtCtxProvider.Context.GetSortOrDie(returnSortId, _sourceMap, _logger);
             var args = argIds.Select(argId => _smtCtxProvider.Context.GetSortOrDie(argId, _sourceMap, _logger));
             var rank = new SmtFunctionRank(returnSort, args.ToArray());
-            var decl = new SmtFunction(name, SmtTheory.UserDefined, rank);
+            var decl = new SmtFunction(name, rank);
 
             return (decl, rank);
         }
