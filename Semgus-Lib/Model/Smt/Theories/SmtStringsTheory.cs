@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt.Theories
 {
-    internal class SmtStringsTheory : ISmtTheory
+    public class SmtStringsTheory : ISmtTheory
     {
         public static SmtStringsTheory Instance { get; } = new(SmtCoreTheory.Instance, SmtIntsTheory.Instance);
 
