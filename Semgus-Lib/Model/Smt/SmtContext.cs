@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Semgus.Model.Smt.Theories;
 
 namespace Semgus.Model.Smt
 {
@@ -12,8 +13,10 @@ namespace Semgus.Model.Smt
         private readonly Stack<AssertionLevel> _assertionStack;
 
         private readonly HashSet<ISmtTheory> _theories;
+        public IEnumerable<ISmtTheory> Theories => _theories;
 
         private AssertionLevel CurrentLevel => _assertionStack.Peek();
+
 
         public SmtContext()
         {
@@ -22,9 +25,9 @@ namespace Semgus.Model.Smt
 
             _theories = new HashSet<ISmtTheory>()
             {
-                Theories.SmtCoreTheory.Instance,
-                Theories.SmtIntsTheory.Instance,
-                Theories.SmtStringsTheory.Instance,
+                SmtCoreTheory.Instance,
+                SmtIntsTheory.Instance,
+                SmtStringsTheory.Instance,
             };
         }
 
