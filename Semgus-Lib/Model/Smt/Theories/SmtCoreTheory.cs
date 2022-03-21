@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt.Theories
 {
-    internal class SmtCoreTheory : ISmtTheory {
+    public class SmtCoreTheory : ISmtTheory {
         public static SmtCoreTheory Instance { get; } = new();
 
         private class BoolSort : SmtSort {
@@ -58,11 +58,13 @@ namespace Semgus.Model.Smt.Theories
             cf(id_or, b, b, b, b, b, b, b);
             cf(id_or, b, b, b, b, b, b, b, b);
 
+            cf(new("!"), b, b);
             cf(new("xor"), b, b, b);
             cf(new("=>"), b, b, b);
             cf(id_eq, b, usf.Sort, usf.Sort);
             cf(new("distinct"), b, usf.Next(), usf.Sort);
             cf(new("ite"), usf.Next(), b, usf.Sort, usf.Sort);
+            cf(new("just"), usf.Next(), usf.Sort);
 
             Functions = fd;
         }
