@@ -49,10 +49,10 @@
               (E.Sem et1 x y r1)
               (E.Sem et2 x y r2)
               (= r (+ r1 r2)))))
-        (($ite bt etc eta)
+        (($ite bt1 etc eta)
          (exists ((rb Bool) (rc Int) (ra Int))
              (and
-              (B.Sem bt x y rb)
+              (B.Sem bt1 x y rb)
               (E.Sem etc x y rc)
               (E.Sem eta x y ra)
               (= r(ite rb rc ra)))))))
@@ -62,10 +62,10 @@
    (! (match bt ; B.Sem definitions
         (($t (= r true))
          ($f(= r false))
-         (($! bt)
+         (($! bt1)
           (exists ((rb Bool))
               (and
-               (B.Sem bt x y rb)
+               (B.Sem bt1 x y rb)
                (= r(not rb)))))
          (($and bt1 bt2)
           (exists ((rb1 Bool) (rb2 Bool))
