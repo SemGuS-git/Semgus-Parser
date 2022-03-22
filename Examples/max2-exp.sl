@@ -4,7 +4,7 @@
 
 ;;; Metadata
 (set-info :format-version "2.0.0")
-(set-info :author("Jinwoo Kim" "Keith Johnson"))
+(set-info :author("Jinwoo Kim" "Keith Johnson" "Wiley Corning"))
 (set-info :realizable true)
 
 ;;;
@@ -87,6 +87,29 @@
                (= r(< r1 r2)))))))
     :input (x y) :output (r))))
 
+
+(set-info :test (
+    (
+        ($< $x $y)
+        (:t 1 2 true)
+        (:t 12 8 false)
+    )
+    (
+        ($+ ($+ $1 $x) $y)
+        (:t 1 2 4)
+        (:t 5 3 9)
+    )
+))
+
+(set-info :demo (
+    (
+        ($+ ($+ $1 $x) $y)
+        (:t 12 64 :any :any)
+    )
+))
+
+(set-info :solution (max2 ($ite ($< $x $y) $y $x)))
+
 ;;;
 ;;; Function to synthesize - a term rooted at E
 ;;;
@@ -97,6 +120,7 @@
 ;;;
 (constraint (E.Sem max2 4 2 4))
 (constraint (E.Sem max2 2 5 5))
+(constraint (E.Sem max2 2 (+ 3 4) 7))
 
 ;;;
 ;;; Constraints - logical specification
