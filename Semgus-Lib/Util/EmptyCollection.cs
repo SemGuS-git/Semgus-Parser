@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Semgus.Util {
-    public class EmptyCollection<T> : IReadOnlyList<T> {
+    internal class EmptyCollection<T> : IReadOnlyList<T> {
         public T this[int index] => throw new IndexOutOfRangeException();
 
         public static EmptyCollection<T> Instance { get; } = new EmptyCollection<T>();
