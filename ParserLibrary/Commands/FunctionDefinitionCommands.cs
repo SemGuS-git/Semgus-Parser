@@ -155,7 +155,7 @@ namespace Semgus.Parser.Commands
             using var logScope = _logger.BeginScope($"processing CHC for {decl.Name}:");
 
             // Rule: must return bool
-            var boolSort = _smtCtxProvider.Context.GetSortOrDie(SmtCommonIdentifiers.SORT_BOOL, _sourceMap, _logger);
+            var boolSort = _smtCtxProvider.Context.GetSortOrDie(SmtCommonIdentifiers.BoolSortId, _sourceMap, _logger);
             if (rank.ReturnSort != boolSort)
             {
                 return; // Not a semantic relation
@@ -273,7 +273,7 @@ namespace Semgus.Parser.Commands
                 }
 
                 List<SmtTerm> bodyParts = new();
-                if (term is SmtFunctionApplication appl && appl.Definition.Name == SmtCommonIdentifiers.FN_AND)
+                if (term is SmtFunctionApplication appl && appl.Definition.Name == SmtCommonIdentifiers.AndFunctionId)
                 {
                     bodyParts.AddRange(appl.Arguments);
                 }
@@ -311,7 +311,7 @@ namespace Semgus.Parser.Commands
             {
                 if (pat.Child is SmtFunctionApplication appl)
                 {
-                    if (appl.Definition.Name == SmtCommonIdentifiers.FN_OR)
+                    if (appl.Definition.Name == SmtCommonIdentifiers.OrFunctionId)
                     {
                         foreach (var t in appl.Arguments)
                         {

@@ -14,7 +14,7 @@ namespace Semgus.Model.Smt.Theories
 
         private class StringSort : SmtSort
         {
-            private StringSort() : base(SORT_STRING) { }
+            private StringSort() : base(StringSortId) { }
             public static StringSort Instance { get; } = new();
         }
 
@@ -24,8 +24,8 @@ namespace Semgus.Model.Smt.Theories
         private SmtStringsTheory(SmtCoreTheory core, SmtIntsTheory ints)
         {
             SmtSort s = StringSort.Instance;
-            SmtSort i = ints.Sorts[SORT_INT.Name];
-            SmtSort b = core.Sorts[SORT_BOOL.Name];
+            SmtSort i = ints.Sorts[IntSortId.Name];
+            SmtSort b = core.Sorts[BoolSortId.Name];
 
             Dictionary<SmtIdentifier, SmtFunction> fd = new();
             void cf(string name, SmtSort ret, params SmtSort[] args)

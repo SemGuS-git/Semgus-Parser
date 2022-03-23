@@ -58,7 +58,7 @@ namespace Semgus.Model.Smt.Terms
         /// </summary>
         /// <param name="ctx">Current SMT context</param>
         /// <param name="value">Literal value</param>
-        public SmtNumeralLiteral(SmtContext ctx, long value) : base(GetSortOrDie(ctx, SmtCommonIdentifiers.SORT_INT))
+        public SmtNumeralLiteral(SmtContext ctx, long value) : base(GetSortOrDie(ctx, SmtCommonIdentifiers.IntSortId))
         {
             Value = value;
         }
@@ -98,7 +98,7 @@ namespace Semgus.Model.Smt.Terms
         /// </summary>
         /// <param name="ctx">Current SMT context</param>
         /// <param name="value">Literal value</param>
-        public SmtDecimalLiteral(SmtContext ctx, double value) : base(GetSortOrDie(ctx, SmtCommonIdentifiers.SORT_REAL))
+        public SmtDecimalLiteral(SmtContext ctx, double value) : base(GetSortOrDie(ctx, SmtCommonIdentifiers.RealSortId))
         {
             Value = value;
         }
@@ -138,7 +138,7 @@ namespace Semgus.Model.Smt.Terms
         /// </summary>
         /// <param name="ctx">Current SMT context</param>
         /// <param name="value">Literal value</param>
-        public SmtStringLiteral(SmtContext ctx, string value) : base(GetSortOrDie(ctx, SmtCommonIdentifiers.SORT_STRING))
+        public SmtStringLiteral(SmtContext ctx, string value) : base(GetSortOrDie(ctx, SmtCommonIdentifiers.StringSortId))
         {
             Value = value;
         }
