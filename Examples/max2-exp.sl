@@ -87,7 +87,9 @@
                (= r(< r1 r2)))))))
     :input (x y) :output (r))))
 
-
+;;;
+;;; [Unstable feature] Hand-written DSL terms and examples of their expected behavior
+;;;
 (set-info :test (
     (
         ($< $x $y)
@@ -98,6 +100,7 @@
         ($+ ($+ $1 $x) $y)
         (:t 1 2 4)
         (:t 5 3 9)
+        (:t 0 0 :any)
     )
 ))
 
@@ -121,6 +124,17 @@
 (constraint (E.Sem max2 4 2 4))
 (constraint (E.Sem max2 2 5 5))
 (constraint (E.Sem max2 2 (+ 3 4) 7))
+
+;;;
+;;; [Unstable feature] Expected solutions to synthesis problems
+;;;
+(set-info :solution (
+    (
+        max2
+        ($ite ($< $x $y) $y $x)
+        ($+ $0 ($ite ($< $x $y) $y $x))
+    )
+))
 
 ;;;
 ;;; Constraints - logical specification
