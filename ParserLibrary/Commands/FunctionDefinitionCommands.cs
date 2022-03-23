@@ -3,7 +3,6 @@
 using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Model.Smt.Terms;
-using Semgus.Model.Smt.Theories;
 using Semgus.Parser.Reader;
 
 using System;
@@ -156,11 +155,7 @@ namespace Semgus.Parser.Commands
             using var logScope = _logger.BeginScope($"processing CHC for {decl.Name}:");
 
             // Rule: must return bool
-<<<<<<< HEAD
             var boolSort = _smtCtxProvider.Context.GetSortOrDie(SmtCommonIdentifiers.SORT_BOOL, _sourceMap, _logger);
-=======
-            var boolSort = _smtCtxProvider.Context.GetSortDeclaration(SmtCommonIdentifiers.SORT_BOOL);
->>>>>>> Create singleton instances for common identifiers (to reduce string constant repetition)
             if (rank.ReturnSort != boolSort)
             {
                 return; // Not a semantic relation

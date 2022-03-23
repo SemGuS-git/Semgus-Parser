@@ -7,6 +7,7 @@ using Semgus.Parser.Reader;
 using Semgus.Model.Smt.Terms;
 using Microsoft.Extensions.Logging;
 using Semgus.Model.Smt.Theories;
+using Semgus.Model.Smt;
 
 namespace Semgus.Parser.Commands
 {

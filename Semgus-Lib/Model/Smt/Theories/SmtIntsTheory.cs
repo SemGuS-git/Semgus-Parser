@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt.Theories
 {
+    using static SmtCommonIdentifiers;
+
     public class SmtIntsTheory : ISmtTheory
     {
         public static SmtIntsTheory Instance { get; } = new(SmtCoreTheory.Instance);
 
         private class IntSort : SmtSort
         {
-            private IntSort() : base(SmtCommonIdentifiers.SORT_INT) { }
+            private IntSort() : base(SORT_INT) { }
             public static IntSort Instance { get; } = new();
         }
 

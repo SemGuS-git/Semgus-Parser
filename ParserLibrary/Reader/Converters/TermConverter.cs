@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Model.Smt.Terms;
-using Semgus.Model.Smt.Theories;
 
 #nullable enable
 
