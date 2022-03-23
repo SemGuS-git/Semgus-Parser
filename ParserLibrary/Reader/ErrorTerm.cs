@@ -15,7 +15,6 @@ namespace Semgus.Parser.Reader
         public ErrorTerm(string message) : base(ErrorSort.Instance)
         {
             Message = message;
-            Console.WriteLine(message);
         }
 
         public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)

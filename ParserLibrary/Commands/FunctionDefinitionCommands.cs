@@ -114,12 +114,17 @@ namespace Semgus.Parser.Commands
 
             if (!_converter.TryConvert(token, out SmtTerm? term))
             {
-                throw new InvalidOperationException($"error: {token.Position}: Cannot convert function term: " + term);
+                throw new FatalParseException($"Cannot convert function term: " + term, token.Position);
+            }
+
+            if (term.Sort == ErrorSort.Instance)
+            {
+                throw new FatalParseException("Error encountered resolving term for definition of function " + decl.Name, token.Position);
             }
 
             if (term.Sort != rank.ReturnSort)
             {
-                throw new InvalidOperationException("Function return sort doesn't match term sort: " + decl.Name);
+                throw new FatalParseException("Function return sort doesn't match term sort: " + decl.Name, token.Position);
             }
 
             SmtLambdaBinder lambda = new(term, scopeCtx.Scope, arguments);
@@ -272,7 +277,7 @@ namespace Semgus.Parser.Commands
                     }
                     if (constraint is not null)
                     {
-                        throw new InvalidOperationException("Multiple constraints in CHC.");
+                        throw new FatalParseException($"Multiple constraints in CHC for {binder.Constructor!.Operator} in {decl.Name}. Only one first-order logic constraint is allowed.");
                     }
                     // TODO: check to make sure this doesn't contain semantic relations.
                     constraint = c;

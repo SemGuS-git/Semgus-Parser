@@ -68,7 +68,7 @@ Holds general metadata about the problem. The `<value>` is either a string, numb
 ```
 { "$event": "set-info", "$type": "meta", "keyword": "<key>", "value": <value> }
 ```
-#### `set-info`
+#### `end-of-stream`
 Sent at the end of the event stream.
 ```
 { "$event": "end-of-stream", "$type": "meta" }

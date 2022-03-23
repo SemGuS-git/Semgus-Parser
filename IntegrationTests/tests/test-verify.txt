@@ -1,0 +1,48 @@
+set-info: :format-version "2.0.0"
+set-info: :author ("Jinwoo Kim" "Keith Johnson")
+set-info: :realizable true
+declare-term-types: 
+  E --> $x() | $y() | $0() | $1() | $+(E, E) | $ite(B, E, E);
+  B --> $t() | $f() | $!(B) | $and(B, B) | $or(B, B) | $<(E, E);
+check-synth
+CHC: (E.Sem et x y r) <= (= r x)
+    [constructor: ($x)]     [inputs: x y]     [outputs: r]
+CHC: (E.Sem et x y r) <= (= r y)
+    [constructor: ($y)]     [inputs: x y]     [outputs: r]
+CHC: (E.Sem et x y r) <= (= r 0)
+    [constructor: ($0)]     [inputs: x y]     [outputs: r]
+CHC: (E.Sem et x y r) <= (= r 1)
+    [constructor: ($1)]     [inputs: x y]     [outputs: r]
+CHC: (E.Sem et x y r) <= (E.Sem et1 x y r1) ^ (E.Sem et2 x y r1) ^ (= r (+ r1 r2))
+    [constructor: ($+ et1 et2)]     [inputs: x y]     [outputs: r]
+CHC: (E.Sem et x y r) <= (B.Sem bt x y rb) ^ (E.Sem etc x y rc) ^ (E.Sem eta x y ra) ^ (= r (ite rb rc ra))
+    [constructor: ($ite bt etc eta)]     [inputs: x y]     [outputs: r]
+CHC: (B.Sem bt x y r) <= (= r true)
+    [constructor: ($t)]     [inputs: x y]     [outputs: r]
+CHC: (B.Sem bt x y r) <= (= r false)
+    [constructor: ($f)]     [inputs: x y]     [outputs: r]
+CHC: (B.Sem bt x y r) <= (B.Sem bt x y rb) ^ (= r (not rb))
+    [constructor: ($! bt)]     [inputs: x y]     [outputs: r]
+CHC: (B.Sem bt x y r) <= (B.Sem bt1 x y rb1) ^ (B.Sem bt2 x y rb2) ^ (= r (and rb1 rb2))
+    [constructor: ($and bt1 bt2)]     [inputs: x y]     [outputs: r]
+CHC: (B.Sem bt x y r) <= (B.Sem bt1 x y rb1) ^ (B.Sem bt2 x y rb2) ^ (= r (or rb1 rb2))
+    [constructor: ($or bt1 bt2)]     [inputs: x y]     [outputs: r]
+CHC: (B.Sem bt x y r) <= (E.Sem et1 x y r1) ^ (E.Sem et2 x y r2) ^ (= r (< r1 r2))
+    [constructor: ($< et1 et2)]     [inputs: x y]     [outputs: r]
+Constraint: (E.Sem max2 4 2 4)
+Constraint: (E.Sem max2 2 5 5)
+Constraint: (forall ((x Int) (y Int) (r Int)) (= (E.Sem max2 x y r) (and (or (= x r) (= y r)) (>= r x) (>= r y))))
+Function to Synthesize: max2
+Grammar: @E__agtt [E] @B__agtt [B]
+@E__agtt --> $x
+@E__agtt --> $y
+@E__agtt --> $0
+@E__agtt --> $1
+@E__agtt --> ($+ @E__agtt @E__agtt)
+@E__agtt --> ($ite @B__agtt @E__agtt @E__agtt)
+@B__agtt --> $t
+@B__agtt --> $f
+@B__agtt --> ($! @B__agtt)
+@B__agtt --> ($and @B__agtt @B__agtt)
+@B__agtt --> ($or @B__agtt @B__agtt)
+@B__agtt --> ($< @E__agtt @E__agtt)

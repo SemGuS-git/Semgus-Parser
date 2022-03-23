@@ -64,18 +64,27 @@ namespace Semgus.Parser.Commands
         public SemgusGrammar CreateDefaultGrammar(SemgusTermType tt)
         {
             Dictionary<SemgusTermType, SemgusGrammar.NonTerminal> nonTerminals = new();
-            foreach (var cons in tt.Constructors)
+
+            void ProcessNonterminal(SemgusTermType tt)
             {
-                foreach (var child in cons.Children)
+                foreach (var cons in tt.Constructors)
                 {
-                    if (child is SemgusTermType ctt) {
-                        if (!nonTerminals.ContainsKey(ctt))
+                    foreach (var child in cons.Children)
+                    {
+                        if (child is SemgusTermType ctt)
                         {
-                            nonTerminals.Add(ctt, new(new SmtIdentifier($"@{ctt.Name}__agtt"), ctt));
+                            if (!nonTerminals.ContainsKey(ctt))
+                            {
+                                nonTerminals.Add(ctt, new(new SmtIdentifier($"@{ctt.Name}__agtt"), ctt));
+                                ProcessNonterminal(ctt);
+                            }
                         }
                     }
                 }
             }
+
+            nonTerminals.Add(tt, new(new SmtIdentifier($"@{tt.Name}__agtt"), tt));
+            ProcessNonterminal(tt);
 
             List<SemgusGrammar.Production> productions = new();
             foreach (var nt in nonTerminals.Values)
