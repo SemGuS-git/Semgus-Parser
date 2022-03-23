@@ -34,7 +34,7 @@ namespace Semgus.Model.Smt.Theories
                 }
                 else
                 {
-                    fd.Add(id, new SmtFunction(id, new SmtFunctionRank(ret, args)));
+                    fd.Add(id, new SmtFunction(id, this, new SmtFunctionRank(ret, args)));
                 }
             }
 

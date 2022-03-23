@@ -98,7 +98,7 @@ namespace Semgus.Parser.Commands
         private (SmtFunction, SmtFunctionRank) ProcessFunctionDeclaration(SmtIdentifier name, IEnumerable<SmtSort> args, SmtSort returnSort)
         {
             var rank = new SmtFunctionRank(returnSort, args.ToArray());
-            var decl = new SmtFunction(name, rank);
+            var decl = new SmtFunction(name, SmtTheory.UserDefined, rank);
 
             return (decl, rank);
         }
