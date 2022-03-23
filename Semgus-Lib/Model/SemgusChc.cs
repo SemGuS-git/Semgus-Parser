@@ -1,6 +1,5 @@
 ﻿using Semgus.Model.Smt;
 using Semgus.Model.Smt.Terms;
-using Semgus.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,8 +14,11 @@ namespace Semgus.Model
 
         public SemanticRelation Head { get; }
 
-        public IReadOnlyCollection<SmtVariable> InputVariables { get; }
-        public IReadOnlyCollection<SmtVariable> OutputVariables { get; }
+        // Null when this CHC is not annotated with input/output information 
+        public IReadOnlyCollection<SmtVariable>? InputVariables { get; }
+
+        // Null when this CHC is not annotated with input/output information 
+        public IReadOnlyCollection<SmtVariable>? OutputVariables { get; }
 
         public IReadOnlyList<SemanticRelation> BodyRelations { get; }
 
@@ -31,8 +33,8 @@ namespace Semgus.Model
             BodyRelations = childRels.ToList();
             Binder = binder;
             Constraint = constraint;
-            InputVariables = inputs is null ? EmptyCollection<SmtVariable>.Instance : inputs.ToList();
-            OutputVariables = outputs is null ? EmptyCollection<SmtVariable>.Instance : outputs.ToList();
+            InputVariables = inputs?.ToList();
+            OutputVariables = outputs?.ToList();
         }
 
         public record SemanticRelation(SmtFunction Relation, SmtFunctionRank Rank, IReadOnlyList<SmtVariable> Arguments)
