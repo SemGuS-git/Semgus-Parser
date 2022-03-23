@@ -19,7 +19,7 @@ namespace Semgus.Model.Smt.Terms
 
         public override object BoxedValue => Value;
 
-        public SmtNumeralLiteral(SmtContext ctx, long value) : base(ctx.GetSortDeclaration(SmtCommonIdentifiers.SORT_INT))
+        public SmtNumeralLiteral(SmtContext ctx, long value) : base(ctx.GetSortDeclaration(SmtCommonIdentifiers.IntSortId))
         {
             Value = value;
         }
@@ -39,7 +39,7 @@ namespace Semgus.Model.Smt.Terms
     {
         public double Value { get; }
         public override object BoxedValue => Value;
-        public SmtDecimalLiteral(SmtContext ctx, double value) : base(ctx.GetSortDeclaration(SmtCommonIdentifiers.SORT_REAL))
+        public SmtDecimalLiteral(SmtContext ctx, double value) : base(ctx.GetSortDeclaration(SmtCommonIdentifiers.RealSortId))
         {
             Value = value;
         }
@@ -59,7 +59,7 @@ namespace Semgus.Model.Smt.Terms
     {
         public string Value { get; }
         public override object BoxedValue => Value;
-        public SmtStringLiteral(SmtContext ctx, string value) : base(ctx.GetSortDeclaration(SmtCommonIdentifiers.SORT_STRING))
+        public SmtStringLiteral(SmtContext ctx, string value) : base(ctx.GetSortDeclaration(SmtCommonIdentifiers.StringSortId))
         {
             Value = value;
         }

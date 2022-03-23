@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt {
     public static class SmtCommonIdentifiers {
-        public static SmtIdentifier SORT_BOOL { get; } = new("Bool");
-        public static SmtIdentifier SORT_INT { get; } = new("Int");
-        public static SmtIdentifier SORT_STRING { get; } = new("String");
-        public static SmtIdentifier SORT_REAL { get; } = new("Real");
+        public static SmtIdentifier BoolSortId { get; } = new("Bool");
+        public static SmtIdentifier IntSortId { get; } = new("Int");
+        public static SmtIdentifier StringSortId { get; } = new("String");
+        public static SmtIdentifier RealSortId { get; } = new("Real");
 
-        public static SmtIdentifier FN_AND { get; } = new("and");
-        public static SmtIdentifier FN_OR { get; } = new("or");
-        public static SmtIdentifier FN_EQ { get; } = new("=");
+        public static SmtIdentifier AndFunctionId { get; } = new("and");
+        public static SmtIdentifier OrFunctionId { get; } = new("or");
+        public static SmtIdentifier EqFunctionId { get; } = new("=");
     }
 }

@@ -30,7 +30,7 @@ namespace Semgus.Parser.Commands
         public void Constraint(SmtTerm predicate)
         {
             // Only Boolean constraints are valid
-            var boolSort = _smtProvider.Context.GetSortDeclaration(SmtCommonIdentifiers.SORT_BOOL);
+            var boolSort = _smtProvider.Context.GetSortDeclaration(SmtCommonIdentifiers.BoolSortId);
             if (predicate.Sort == boolSort)
             {
                 _semgusProvider.Context.AddConstraint(predicate);

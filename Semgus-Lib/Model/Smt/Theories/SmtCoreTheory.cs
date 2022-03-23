@@ -12,7 +12,7 @@ namespace Semgus.Model.Smt.Theories
         public static SmtCoreTheory Instance { get; } = new();
 
         private class BoolSort : SmtSort {
-            private BoolSort() : base(SORT_BOOL) { }
+            private BoolSort() : base(BoolSortId) { }
             public static BoolSort Instance { get; } = new();
         }
         public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
@@ -38,9 +38,9 @@ namespace Semgus.Model.Smt.Theories
 
             Sorts = new Dictionary<SmtIdentifier, SmtSort>() { { b.Name, b } };
 
-            var id_and = FN_AND;
-            var id_or = FN_OR;
-            var id_eq = FN_EQ;
+            var id_and = AndFunctionId;
+            var id_or = OrFunctionId;
+            var id_eq = EqFunctionId;
 
             cf(new("true"), b);
             cf(new("false"), b);
