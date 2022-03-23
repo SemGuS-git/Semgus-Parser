@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Semgus.Model.Smt.Theories {
+namespace Semgus.Model.Smt {
     public static class SmtCommonIdentifiers {
         public static SmtIdentifier SORT_BOOL { get; } = new("Bool");
         public static SmtIdentifier SORT_INT { get; } = new("Int");

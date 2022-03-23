@@ -5,7 +5,7 @@ using System.IO;
 using Semgus.Parser.Reader;
 
 using Semgus.Model.Smt.Terms;
-using Semgus.Model.Smt.Theories;
+using Semgus.Model.Smt;
 
 namespace Semgus.Parser.Commands
 {

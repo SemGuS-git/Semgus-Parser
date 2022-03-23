@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt.Theories
 {
+    using static SmtCommonIdentifiers;
+
     public class SmtStringsTheory : ISmtTheory
     {
         public static SmtStringsTheory Instance { get; } = new(SmtCoreTheory.Instance, SmtIntsTheory.Instance);
 
         private class StringSort : SmtSort
         {
-            private StringSort() : base(SmtCommonIdentifiers.SORT_STRING) { }
+            private StringSort() : base(SORT_STRING) { }
             public static StringSort Instance { get; } = new();
         }
 
@@ -22,8 +24,8 @@ namespace Semgus.Model.Smt.Theories
         private SmtStringsTheory(SmtCoreTheory core, SmtIntsTheory ints)
         {
             SmtSort s = StringSort.Instance;
-            SmtSort i = ints.Sorts[SmtCommonIdentifiers.SORT_INT];
-            SmtSort b = core.Sorts[SmtCommonIdentifiers.SORT_BOOL];
+            SmtSort i = ints.Sorts[SORT_INT];
+            SmtSort b = core.Sorts[SORT_BOOL];
 
             Dictionary<SmtIdentifier, SmtFunction> fd = new();
             void cf(string name, SmtSort ret, params SmtSort[] args)

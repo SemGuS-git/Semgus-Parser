@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt.Theories
 {
+    using static SmtCommonIdentifiers;
+
     public class SmtIntsTheory : ISmtTheory
     {
         public static SmtIntsTheory Instance { get; } = new(SmtCoreTheory.Instance);
 
         private class IntSort : SmtSort
         {
-            private IntSort() : base(SmtCommonIdentifiers.SORT_INT) { }
+            private IntSort() : base(SORT_INT) { }
             public static IntSort Instance { get; } = new();
         }
 
@@ -22,7 +24,7 @@ namespace Semgus.Model.Smt.Theories
         private SmtIntsTheory(SmtCoreTheory core)
         {
             SmtSort i = IntSort.Instance;
-            SmtSort b = core.Sorts[SmtCommonIdentifiers.SORT_BOOL];
+            SmtSort b = core.Sorts[SORT_BOOL];
 
             Dictionary<SmtIdentifier, SmtFunction> fd = new();
             void cf(string name, SmtSort ret, params SmtSort[] args)
@@ -38,7 +40,6 @@ namespace Semgus.Model.Smt.Theories
                 }
             }
 
-            // TODO: Should this also inlcude the bool sort?
             Sorts = new Dictionary<SmtIdentifier, SmtSort>() { { i.Name, i } };
 
             cf("-", i, i); // Negation

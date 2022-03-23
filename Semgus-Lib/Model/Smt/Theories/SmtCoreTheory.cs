@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt.Theories
 {
+    using static SmtCommonIdentifiers;
+
     public class SmtCoreTheory : ISmtTheory {
         public static SmtCoreTheory Instance { get; } = new();
 
         private class BoolSort : SmtSort {
-            private BoolSort() : base(SmtCommonIdentifiers.SORT_BOOL) { }
+            private BoolSort() : base(SORT_BOOL) { }
             public static BoolSort Instance { get; } = new();
         }
         public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
@@ -36,9 +38,9 @@ namespace Semgus.Model.Smt.Theories
 
             Sorts = new Dictionary<SmtIdentifier, SmtSort>() { { b.Name, b } };
 
-            var id_and = SmtCommonIdentifiers.FN_AND;
-            var id_or = SmtCommonIdentifiers.FN_OR;
-            var id_eq = SmtCommonIdentifiers.FN_EQ;
+            var id_and = FN_AND;
+            var id_or = FN_OR;
+            var id_eq = FN_EQ;
 
             cf(new("true"), b);
             cf(new("false"), b);
@@ -64,7 +66,6 @@ namespace Semgus.Model.Smt.Theories
             cf(id_eq, b, usf.Sort, usf.Sort);
             cf(new("distinct"), b, usf.Next(), usf.Sort);
             cf(new("ite"), usf.Next(), b, usf.Sort, usf.Sort);
-            cf(new("just"), usf.Next(), usf.Sort);
 
             Functions = fd;
         }

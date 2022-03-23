@@ -1,5 +1,4 @@
-﻿using Semgus.Model.Smt.Theories;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;

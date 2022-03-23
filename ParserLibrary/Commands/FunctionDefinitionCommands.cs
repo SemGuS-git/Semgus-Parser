@@ -3,7 +3,6 @@
 using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Model.Smt.Terms;
-using Semgus.Model.Smt.Theories;
 using Semgus.Parser.Reader;
 
 using System;
