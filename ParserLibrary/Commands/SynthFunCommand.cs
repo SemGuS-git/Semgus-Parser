@@ -48,7 +48,7 @@ namespace Semgus.Parser.Commands
             }
 
             var rank = new SmtFunctionRank(tt);
-            var decl = new SmtFunction(name, rank);
+            var decl = new SmtFunction(name, SmtTheory.UserDefined, rank);
 
             // Handle the grammar declaration
             SemgusGrammar grammar;

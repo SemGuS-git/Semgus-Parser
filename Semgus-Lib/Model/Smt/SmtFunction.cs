@@ -11,9 +11,10 @@ namespace Semgus.Model.Smt
 {
     public class SmtFunction
     {
-        public SmtFunction(SmtIdentifier name, params SmtFunctionRank[] rankTemplates)
+        public SmtFunction(SmtIdentifier name, ISmtTheory theory, params SmtFunctionRank[] rankTemplates)
         {
             Name = name;
+            Theory = theory;
             _rankTemplates = new List<SmtFunctionRank>(rankTemplates);
             _definitions = new Dictionary<SmtFunctionRank, SmtLambdaBinder>();
         }
@@ -26,6 +27,7 @@ namespace Semgus.Model.Smt
         }
 
         public SmtIdentifier Name { get; private set; }
+        public ISmtTheory Theory { get; private set; }
 
         private readonly List<SmtFunctionRank> _rankTemplates;
 
