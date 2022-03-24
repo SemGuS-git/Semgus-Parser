@@ -1,6 +1,6 @@
 # SemGuS-Parser
 A C# parsing library for SemGuS problems. We also provide a standalone tool for verifying and converting
-SemGuS files.
+SemGuS files. Find the latest release and binaries on the [Releases page](https://github.com/SemGuS-git/Semgus-Parser/releases).
 
 ## Usage
 
