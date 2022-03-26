@@ -16,9 +16,9 @@ namespace Semgus.Parser.Reader
 {
     internal class DestructuringHelper
     {
-        private readonly SmtConverter _conv;
+        private readonly ISmtConverter _conv;
 
-        public DestructuringHelper(SmtConverter converter)
+        public DestructuringHelper(ISmtConverter converter)
         {
             _conv = converter;
         }

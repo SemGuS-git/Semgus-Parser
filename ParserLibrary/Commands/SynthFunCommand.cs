@@ -19,10 +19,10 @@ namespace Semgus.Parser.Commands
         private readonly ISemgusProblemHandler _handler;
         private readonly ISmtContextProvider _smtContext;
         private readonly ISemgusContextProvider _semgusContext;
-        private readonly SmtConverter _converter;
+        private readonly ISmtConverter _converter;
         private readonly ILogger<SynthFunCommand> _logger;
 
-        public SynthFunCommand(ISemgusProblemHandler handler, ISmtContextProvider smtContext, ISemgusContextProvider semgusContext, SmtConverter converter, ILogger<SynthFunCommand> logger)
+        public SynthFunCommand(ISemgusProblemHandler handler, ISmtContextProvider smtContext, ISemgusContextProvider semgusContext, ISmtConverter converter, ILogger<SynthFunCommand> logger)
         {
             _handler = handler;
             _smtContext = smtContext;

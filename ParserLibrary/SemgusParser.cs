@@ -90,7 +90,7 @@ namespace Semgus.Parser
             procClass(typeof(CheckSynthCommand));
 
             ServiceCollection services = new ServiceCollection();
-            services.AddSingleton<SmtConverter>();
+            services.AddSingleton<ISmtConverter, Reader.Converters.SmtConverter>();
             services.AddSingleton<DestructuringHelper>();
             services.AddScoped<ISmtContextProvider, SmtContextProvider>();
             services.AddScoped<ISmtScopeProvider, SmtScopeProvider>();
