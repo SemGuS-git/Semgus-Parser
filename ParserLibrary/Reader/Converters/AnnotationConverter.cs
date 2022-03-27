@@ -15,11 +15,11 @@ namespace Semgus.Parser.Reader.Converters
 {
     internal class AnnotationConverter : AbstractConverter
     {
-        private readonly SmtConverter _converter;
+        private readonly ISmtConverter _converter;
         private readonly ISmtContextProvider _context;
         private readonly ILogger<AnnotationConverter> _logger;
 
-        public AnnotationConverter(SmtConverter converter, ISmtContextProvider context, ILogger<AnnotationConverter> logger)
+        public AnnotationConverter(ISmtConverter converter, ISmtContextProvider context, ILogger<AnnotationConverter> logger)
         {
             _converter = converter;
             _context = context;

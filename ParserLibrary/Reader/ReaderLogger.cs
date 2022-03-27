@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -55,10 +56,14 @@ namespace Semgus.Parser.Reader
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
-            _writer.Write(GetPrefix(logLevel));
-            if (_scopeStack.TryPeek(out var scope))
+            if (state is ReaderLoggerState rls)
             {
-                _writer.Write($"{scope}");
+                _writer.Write($"{rls.Position?.ToString() ?? "0:0:0"}: ");
+            }
+            _writer.Write(GetPrefix(logLevel));
+            if (_scopeStack.Count > 0)
+            {
+                _writer.Write(string.Join(' ', _scopeStack.Reverse()) + " ");
             }
             _writer.Write(formatter(state, exception));
             _writer.WriteLine();
@@ -79,11 +84,20 @@ namespace Semgus.Parser.Reader
         }
     }
 
+    internal record ReaderLoggerState(string Message, SexprPosition? Position);
+
     public static class ReaderLoggerExtensions
     {
         public static void LogParseError<T>(this ILogger<T> logger, string msg, SexprPosition? pos)
         {
-            logger.LogError("{Position}: {Message}", pos?.ToString() ?? "0:0:0:", msg);
+            logger.Log(LogLevel.Error, default, new ReaderLoggerState(msg, pos), null, (s, e) => s.Message);
+        }
+
+        [DoesNotReturn]
+        public static void LogParseErrorAndThrow<T>(this ILogger<T> logger, string msg, SexprPosition? pos)
+        {
+            logger.LogParseError(msg, pos);
+            throw new FatalParseException(msg, pos);
         }
     }
 
