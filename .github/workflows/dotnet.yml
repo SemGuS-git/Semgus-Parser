@@ -120,7 +120,7 @@ jobs:
           mkdir -p release_files
           for asset_folder in assets/*; do
             rm -f "${asset_folder}/*.pdb"
-            zip -j "release_files/$(basename ${asset_folder}).zip" "${asset_folder}"
+            zip -j -r "release_files/$(basename ${asset_folder}).zip" "${asset_folder}"
           done
 
       - name: Update Release
