@@ -84,10 +84,12 @@ jobs:
         with:
           dotnet-version: 6.0.x
       - name: Pack
+        # Notes: substitute '/' with ' ' in ref to create refArray (e.g., 'refs' 'tags' 'v1.2.3' for /refs/tags/v1.2.3)
+        #        remove leading 'v' from the tag (e.g., v1.2.3-beta7)
         run: |
-          refArray=(${GITHUB_REF//\// }) # substitute '/' with ' ' in ref to create array
+          refArray=(${GITHUB_REF//\// })
           if [ "${refArray[1]" == "tags" ]; then
-            VERSION="${refArray[2]/v}" # remove leading 'v' from the tag (e.g., v1.2.3-beta7)
+            VERSION="${refArray[2]/v}"
           else
             VERSION="0.0.${GITHUB_RUN_ATTEMPT}-r${GITHUB_SHA}"
           fi
@@ -110,6 +112,9 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           path: assets
+
+      - name: Display Assets
+        run: ls -l -a assets/
 
       - name: Release
         uses: softprops/action-gh-release@v1
