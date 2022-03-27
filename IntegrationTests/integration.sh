@@ -19,7 +19,7 @@ for testrsp in tests/*.rsp; do
 
     testname="$(basename "$testrsp" .rsp)"
     echo "running: ${testname}"
-    dotnet run --project "${ProjectDir}" --no-build -- @"${testrsp}" --output "tests/${testname}.out"
+    dotnet run --project "${ProjectDir}" --no-build -- --output "tests/${testname}.out" @"${testrsp}"
     if [ $? -ne 0 ]; then
 	echo "error: parsing failed for test '${testname}'." >&2
 	echo " --> failed."

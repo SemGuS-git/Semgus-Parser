@@ -21,12 +21,12 @@ namespace Semgus.Parser.Json
             TermType = ssf.Rank.ReturnSort.Name;
             Grammar = new GrammarModel(ssf.Grammar.NonTerminals.Select(n => new NonTerminalDeclarationModel(n.Name, n.Sort.Name)),
                                        ssf.Grammar.Productions.Select(p => new ProductionModel(p.Instance.Name,
-                                                                                               p.Constructor.Operator,
+                                                                                               p.Constructor?.Operator,
                                                                                                p.Occurrences.Select(o => o?.Name))));
         }
 
         public record NonTerminalDeclarationModel(SmtIdentifier Name, SmtIdentifier TermType);
-        public record ProductionModel(SmtIdentifier Instance, SmtIdentifier Operator, IEnumerable<SmtIdentifier?> Occurrences);
+        public record ProductionModel(SmtIdentifier Instance, SmtIdentifier? Operator, IEnumerable<SmtIdentifier?> Occurrences);
         public record GrammarModel(IEnumerable<NonTerminalDeclarationModel> NonTerminals, IEnumerable<ProductionModel> Productions);
     }
 }

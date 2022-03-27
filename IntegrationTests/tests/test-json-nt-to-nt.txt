@@ -1,0 +1,5 @@
+{"name":"E","$event":"declare-term-type","$type":"semgus"}
+{"name":"E","constructors":[],"$event":"define-term-type","$type":"semgus"}
+{"name":"fn","termType":"E","grammar":{"nonTerminals":[{"name":"X","termType":"E"},{"name":"Q","termType":"E"}],"productions":[{"instance":"X","operator":null,"occurrences":["Q"]}]},"$event":"synth-fun","$type":"semgus"}
+{"$event":"check-synth","$type":"semgus"}
+{"$type":"meta","$event":"end-of-stream"}
