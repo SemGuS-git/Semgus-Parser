@@ -5,9 +5,12 @@
     <RootNamespace>Semgus.Sexpr</RootNamespace>
     <Nullable>enable</Nullable>
     <PackageId>Semgus.Sexpr</PackageId>
-    <Authors>Semgus</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>The SemGuS Team</Authors>
     <Company>University of Wisconsin-Madison</Company>
-    <Product>Semgus</Product>
+    <Product>SemGuS</Product>
+    <PackageProjectUrl>https://semgus.org/</PackageProjectUrl>
+    <Description>Library for working with S-expressions, in the context of semantics-guided synthesis (SemGuS) problem files.</Description>
   </PropertyGroup>
 
   <ItemGroup>

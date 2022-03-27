@@ -2,13 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-
     <IsPackable>false</IsPackable>
-
     <AssemblyName>Semgus.Parser.Tests</AssemblyName>
-
     <RootNamespace>$(AssemblyName)</RootNamespace>
-
     <Nullable>enable</Nullable>
   </PropertyGroup>
 

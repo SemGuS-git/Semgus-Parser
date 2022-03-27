@@ -10,10 +10,12 @@
     <AntlrOutputDir>$(RepositoryRoot)/build/generated-src/antlr/csharp</AntlrOutputDir>
     <RootNamespace>Semgus.Parser</RootNamespace>
     <PackageId>Semgus.Parser</PackageId>
-    <Authors>Semgus</Authors>
+    <Authors>The SemGuS Team</Authors>
     <Company>University of Wisconsin-Madison</Company>
-    <Product>Semgus</Product>
-    <Version>1.1.0</Version>
+    <Product>SemGuS</Product>
+    <PackageProjectUrl>https://semgus.org/</PackageProjectUrl>
+    <Description>Library for parsing semantics-guided synthesis (SemGuS) problem files.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Nullable>warnings</Nullable>
   </PropertyGroup>
   <ItemGroup>
