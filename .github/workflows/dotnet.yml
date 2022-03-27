@@ -116,4 +116,4 @@ jobs:
         with:
           files: assets/*
           generate_release_notes: true
-          prerelease: ${{ contains(github.ref, '-' }} # anything with a dash is a prerelease
+          prerelease: ${{ contains(github.ref, '-') }} # anything with a dash is a prerelease
