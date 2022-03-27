@@ -94,13 +94,13 @@ jobs:
           else
             VERSION="0.0.${GITHUB_RUN_ATTEMPT}-r${GITHUB_SHA}"
           fi
-          dotnet pack -v normal -c Release --include-symbols --include-source -o ./nupkg -p:PackageVersion=${VERSION}
+          dotnet pack -v normal -c Release --include-symbols --include-source -o ./nupkg -p:PackageVersion=${VERSION} -p:SymbolPackageFormat=snupkg
 
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
           name: nupkg
-          path: ./nupkg/*.nupkg
+          path: ./nupkg/*.?nupkg
 
   release:
     runs-on: ubuntu-latest
@@ -115,8 +115,16 @@ jobs:
       - name: Display Assets
         run: ls -l -a assets/*
 
+      - name: Zip Assets
+        run: |
+          mkdir -p release_files
+          for asset in assets/*; do
+            rm "assets/${asset}/*.pdb"
+            zip -j "release_files/${asset}.zip" "assets/${asset}"
+          done
+
       - name: Update Release
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ github.event.release.name }}
-          files: assets/*/*
+          files: release_files/*.zip
