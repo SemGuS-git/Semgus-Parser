@@ -100,7 +100,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: nupkg
-          path: ./nupkg/*.?nupkg
+          path: ./nupkg/*.*nupkg
 
   release:
     runs-on: ubuntu-latest
@@ -118,9 +118,9 @@ jobs:
       - name: Zip Assets
         run: |
           mkdir -p release_files
-          for asset in assets/*; do
-            rm -f "assets/${asset}/*.pdb"
-            zip -j "release_files/${asset}.zip" "assets/${asset}"
+          for asset_folder in assets/*; do
+            rm -f "${asset_folder}/*.pdb"
+            zip -j "release_files/$(basename ${asset_folder}).zip" "${asset_folder}"
           done
 
       - name: Update Release
