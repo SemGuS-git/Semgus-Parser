@@ -119,7 +119,7 @@ jobs:
         run: |
           mkdir -p release_files
           for asset in assets/*; do
-            rm "assets/${asset}/*.pdb"
+            rm -f "assets/${asset}/*.pdb"
             zip -j "release_files/${asset}.zip" "assets/${asset}"
           done
 
