@@ -7,25 +7,59 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+
+  test:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+    
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
+        
     - name: Restore dependencies
       run: dotnet restore
       working-directory: SemgusParser
+      
     - name: Build
       run: dotnet build --no-restore --configuration Release
       working-directory: SemgusParser
+      
     - name: Unit Tests
       run: dotnet test
       working-directory: ParserTests
+      
     - name: Integration Tests
       working-directory: IntegrationTests
       run: ./integration.sh
+
+  publish:
+    runs-on: ubuntu-latest
+
+    needs: test
+
+    strategy:
+      matrix:
+        tpm:
+          - linux-x64
+          - win-x64
+          - osx-x64
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Publish
+        run: dotnet publish -c Release -o ../output/${{ matrix.tpm }} -r ${{ matrix.tpm }} --self-contained true -p:PublishSingleFile=true
+        working-directory: SemgusParser
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: semgus-parser-${{ matrix.tpm }}
+          path: output/${{ matrix.tpm }}
