@@ -88,7 +88,7 @@ jobs:
         #        remove leading 'v' from the tag (e.g., v1.2.3-beta7)
         run: |
           refArray=(${GITHUB_REF//\// })
-          if [ "${refArray[1]" == "tags" ]; then
+          if [ "${refArray[1]}" == "tags" ]; then
             VERSION="${refArray[2]/v}"
           else
             VERSION="0.0.${GITHUB_RUN_ATTEMPT}-r${GITHUB_SHA}"
