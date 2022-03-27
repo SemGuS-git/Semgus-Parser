@@ -5,6 +5,13 @@
     <RootNamespace>Semgus</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>Semgus.Common</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>The SemGuS Team</Authors>
+    <Company>University of Wisconsin-Madison</Company>
+    <Product>SemGuS</Product>
+    <PackageProjectUrl>https://semgus.org/</PackageProjectUrl>
+    <Description>Common types for semantics-guided synthesis (SemGuS) tooling.</Description>
   </PropertyGroup>
 
 </Project>

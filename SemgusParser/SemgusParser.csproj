@@ -7,6 +7,15 @@
     <Nullable>enable</Nullable>
     <StartupObject>Semgus.Parser.Program</StartupObject>
     <RootNamespace>Semgus.Parser</RootNamespace>
+    <PackageId>Semgus.Parser.Tool</PackageId>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>semgus-parser</ToolCommandName>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>The SemGuS Team</Authors>
+    <Company>University of Wisconsin-Madison</Company>
+    <Product>SemGuS</Product>
+    <PackageProjectUrl>https://semgus.org/</PackageProjectUrl>
+    <Description>Command line tool for parsing semantics-guided synthesis (SemGuS) problem files.</Description>
   </PropertyGroup>
 
   <ItemGroup>
