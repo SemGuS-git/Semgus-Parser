@@ -21,14 +21,14 @@ namespace Semgus.Parser.Commands
         private readonly ISmtContextProvider _smtCtxProvider;
         private readonly ISemgusContextProvider _semgusCtxProvider;
         private readonly ISmtScopeProvider _scopeProvider;
-        private readonly SmtConverter _converter;
+        private readonly ISmtConverter _converter;
         private readonly ILogger<FunctionDefinitionCommands> _logger;
 
         public FunctionDefinitionCommands(ISemgusProblemHandler handler,
                                     ISmtContextProvider smtCtxProvider,
                                     ISemgusContextProvider semgusCtxProvider,
                                     ISmtScopeProvider scopeProvider,
-                                    SmtConverter converter,
+                                    ISmtConverter converter,
                                     ILogger<FunctionDefinitionCommands> logger)
         {
             _handler = handler;

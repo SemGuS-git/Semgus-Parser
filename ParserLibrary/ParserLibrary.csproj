@@ -25,4 +25,10 @@
     <ProjectReference Include="..\Semgus-Lib\Semgus-Lib.csproj" />
   </ItemGroup>
   
+  <!-- Let our test assembly poke at our internals -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Semgus.Parser.Tests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+  
 </Project>

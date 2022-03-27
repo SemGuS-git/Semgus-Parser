@@ -19,9 +19,9 @@ namespace Semgus.Parser.Commands
     {
         private readonly ISemgusProblemHandler _handler;
         private readonly ISmtContextProvider _context;
-        private readonly SmtConverter _converter;
+        private readonly ISmtConverter _converter;
 
-        public DeclareTermTypeCommand(ISemgusProblemHandler handler, ISmtContextProvider context, SmtConverter converter)
+        public DeclareTermTypeCommand(ISemgusProblemHandler handler, ISmtContextProvider context, ISmtConverter converter)
         {
             _handler = handler;
             _context = context;

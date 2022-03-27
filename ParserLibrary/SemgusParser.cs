@@ -90,7 +90,7 @@ namespace Semgus.Parser
             procClass(typeof(CheckSynthCommand));
 
             ServiceCollection services = new ServiceCollection();
-            services.AddSingleton<SmtConverter>();
+            services.AddSingleton<ISmtConverter, Reader.Converters.SmtConverter>();
             services.AddSingleton<DestructuringHelper>();
             services.AddScoped<ISmtContextProvider, SmtContextProvider>();
             services.AddScoped<ISmtScopeProvider, SmtScopeProvider>();
@@ -183,15 +183,10 @@ namespace Semgus.Parser
                                     errorStream.WriteLine("Failed to find matching command signature for: " + commandName.Name);
                                 }
                             }
-                            catch (FatalParseException fpe)
+                            catch (FatalParseException)
                             {
-                                errorStream.Write("error: ");
-                                if (fpe.Position is not null)
-                                {
-                                    errorStream.Write($"{fpe.Position.Source}:{fpe.Position.Line}:{fpe.Position.Column}: ");
-                                }
-                                errorStream.WriteLine($"while parsing {commandName.Name} command:");
-                                errorStream.WriteLine("  " + fpe.Message);
+                                // Details should be logged when thrown
+                                errorStream.WriteLine($"\nTerminated parsing `{commandName.Name}` command due to fatal error.");
                                 errorStream.WriteLine("--------------------\n");
                                 errCount += 1;
                             }

@@ -13,10 +13,10 @@ namespace Semgus.Parser.Reader.Converters
 {
     internal class IListConverter : AbstractConverter
     {
-        private readonly SmtConverter _converter;
+        private readonly ISmtConverter _converter;
         private readonly ILogger<IListConverter> _logger;
 
-        public IListConverter(SmtConverter converter, ILogger<IListConverter> logger)
+        public IListConverter(ISmtConverter converter, ILogger<IListConverter> logger)
         {
             _converter = converter;
             _logger = logger;

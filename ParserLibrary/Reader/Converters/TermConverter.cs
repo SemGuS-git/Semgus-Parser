@@ -18,12 +18,12 @@ namespace Semgus.Parser.Reader.Converters
     internal class TermConverter : AbstractConverter
     {
         private readonly DestructuringHelper _destructuringHelper;
-        private readonly SmtConverter _converter;
+        private readonly ISmtConverter _converter;
         private readonly ISmtScopeProvider _scopeProvider;
         private readonly ISmtContextProvider _contextProvider;
         private readonly ILogger<TermConverter> _logger;
         
-        public TermConverter(DestructuringHelper helper, SmtConverter converter, ISmtScopeProvider scopeProvider, ISmtContextProvider contextProvider, ILogger<TermConverter> logger)
+        public TermConverter(DestructuringHelper helper, ISmtConverter converter, ISmtScopeProvider scopeProvider, ISmtContextProvider contextProvider, ILogger<TermConverter> logger)
         {
             _destructuringHelper = helper;
             _converter = converter;

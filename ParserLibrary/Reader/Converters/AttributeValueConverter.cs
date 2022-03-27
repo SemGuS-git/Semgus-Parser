@@ -16,13 +16,13 @@ namespace Semgus.Parser.Reader.Converters
 {
     internal class AttributeValueConverter : AbstractConverter
     {
-        private readonly SmtConverter _converter;
+        private readonly ISmtConverter _converter;
         private readonly ISmtContextProvider _context;
         private readonly ILogger<AttributeValueConverter> _logger;
 
         public override int Priority => -10;
 
-        public AttributeValueConverter(SmtConverter converter, ISmtContextProvider context, ILogger<AttributeValueConverter> logger)
+        public AttributeValueConverter(ISmtConverter converter, ISmtContextProvider context, ILogger<AttributeValueConverter> logger)
         {
             _converter = converter;
             _context = context;

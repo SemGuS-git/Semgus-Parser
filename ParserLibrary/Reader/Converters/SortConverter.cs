@@ -13,10 +13,10 @@ namespace Semgus.Parser.Reader.Converters
 {
     internal class SortConverter : AbstractConverter
     {
-        private readonly SmtConverter _converter;
+        private readonly ISmtConverter _converter;
         private readonly ISmtContextProvider _context;
 
-        public SortConverter(SmtConverter converter, ISmtContextProvider context)
+        public SortConverter(ISmtConverter converter, ISmtContextProvider context)
         {
             _converter = converter;
             _context = context;
