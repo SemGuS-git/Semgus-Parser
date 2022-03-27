@@ -82,10 +82,11 @@ jobs:
         with:
           dotnet-version: 6.0.x
       - name: Pack
-        run: dotnet pack -v normal -c Release --include-symbols --include-source -o ./nupkg -p:PackageVersion=${GITHUB_SHA}-${GITHUB_RUN_ATTEMPT}
+        run: dotnet pack -v normal -c Release --include-symbols --include-source -o ./nupkg -p:PackageVersion=0.0.${GITHUB_RUN_ATTEMPT}-r${GITHUB_SHA}
 
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
-          path: ./nupkg/
+          name: nupkg
+          path: ./nupkg/*.nupkg
 
