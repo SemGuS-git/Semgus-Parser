@@ -172,6 +172,11 @@ jobs:
         run: dotnet restore
         
       - name: DocFX Build
-        working-directory: docs
         run: docfx docfx.json
         continue-on-error: false
+        
+      - name: Upload Docs
+        uses: actions/upload-artifact@v2
+        with:
+          name: documentation
+          path: _site
