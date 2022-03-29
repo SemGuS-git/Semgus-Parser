@@ -44,9 +44,11 @@ namespace Semgus.Parser.Commands
         [Command("define-funs-rec")]
         public void DefineFunsRec(IList<DefinitionSignature> signatures, IList<SemgusToken> definitions)
         {
+            using var logScope = _logger.BeginScope($"while processing `define-funs-rec`:");
+
             if (signatures.Count != definitions.Count)
             {
-                throw new InvalidOperationException("In define-funs-rec: number of signatures does not match definitions");
+                _logger.LogParseErrorAndThrow($"number of signatures ({signatures.Count}) does not match number of definitions {definitions.Count}", default);
             }
 
             List<(SmtFunction Decl, SmtFunctionRank Rank)> declarations = new();
@@ -67,6 +69,8 @@ namespace Semgus.Parser.Commands
         [Command("define-fun")]
         public void DefineFun(SmtIdentifier id, IList<(SmtIdentifier Id, SmtSort Sort)> args, SmtSort returnSort, SemgusToken definition)
         {
+            using var logScope = _logger.BeginScope($"while processing `define-fun` for {id}:");
+
             var (decl, rank) = ProcessFunctionDeclaration(id, args.Select(a => a.Sort), returnSort);
             ProcessFunctionDefinition(decl, rank, args.Select(a => a.Id), definition);
             _smtCtxProvider.Context.AddFunctionDeclaration(decl);
@@ -75,6 +79,8 @@ namespace Semgus.Parser.Commands
         [Command("define-fun-rec")]
         public void DefineFunRec(SmtIdentifier id, IList<(SmtIdentifier Id, SmtSort Sort)> args, SmtSort returnSort, SemgusToken definition)
         {
+            using var logScope = _logger.BeginScope($"while processing `define-fun-rec` for {id}:");
+
             var (decl, rank) = ProcessFunctionDeclaration(id, args.Select(a => a.Sort), returnSort);
             _smtCtxProvider.Context.AddFunctionDeclaration(decl);
             ProcessFunctionDefinition(decl, rank, args.Select(a => a.Id), definition);
@@ -83,6 +89,8 @@ namespace Semgus.Parser.Commands
         [Command("declare-fun")]
         public void DeclareFun(SmtIdentifier id, IList<SmtSort> args, SmtSort returnSort)
         {
+            using var logScope = _logger.BeginScope($"while processing `declare-fun` for {id}:");
+
             var (decl, _) = ProcessFunctionDeclaration(id, args, returnSort);
             _smtCtxProvider.Context.AddFunctionDeclaration(decl);
         }
@@ -90,12 +98,16 @@ namespace Semgus.Parser.Commands
         [Command("declare-const")]
         public void DeclareConst(SmtIdentifier id, SmtSort sort)
         {
+            using var logScope = _logger.BeginScope($"while processing `declare-const` for {id}:");
+
             var (decl, _) = ProcessFunctionDeclaration(id, Enumerable.Empty<SmtSort>(), sort);
             _smtCtxProvider.Context.AddFunctionDeclaration(decl);
         }
 
         private (SmtFunction, SmtFunctionRank) ProcessFunctionDeclaration(SmtIdentifier name, IEnumerable<SmtSort> args, SmtSort returnSort)
         {
+            using var logScope = _logger.BeginScope($"processing declaration for {name}:");
+
             var rank = new SmtFunctionRank(returnSort, args.ToArray());
             var decl = new SmtFunction(name, SmtTheory.UserDefined, rank);
 
@@ -104,6 +116,7 @@ namespace Semgus.Parser.Commands
 
         private void ProcessFunctionDefinition(SmtFunction decl, SmtFunctionRank rank, IEnumerable<SmtIdentifier> arguments, SemgusToken token)
         {
+            using var logScope = _logger.BeginScope($"processing definition for {decl.Name}:");
             using var scopeCtx = _scopeProvider.CreateNewScope();
 
             foreach (var (id, sort) in arguments.Zip(rank.ArgumentSorts))
@@ -113,17 +126,17 @@ namespace Semgus.Parser.Commands
 
             if (!_converter.TryConvert(token, out SmtTerm? term))
             {
-                throw new FatalParseException($"Cannot convert function term: " + term, token.Position);
+                _logger.LogParseErrorAndThrow($"Cannot convert function term: " + term, token.Position);
             }
 
             if (term.Sort == ErrorSort.Instance)
             {
-                throw new FatalParseException("Error encountered resolving term for definition of function " + decl.Name, token.Position);
+                _logger.LogParseErrorAndThrow("Error encountered resolving term for definition of function " + decl.Name, token.Position);
             }
 
             if (term.Sort != rank.ReturnSort)
             {
-                throw new FatalParseException("Function return sort doesn't match term sort: " + decl.Name, token.Position);
+                _logger.LogParseErrorAndThrow("Function return sort doesn't match term sort: " + decl.Name, token.Position);
             }
 
             SmtLambdaBinder lambda = new(term, scopeCtx.Scope, arguments);
@@ -134,6 +147,8 @@ namespace Semgus.Parser.Commands
 
         private void MaybeProcessChcDefinition(SmtFunction decl, SmtFunctionRank rank, SmtLambdaBinder defn)
         {
+            using var logScope = _logger.BeginScope($"processing CHC for {decl.Name}:");
+
             // Rule: must return bool
             var boolSort = _smtCtxProvider.Context.GetSortDeclaration(new SmtIdentifier("Bool"));
             if (rank.ReturnSort != boolSort)
@@ -239,6 +254,8 @@ namespace Semgus.Parser.Commands
             // Each pattern is one or more CHC
             void procCHC(SmtMatchBinder binder, SmtTerm term)
             {
+                using var logMatchScope = _logger.BeginScope($"in match {(binder.Constructor?.Operator.ToString() ?? "default")}:");
+
                 SmtScope bodyScope = new(headScope);
                 List<SmtVariableBinding> bodyBindings = new();
                 if (term is SmtExistsBinder existsBinder)
@@ -276,7 +293,7 @@ namespace Semgus.Parser.Commands
                     }
                     if (constraint is not null)
                     {
-                        throw new FatalParseException($"Multiple constraints in CHC for {binder.Constructor!.Operator} in {decl.Name}. Only one first-order logic constraint is allowed.");
+                        _logger.LogParseErrorAndThrow($"Multiple constraints in CHC for {binder.Constructor!.Operator} in {decl.Name}. Only one first-order logic constraint is allowed.", default);
                     }
                     // TODO: check to make sure this doesn't contain semantic relations.
                     constraint = c;
