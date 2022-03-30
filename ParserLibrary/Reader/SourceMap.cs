@@ -63,15 +63,10 @@ namespace Semgus.Parser.Reader
             }
 
             set
-            {   
-                try
-                {
-                    _sourceMap.Add(key, value);
-                }
-                catch (ArgumentException)
-                {
-                    throw new InvalidOperationException($"Attempt to add duplicate source key: {key}");
-                }
+            {
+                // Updating happens in cases like annotations, where converters just
+                // take the result of an existing conversion, modify it, and push it up
+                _sourceMap.AddOrUpdate(key, value);
             }
         }
     }

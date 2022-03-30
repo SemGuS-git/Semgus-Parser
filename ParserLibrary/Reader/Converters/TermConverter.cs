@@ -438,7 +438,7 @@ namespace Semgus.Parser.Reader.Converters
         }
 
         [return: NotNullIfNotNull("id")]
-        private SmtSort? GetSortOrDie(SmtSortIdentifier id) => _contextProvider.Context.GetSortOrDie(id, _sourceMap, _logger);
+        private SmtSort? GetSortOrDie(SmtSortIdentifier? id) => _contextProvider.Context.GetSortOrDie(id, _sourceMap, _logger);
 
         // Note: child terms for binders are SemgusTokens, since we need to update the scope before parsing them.
         private record AnnotationForm([Exactly("!")] SmtIdentifier _, SmtTerm Child, [Rest] IList<SemgusToken> Attributes);
