@@ -34,6 +34,13 @@ namespace Semgus.Parser.Tests.Issues
     /// </summary>
     public class Issue47
     {
+        private ISmtContextProvider FakeSmtCtx(SmtContext ctx)
+        {
+            var fake = A.Fake<ISmtContextProvider>();
+            A.CallTo(() => fake.Context).Returns(ctx);
+            return fake;
+        }
+
         [Fact]
         public void HandlesNtToNtProductions()
         {
@@ -45,14 +52,14 @@ namespace Semgus.Parser.Tests.Issues
             SemgusTermType tt = new(ttId);
             smtCtx.AddSortDeclaration(tt);
 
-            List<(SmtIdentifier, SmtSort)> ntMap = new()
+            List<(SmtIdentifier, SmtSortIdentifier)> ntMap = new()
             {
-                (ntId, tt)
+                (ntId, ttId)
             };
 
-            List<(SmtIdentifier, SmtSort, IList<SemgusToken>)> prods = new()
+            List<(SmtIdentifier, SmtSortIdentifier, IList<SemgusToken>)> prods = new()
             {
-                (ntId, tt, new List<SemgusToken>() { ntSymbol })
+                (ntId, ttId, new List<SemgusToken>() { ntSymbol })
             };
 
             SynthFunCommand.GrammarForm gf = new(ntMap, prods);
@@ -62,7 +69,7 @@ namespace Semgus.Parser.Tests.Issues
 
             SynthFunCommand sfc = new(
                 A.Fake<ISemgusProblemHandler>(),
-                A.Fake<ISmtContextProvider>(),
+                FakeSmtCtx(smtCtx),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
                 A.Fake<ISourceMap>(),
@@ -91,15 +98,15 @@ namespace Semgus.Parser.Tests.Issues
             SemgusTermType tt = new(ttId);
             smtCtx.AddSortDeclaration(tt);
 
-            List<(SmtIdentifier, SmtSort)> ntMap = new()
+            List<(SmtIdentifier, SmtSortIdentifier)> ntMap = new()
             {
-                (nt1Id, tt),
-                (nt2Id, tt)
+                (nt1Id, ttId),
+                (nt2Id, ttId)
             };
 
-            List<(SmtIdentifier, SmtSort, IList<SemgusToken>)> prods = new()
+            List<(SmtIdentifier, SmtSortIdentifier, IList<SemgusToken>)> prods = new()
             {
-                (nt1Id, tt, new List<SemgusToken>() { nt2Symbol })
+                (nt1Id, ttId, new List<SemgusToken>() { nt2Symbol })
             };
 
             SynthFunCommand.GrammarForm gf = new(ntMap, prods);
@@ -109,7 +116,7 @@ namespace Semgus.Parser.Tests.Issues
 
             SynthFunCommand sfc = new(
                 A.Fake<ISemgusProblemHandler>(),
-                A.Fake<ISmtContextProvider>(),
+                FakeSmtCtx(smtCtx),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
                 A.Fake<ISourceMap>(),
@@ -141,15 +148,15 @@ namespace Semgus.Parser.Tests.Issues
             smtCtx.AddSortDeclaration(tt1);
             smtCtx.AddSortDeclaration(tt2);
 
-            List<(SmtIdentifier, SmtSort)> ntMap = new()
+            List<(SmtIdentifier, SmtSortIdentifier)> ntMap = new()
             {
-                (nt1Id, tt1),
-                (nt2Id, tt2)
+                (nt1Id, tt1Id),
+                (nt2Id, tt2Id)
             };
 
-            List<(SmtIdentifier, SmtSort, IList<SemgusToken>)> prods = new()
+            List<(SmtIdentifier, SmtSortIdentifier, IList<SemgusToken>)> prods = new()
             {
-                (nt1Id, tt1, new List<SemgusToken>() { nt2Symbol })
+                (nt1Id, tt1Id, new List<SemgusToken>() { nt2Symbol })
             };
 
             SynthFunCommand.GrammarForm gf = new(ntMap, prods);
@@ -159,7 +166,7 @@ namespace Semgus.Parser.Tests.Issues
 
             SynthFunCommand sfc = new(
                 A.Fake<ISemgusProblemHandler>(),
-                A.Fake<ISmtContextProvider>(),
+                FakeSmtCtx(smtCtx),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
                 A.Fake<ISourceMap>(),
@@ -180,14 +187,14 @@ namespace Semgus.Parser.Tests.Issues
             tt.AddConstructor(new(ntId));
             smtCtx.AddSortDeclaration(tt);
 
-            List<(SmtIdentifier, SmtSort)> ntMap = new()
+            List<(SmtIdentifier, SmtSortIdentifier)> ntMap = new()
             {
-                (ntId, tt)
+                (ntId, ttId)
             };
 
-            List<(SmtIdentifier, SmtSort, IList<SemgusToken>)> prods = new()
+            List<(SmtIdentifier, SmtSortIdentifier, IList<SemgusToken>)> prods = new()
             {
-                (ntId, tt, new List<SemgusToken>() { ntSymbol })
+                (ntId, ttId, new List<SemgusToken>() { ntSymbol })
             };
 
             SynthFunCommand.GrammarForm gf = new(ntMap, prods);
@@ -197,7 +204,7 @@ namespace Semgus.Parser.Tests.Issues
 
             SynthFunCommand sfc = new(
                 A.Fake<ISemgusProblemHandler>(),
-                A.Fake<ISmtContextProvider>(),
+                FakeSmtCtx(smtCtx),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
                 A.Fake<ISourceMap>(),
@@ -228,15 +235,15 @@ namespace Semgus.Parser.Tests.Issues
             SemgusTermType tt = new(ttId);
             smtCtx.AddSortDeclaration(tt);
 
-            List<(SmtIdentifier, SmtSort)> ntMap = new()
+            List<(SmtIdentifier, SmtSortIdentifier)> ntMap = new()
             {
-                (nt1Id, tt),
-                (nt2Id, tt)
+                (nt1Id, ttId),
+                (nt2Id, ttId)
             };
 
-            List<(SmtIdentifier, SmtSort, IList<SemgusToken>)> prods = new()
+            List<(SmtIdentifier, SmtSortIdentifier, IList<SemgusToken>)> prods = new()
             {
-                (nt1Id, tt, new List<SemgusToken>() { nt2Symbol })
+                (nt1Id, ttId, new List<SemgusToken>() { nt2Symbol })
             };
 
             SynthFunCommand.GrammarForm gf = new(ntMap, prods);
@@ -246,7 +253,7 @@ namespace Semgus.Parser.Tests.Issues
 
             SynthFunCommand sfc = new(
                 A.Fake<ISemgusProblemHandler>(),
-                A.Fake<ISmtContextProvider>(),
+                FakeSmtCtx(smtCtx),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
                 A.Fake<ISourceMap>(),

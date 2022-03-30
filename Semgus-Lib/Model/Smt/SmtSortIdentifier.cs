@@ -60,5 +60,18 @@ namespace Semgus.Model.Smt
                 return hash;
             }
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            if (Parameters.Length == 0)
+            {
+                return Name.ToString();
+            }
+            else
+            {
+                return $"({Name} {string.Join(' ', Parameters.Select(p => p.ToString()))})";
+            }
+        }
     }
 }

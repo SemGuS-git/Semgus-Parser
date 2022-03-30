@@ -5,6 +5,7 @@ using System.IO;
 using Semgus.Parser.Reader;
 
 using Semgus.Model.Smt.Terms;
+using Microsoft.Extensions.Logging;
 
 namespace Semgus.Parser.Commands
 {
@@ -12,24 +13,28 @@ namespace Semgus.Parser.Commands
     /// Command for adding a new constraint into the SemGuS problem
     /// Syntax: (constraint [predicate])
     /// </summary>
-    public class ConstraintCommand
+    internal class ConstraintCommand
     {
         private readonly ISemgusProblemHandler _problemHandler;
         private readonly ISmtContextProvider _smtProvider;
         private readonly ISemgusContextProvider _semgusProvider;
+        private readonly ISourceMap _sourceMap;
+        private readonly ILogger<ConstraintCommand> _logger;
 
-        public ConstraintCommand(ISemgusProblemHandler handler, ISmtContextProvider smtProvider, ISemgusContextProvider semgusProvider)
+        public ConstraintCommand(ISemgusProblemHandler handler, ISmtContextProvider smtProvider, ISemgusContextProvider semgusProvider, ISourceMap sourceMap, ILogger<ConstraintCommand> logger)
         {
             _problemHandler = handler;
             _smtProvider = smtProvider;
             _semgusProvider = semgusProvider;
+            _sourceMap = sourceMap;
+            _logger = logger;
         }
 
         [Command("constraint")]
         public void Constraint(SmtTerm predicate)
         {
             // Only Boolean constraints are valid
-            var boolSort = _smtProvider.Context.GetSortDeclaration(new("Bool"));
+            var boolSort = _smtProvider.Context.GetSortOrDie(new("Bool"), _sourceMap, _logger);
             if (predicate.Sort == boolSort)
             {
                 _semgusProvider.Context.AddConstraint(predicate);

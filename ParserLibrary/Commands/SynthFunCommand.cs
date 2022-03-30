@@ -109,8 +109,9 @@ namespace Semgus.Parser.Commands
             using var logScope = _logger.BeginScope("in grammar block:");
 
             List<SemgusGrammar.NonTerminal> nonTerminals = new();
-            foreach (var (id, sort) in grammarForm.ntDecls)
+            foreach (var (id, sortId) in grammarForm.ntDecls)
             {
+                var sort = _smtContext.Context.GetSortOrDie(sortId, _sourceMap, _logger);
                 if (sort is not SemgusTermType stt)
                 {
                     throw _logger.LogParseErrorAndThrow($"Not a term type in synth-fun non-terminal decl: ({id} {sort.Name})", _sourceMap[sort]);
@@ -119,8 +120,9 @@ namespace Semgus.Parser.Commands
             }
 
             List<SemgusGrammar.Production> productions = new();
-            foreach (var (id, sort, terms) in grammarForm.Productions)
+            foreach (var (id, sortId, terms) in grammarForm.Productions)
             {
+                var sort = _smtContext.Context.GetSortOrDie(sortId, _sourceMap, _logger);
                 if (sort is not SemgusTermType stt)
                 {
                     throw _logger.LogParseErrorAndThrow($"Not a term type in synth-fun production: ({id} {sort.Name} ...)", _sourceMap[sort]);
@@ -211,6 +213,6 @@ namespace Semgus.Parser.Commands
             return new SemgusGrammar(nonTerminals, productions);
         }
 
-        public record GrammarForm(IList<(SmtIdentifier Name, SmtSort Sort)> ntDecls, IList<(SmtIdentifier Name, SmtSort Sort, IList<SemgusToken> Productions)> Productions);
+        public record GrammarForm(IList<(SmtIdentifier Name, SmtSortIdentifier Sort)> ntDecls, IList<(SmtIdentifier Name, SmtSortIdentifier Sort, IList<SemgusToken> Productions)> Productions);
     }
 }

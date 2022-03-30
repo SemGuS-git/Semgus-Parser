@@ -29,6 +29,7 @@ namespace Semgus.Parser.Json
             _serializer.Converters.Add(new SemanticRelationConverter());
             _serializer.Converters.Add(new SmtTermConverter());
             _serializer.Converters.Add(new SmtAttributeValueConverter());
+            _serializer.Converters.Add(new SmtSortIdentifierConverter());
             _writer = writer;
             _processingMode = mode;
             if (_processingMode == Program.ProcessingMode.Batch)
