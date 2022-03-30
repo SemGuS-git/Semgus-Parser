@@ -20,21 +20,25 @@ namespace Semgus.Parser.Commands
         private readonly ISmtContextProvider _smtContext;
         private readonly ISemgusContextProvider _semgusContext;
         private readonly ISmtConverter _converter;
+        private readonly ISourceMap _sourceMap;
         private readonly ILogger<SynthFunCommand> _logger;
 
-        public SynthFunCommand(ISemgusProblemHandler handler, ISmtContextProvider smtContext, ISemgusContextProvider semgusContext, ISmtConverter converter, ILogger<SynthFunCommand> logger)
+        public SynthFunCommand(ISemgusProblemHandler handler, ISmtContextProvider smtContext, ISemgusContextProvider semgusContext, ISmtConverter converter, ISourceMap sourceMap, ILogger<SynthFunCommand> logger)
         {
             _handler = handler;
             _smtContext = smtContext;
             _semgusContext = semgusContext;
             _converter = converter;
+            _sourceMap = sourceMap;
             _logger = logger;
         }
 
         [Command("synth-fun")]
-        public void SynthFun(SmtIdentifier name, IList<SmtConstant> args, SmtSort ret, GrammarForm? grammarForm = default)
+        public void SynthFun(SmtIdentifier name, IList<SmtConstant> args, SmtSortIdentifier retId, GrammarForm? grammarForm = default)
         {
             using var logscope = _logger.BeginScope($"while processing `synth-fun` for {name.Symbol}:");
+
+            var ret = _smtContext.Context.GetSortOrDie(retId, _sourceMap, _logger);
 
             // Currently, only Semgus-style synth-funs are supported
             if (args.Count > 0 || ret is not SemgusTermType tt)
@@ -109,8 +113,7 @@ namespace Semgus.Parser.Commands
             {
                 if (sort is not SemgusTermType stt)
                 {
-                    _logger.LogParseErrorAndThrow($"Not a term type in synth-fun non-terminal decl: ({id} {sort.Name})", default);
-                    throw null; // ^doesn't return, but make the compiler happy
+                    throw _logger.LogParseErrorAndThrow($"Not a term type in synth-fun non-terminal decl: ({id} {sort.Name})", _sourceMap[sort]);
                 }
                 nonTerminals.Add(new(id, stt));
             }
@@ -120,14 +123,13 @@ namespace Semgus.Parser.Commands
             {
                 if (sort is not SemgusTermType stt)
                 {
-                    _logger.LogParseErrorAndThrow($"Not a term type in synth-fun production: ({id} {sort.Name} ...)", default);
-                    throw null; // ^doesn't return, but the compiler complains that stt is unassigned
+                    throw _logger.LogParseErrorAndThrow($"Not a term type in synth-fun production: ({id} {sort.Name} ...)", _sourceMap[sort]);
                 }
 
                 var instance = nonTerminals.Find(m => m.Name == id && m.Sort == stt);
                 if (instance is null)
                 {
-                    _logger.LogParseErrorAndThrow($"Nonterminal not declared in synth-fun: ({id} {sort.Name} ...)", default);
+                    throw _logger.LogParseErrorAndThrow($"Nonterminal not declared in synth-fun: ({id} {sort.Name} ...)", _sourceMap[id]);
                 }
 
                 foreach (var term in terms)
@@ -142,7 +144,7 @@ namespace Semgus.Parser.Commands
                         {
                             if (instance.Sort != matchingNt.Sort)
                             {
-                                _logger.LogParseErrorAndThrow($"Term types do not match between non-terminals in production: {instance} --> {matchingNt}", term.Position);
+                                throw _logger.LogParseErrorAndThrow($"Term types do not match between non-terminals in production: {instance} --> {matchingNt}", term.Position);
                             }
                             productions.Add(new(instance, matchingNt));
                         }
@@ -151,11 +153,11 @@ namespace Semgus.Parser.Commands
                             var c = stt.Constructors.FirstOrDefault(p => p.Operator == termId);
                             if (c == null)
                             {
-                                _logger.LogParseErrorAndThrow($"Not a valid constructor or non-terminal for production: ({id} {sort.Name} ... {termId})", term.Position);
+                                throw _logger.LogParseErrorAndThrow($"Not a valid constructor or non-terminal for production: ({id} {sort.Name} ... {termId})", term.Position);
                             }
                             else if (c.Children.Length > 0)
                             {
-                                _logger.LogParseErrorAndThrow($"Not a valid nullary constructor for production: ({id} {sort.Name} ... {termId})", term.Position);
+                                throw _logger.LogParseErrorAndThrow($"Not a valid nullary constructor for production: ({id} {sort.Name} ... {termId})", term.Position);
                             }
                             else
                             {
@@ -168,11 +170,11 @@ namespace Semgus.Parser.Commands
                         var c = stt.Constructors.FirstOrDefault(p => p.Operator == applTerm.First());
                         if (c == null)
                         {
-                            _logger.LogParseErrorAndThrow($"Not a valid operator for production: {id} --> {applTerm.First()}({string.Join(' ', applTerm.Skip(1).Select(s => s.Symbol))})", term.Position);
+                            throw _logger.LogParseErrorAndThrow($"Not a valid operator for production: {id} --> {applTerm.First()}({string.Join(' ', applTerm.Skip(1).Select(s => s.Symbol))})", term.Position);
                         }
                         else if (c.Children.Length != applTerm.Count - 1)
                         {
-                            _logger.LogParseErrorAndThrow($"Not a valid number of children for constructor for production: ({id} {sort.Name} ... {termId})", term.Position);
+                            throw _logger.LogParseErrorAndThrow($"Not a valid number of children for constructor for production: ({id} {sort.Name} ... {termId})", term.Position);
                         }
                         else
                         {
@@ -188,7 +190,7 @@ namespace Semgus.Parser.Commands
                                     var oNT = nonTerminals.Find(p => p.Name == applTerm[ix + 1]);
                                     if (oNT is null)
                                     {
-                                        _logger.LogParseErrorAndThrow($"Nonterminal not declared in synth-fun: ({id} {sort.Name} ...)", default);
+                                        throw _logger.LogParseErrorAndThrow($"Nonterminal not declared in synth-fun: ({id} {sort.Name} ...)", _sourceMap[applTerm[ix + 1]]);
                                     }
                                     else
                                     {
@@ -202,7 +204,7 @@ namespace Semgus.Parser.Commands
                     }
                     else
                     {
-                        _logger.LogParseErrorAndThrow("Malformed production: " + term.ToString(), term.Position);
+                        throw _logger.LogParseErrorAndThrow("Malformed production: " + term.ToString(), term.Position);
                     }
                 }
             }

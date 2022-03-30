@@ -61,8 +61,8 @@ namespace Semgus.Parser.Json.Converters
             }
 
             private record FunctionApplicationModel(SmtIdentifier Name,
-                                                    SmtIdentifier ReturnSort,
-                                                    IEnumerable<SmtIdentifier> ArgumentSorts,
+                                                    SmtSortIdentifier ReturnSort,
+                                                    IEnumerable<SmtSortIdentifier> ArgumentSorts,
                                                     IEnumerable<SmtTerm> Arguments) : TermModel("application");
             public object VisitFunctionApplication(SmtFunctionApplication functionApplication)
             {
@@ -87,7 +87,7 @@ namespace Semgus.Parser.Json.Converters
                 return this;
             }
 
-            private record VariableModel(SmtIdentifier Name, SmtIdentifier Sort) : TermModel("variable");
+            private record VariableModel(SmtIdentifier Name, SmtSortIdentifier Sort) : TermModel("variable");
             public object VisitVariable(SmtVariable variable)
             {
                 _serializer.Serialize(_writer, new VariableModel(Name: variable.Name, Sort: variable.Sort.Name));

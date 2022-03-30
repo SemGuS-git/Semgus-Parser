@@ -38,7 +38,7 @@ namespace Semgus.Parser.Tests.Issues
         public void HandlesNtToNtProductions()
         {
             SmtIdentifier ntId = new("nt");
-            SmtIdentifier ttId = new("Term");
+            SmtSortIdentifier ttId = new("Term");
             SymbolToken ntSymbol = new(ntId.Symbol, SexprPosition.Default);
 
             SmtContext smtCtx = new();
@@ -65,6 +65,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISmtContextProvider>(),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
+                A.Fake<ISourceMap>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             SemgusGrammar grammar = sfc.CreateGrammarFromForm(gf);
@@ -83,7 +84,7 @@ namespace Semgus.Parser.Tests.Issues
         {
             SmtIdentifier nt1Id = new("E");
             SmtIdentifier nt2Id = new("A");
-            SmtIdentifier ttId = new("Term");
+            SmtSortIdentifier ttId = new("Term");
             SymbolToken nt2Symbol = new(nt2Id.Symbol, SexprPosition.Default);
 
             SmtContext smtCtx = new();
@@ -111,6 +112,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISmtContextProvider>(),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
+                A.Fake<ISourceMap>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             SemgusGrammar grammar = sfc.CreateGrammarFromForm(gf);
@@ -129,8 +131,8 @@ namespace Semgus.Parser.Tests.Issues
         {
             SmtIdentifier nt1Id = new("E");
             SmtIdentifier nt2Id = new("A");
-            SmtIdentifier tt1Id = new("Term1");
-            SmtIdentifier tt2Id = new("Term2");
+            SmtSortIdentifier tt1Id = new("Term1");
+            SmtSortIdentifier tt2Id = new("Term2");
             SymbolToken nt2Symbol = new(nt2Id.Symbol, SexprPosition.Default);
 
             SmtContext smtCtx = new();
@@ -160,6 +162,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISmtContextProvider>(),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
+                A.Fake<ISourceMap>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             Assert.Throws<FatalParseException>(() => sfc.CreateGrammarFromForm(gf));
@@ -169,7 +172,7 @@ namespace Semgus.Parser.Tests.Issues
         public void OverridesNullaryConstructors()
         {
             SmtIdentifier ntId = new("nt");
-            SmtIdentifier ttId = new("Term");
+            SmtSortIdentifier ttId = new("Term");
             SymbolToken ntSymbol = new(ntId.Symbol, SexprPosition.Default);
 
             SmtContext smtCtx = new();
@@ -197,6 +200,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISmtContextProvider>(),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
+                A.Fake<ISourceMap>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             SemgusGrammar grammar = sfc.CreateGrammarFromForm(gf);
@@ -217,7 +221,7 @@ namespace Semgus.Parser.Tests.Issues
             SmtIdentifier nt1Id = new("E");
             SmtIdentifier nt2Id = new("A");
             SmtIdentifier bogusId = new("Bogus");
-            SmtIdentifier ttId = new("Term");
+            SmtSortIdentifier ttId = new("Term");
             SymbolToken nt2Symbol = new(bogusId.Symbol, SexprPosition.Default);
 
             SmtContext smtCtx = new();
@@ -245,6 +249,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISmtContextProvider>(),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
+                A.Fake<ISourceMap>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             Assert.Throws<FatalParseException>(() => sfc.CreateGrammarFromForm(gf));

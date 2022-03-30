@@ -30,7 +30,7 @@ namespace Semgus.Parser.Tests.Issues
         public void RejectsInvalidNullaryOp()
         {
             SmtIdentifier ntId = new("E");
-            SmtIdentifier ttId = new("Term");
+            SmtSortIdentifier ttId = new("Term");
             SmtIdentifier opId = new("op-that-does-not-exist");
             SymbolToken opSymbol = new(opId.Symbol, SexprPosition.Default);
 
@@ -58,6 +58,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISmtContextProvider>(),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
+                A.Fake<ISourceMap>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             Assert.Throws<FatalParseException>(() => sfc.CreateGrammarFromForm(gf));
@@ -67,7 +68,7 @@ namespace Semgus.Parser.Tests.Issues
         public void RejectsInvalidArity()
         {
             SmtIdentifier ntId = new("E");
-            SmtIdentifier ttId = new("Term");
+            SmtSortIdentifier ttId = new("Term");
             SmtIdentifier opId = new("op");
             SymbolToken opSymbol = new(opId.Symbol, SexprPosition.Default);
             SymbolToken ntSymbol = new(ntId.Symbol, SexprPosition.Default);
@@ -105,6 +106,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISmtContextProvider>(),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
+                A.Fake<ISourceMap>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             Assert.Throws<FatalParseException>(() => sfc.CreateGrammarFromForm(gf));
@@ -114,7 +116,7 @@ namespace Semgus.Parser.Tests.Issues
         public void RejectsMalformed()
         {
             SmtIdentifier ntId = new("E");
-            SmtIdentifier ttId = new("Term");
+            SmtSortIdentifier ttId = new("Term");
             SmtIdentifier opId = new("op");
             SymbolToken opSymbol = new(opId.Symbol, SexprPosition.Default);
 
@@ -143,6 +145,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISmtContextProvider>(),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
+                A.Fake<ISourceMap>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             Assert.Throws<FatalParseException>(() => sfc.CreateGrammarFromForm(gf));

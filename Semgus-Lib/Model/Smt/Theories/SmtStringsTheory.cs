@@ -10,7 +10,7 @@ namespace Semgus.Model.Smt.Theories
     {
         private class StringSort : SmtSort
         {
-            private StringSort() : base(new SmtIdentifier("String")) { }
+            private StringSort() : base(new SmtSortIdentifier("String")) { }
             public static StringSort Instance { get; } = new();
         }
 
@@ -38,7 +38,7 @@ namespace Semgus.Model.Smt.Theories
                 }
             }
 
-            _stringSortList = new Dictionary<SmtIdentifier, SmtSort>() { { s.Name, s } };
+            _stringSortList = new Dictionary<SmtIdentifier, SmtSort>() { { s.Name.Name, s } };
 
             // TODO: regular expression functions
             cf("str.++", s, s, s);

@@ -18,8 +18,8 @@ namespace Semgus.Parser.Json
         public SynthFunEvent(SemgusSynthFun ssf) : base("synth-fun", "semgus")
         {
             Name = ssf.Relation.Name;
-            TermType = ssf.Rank.ReturnSort.Name;
-            Grammar = new GrammarModel(ssf.Grammar.NonTerminals.Select(n => new NonTerminalDeclarationModel(n.Name, n.Sort.Name)),
+            TermType = ssf.Rank.ReturnSort.Name.Name;
+            Grammar = new GrammarModel(ssf.Grammar.NonTerminals.Select(n => new NonTerminalDeclarationModel(n.Name, n.Sort.Name.Name)),
                                        ssf.Grammar.Productions.Select(p => new ProductionModel(p.Instance.Name,
                                                                                                p.Constructor?.Operator,
                                                                                                p.Occurrences.Select(o => o?.Name))));

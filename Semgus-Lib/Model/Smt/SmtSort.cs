@@ -9,12 +9,12 @@ namespace Semgus.Model.Smt
 {
     public abstract class SmtSort
     {
-        public SmtSort(SmtIdentifier name)
+        public SmtSort(SmtSortIdentifier name)
         {
             Name = name;
         }
 
-        public SmtIdentifier Name { get; }
+        public SmtSortIdentifier Name { get; }
 
         /// <summary>
         /// Does this sort have parameters?
@@ -28,7 +28,7 @@ namespace Semgus.Model.Smt
 
         private class GenericSort : SmtSort
         {
-            public GenericSort(SmtIdentifier name) : base(name)
+            public GenericSort(SmtSortIdentifier name) : base(name)
             { }
         }
 
@@ -36,7 +36,7 @@ namespace Semgus.Model.Smt
         {
             private class UniqueSort : SmtSort
             {
-                public UniqueSort(string prefix, long counter) : base(new SmtIdentifier($"{prefix}{counter}"))
+                public UniqueSort(string prefix, long counter) : base(new SmtSortIdentifier($"{prefix}{counter}"))
                 {
                     IsSortParameter = true;
                 }

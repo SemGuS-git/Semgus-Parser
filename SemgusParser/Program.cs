@@ -146,17 +146,17 @@ namespace Semgus.Parser
                 writer.Flush();
                 stream.Position = 0;
                 friendlyName = "test input";
-                return new(stream, "string");
+                return new SemgusParser(stream, "string");
             }
             else if (input == "-")
             {
                 friendlyName = "standard input";
-                return new(Console.In, "stdin");
+                return new SemgusParser(Console.In, "stdin");
             }
             else
             {
                 friendlyName = input;
-                return new(input);
+                return new SemgusParser(input);
             }
         }
 

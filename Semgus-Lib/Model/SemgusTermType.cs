@@ -10,7 +10,7 @@ namespace Semgus.Model
 {
     public class SemgusTermType : SmtSort
     {
-        public SemgusTermType(SmtIdentifier termname) : base(termname) { }
+        public SemgusTermType(SmtSortIdentifier termname) : base(termname) { }
         public IList<Constructor> Constructors { get; } = new List<Constructor>();
         public void AddConstructor(Constructor constructor)
         {

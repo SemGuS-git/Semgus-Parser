@@ -11,7 +11,7 @@ namespace Semgus.Parser.Json
 {
     internal class TermTypeDeclarationEvent : ParseEvent
     {
-        public SmtIdentifier Name { get; }
+        public SmtSortIdentifier Name { get; }
         public TermTypeDeclarationEvent(SemgusTermType tt) : base("declare-term-type", "semgus")
         {
             Name = tt.Name;
@@ -20,7 +20,7 @@ namespace Semgus.Parser.Json
 
     internal class TermTypeDefinitionEvent : ParseEvent
     {
-        public SmtIdentifier Name { get; }
+        public SmtSortIdentifier Name { get; }
         public IEnumerable<ConstructorModel> Constructors { get; }
          
         public TermTypeDefinitionEvent(SemgusTermType tt) : base("define-term-type", "semgus")
@@ -28,6 +28,6 @@ namespace Semgus.Parser.Json
             Name = tt.Name;
             Constructors = tt.Constructors.Select(c => new ConstructorModel(c.Operator, c.Children.Select(x => x.Name)));
         }
-        public record ConstructorModel(SmtIdentifier Name, IEnumerable<SmtIdentifier> Children);
+        public record ConstructorModel(SmtIdentifier Name, IEnumerable<SmtSortIdentifier> Children);
     }
 }

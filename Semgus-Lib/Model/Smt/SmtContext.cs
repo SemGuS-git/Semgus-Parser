@@ -31,12 +31,12 @@ namespace Semgus.Model.Smt
             };
         }
 
-        public bool IsNameInUse(SmtIdentifier id)
+        public bool IsFunctionNameInUse(SmtIdentifier id)
         {
             // This iterates from top-down (from what I gather from the docs)
             foreach(var level in _assertionStack)
             {
-                if (level.IsNameInUse(id))
+                if (level.IsFunctionNameInUse(id))
                 {
                     return true;
                 }
@@ -53,9 +53,31 @@ namespace Semgus.Model.Smt
             return false;
         }
 
+        public bool IsSortNameInUse(SmtSortIdentifier id)
+        {
+            // This iterates from top-down (from what I gather from the docs)
+            foreach (var level in _assertionStack)
+            {
+                if (level.IsFunctionNameInUse(id.Name))
+                {
+                    return true;
+                }
+            }
+
+            foreach (var theory in _theories)
+            {
+                if (theory.Sorts.ContainsKey(id.Name))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public void AddFunctionDeclaration(SmtFunction func)
         {
-            if (IsNameInUse(func.Name))
+            if (IsFunctionNameInUse(func.Name))
             {
                 throw new InvalidOperationException("Redeclaration of identifier: " + func.Name);
             }
@@ -65,12 +87,13 @@ namespace Semgus.Model.Smt
 
         public void AddSortDeclaration(SmtSort sort)
         {
-            if (IsNameInUse(sort.Name))
+            if (IsSortNameInUse(sort.Name))
             {
                 throw new InvalidOperationException("Redeclaration of identifier: " + sort.Name);
             }
 
-            CurrentLevel.Sorts.Add(sort.Name, sort);
+            // Sorts are indexed by their primary name, not the parameters
+            CurrentLevel.Sorts.Add(sort.Name.Name, sort);
         }
 
         /// <summary>
@@ -181,25 +204,41 @@ namespace Semgus.Model.Smt
             return distances[a.Length, b.Length];
         }
 
+        [Obsolete("Use TryGetSortDeclaration instead.")]
         public SmtSort GetSortDeclaration(SmtIdentifier id)
+        {
+            if (TryGetSortDeclaration(new(id), out var sort))
+            {
+                return sort;
+            }
+            else
+            {
+                throw new InvalidOperationException("Sort not declared: " + id);
+            }
+        }
+
+        public bool TryGetSortDeclaration(SmtSortIdentifier id, [NotNullWhen(true)] out SmtSort? sort)
         {
             foreach (var level in _assertionStack)
             {
-                if (level.Sorts.ContainsKey(id))
+                if (level.Sorts.ContainsKey(id.Name))
                 {
-                    return level.Sorts[id];
+                    sort = level.Sorts[id.Name];
+                    return true;
                 }
             }
 
             foreach (var theory in _theories)
             {
-                if (theory.Sorts.ContainsKey(id))
+                if (theory.Sorts.ContainsKey(id.Name))
                 {
-                    return theory.Sorts[id];
+                    sort = theory.Sorts[id.Name];
+                    return true;
                 }
             }
 
-            throw new InvalidOperationException("Sort not declared: " + id);
+            sort = default;
+            return false;
         }
 
         public SmtSort ResolveParameterizedSort(SmtSort parameterized, IList<SmtSort> arguments)
@@ -231,9 +270,13 @@ namespace Semgus.Model.Smt
                 Functions = new Dictionary<SmtIdentifier, SmtFunction>();
             }
 
-            public bool IsNameInUse(SmtIdentifier id)
+            public bool IsFunctionNameInUse(SmtIdentifier id)
             {
-                return Sorts.ContainsKey(id) || Functions.ContainsKey(id);
+                return Functions.ContainsKey(id);
+            }
+            public bool IsSortNameInUse(SmtSortIdentifier id)
+            {
+                return Sorts.ContainsKey(id.Name);
             }
         }
     }
