@@ -1,5 +1,4 @@
-﻿using Semgus.Model.Smt.Theories;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +12,12 @@ namespace Semgus.Model.Smt.Terms
     /// </summary>
     public abstract class SmtLiteral : SmtTerm
     {
+        /// <summary>
+        /// Loosely-typed accessor for this literal's value
+        /// </summary>
+        /// <value></value>
+        public abstract object BoxedValue { get; }
+        
         /// <summary>
         /// Resolves the given sort for a literal
         /// </summary>
@@ -45,13 +50,15 @@ namespace Semgus.Model.Smt.Terms
         /// The literal value
         /// </summary>
         public long Value { get; }
+    
+        public override object BoxedValue => Value;
 
         /// <summary>
         /// Constructs a new numeral literal with the given value
         /// </summary>
         /// <param name="ctx">Current SMT context</param>
         /// <param name="value">Literal value</param>
-        public SmtNumeralLiteral(SmtContext ctx, long value) : base(GetSortOrDie(ctx, new("Int")))
+        public SmtNumeralLiteral(SmtContext ctx, long value) : base(GetSortOrDie(ctx, SmtCommonIdentifiers.IntSortId))
         {
             Value = value;
         }
@@ -79,6 +86,8 @@ namespace Semgus.Model.Smt.Terms
     /// </summary>
     public class SmtDecimalLiteral : SmtLiteral
     {
+        public override object BoxedValue => Value;
+        
         /// <summary>
         /// The literal value
         /// </summary>
@@ -89,7 +98,7 @@ namespace Semgus.Model.Smt.Terms
         /// </summary>
         /// <param name="ctx">Current SMT context</param>
         /// <param name="value">Literal value</param>
-        public SmtDecimalLiteral(SmtContext ctx, double value) : base(GetSortOrDie(ctx, new("Real")))
+        public SmtDecimalLiteral(SmtContext ctx, double value) : base(GetSortOrDie(ctx, SmtCommonIdentifiers.RealSortId))
         {
             Value = value;
         }
@@ -117,6 +126,8 @@ namespace Semgus.Model.Smt.Terms
     /// </summary>
     public class SmtStringLiteral : SmtLiteral
     {
+        public override object BoxedValue => Value;
+        
         /// <summary>
         /// The literal value
         /// </summary>
@@ -127,7 +138,7 @@ namespace Semgus.Model.Smt.Terms
         /// </summary>
         /// <param name="ctx">Current SMT context</param>
         /// <param name="value">Literal value</param>
-        public SmtStringLiteral(SmtContext ctx, string value) : base(GetSortOrDie(ctx, new("String")))
+        public SmtStringLiteral(SmtContext ctx, string value) : base(GetSortOrDie(ctx, SmtCommonIdentifiers.StringSortId))
         {
             Value = value;
         }

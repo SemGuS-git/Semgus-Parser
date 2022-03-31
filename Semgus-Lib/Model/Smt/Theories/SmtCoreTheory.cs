@@ -6,27 +6,27 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt.Theories
 {
-    internal class SmtCoreTheory : SmtTheory
-    {
-        private class BoolSort : SmtSort
-        {
-            private BoolSort() : base(new SmtSortIdentifier("Bool")) { }
+    using static SmtCommonIdentifiers;
+
+    internal class SmtCoreTheory : ISmtTheory {
+        public static SmtCoreTheory Instance { get; } = new();
+
+        private class BoolSort : SmtSort {
+            private BoolSort() : base(BoolSortId) { }
             public static BoolSort Instance { get; } = new();
         }
+        public SmtIdentifier Name { get; } = CoreTheoryId;
+        public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
+        public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
 
-        private readonly IReadOnlyDictionary<SmtIdentifier, SmtSort> _boolSortList;
-
-        private readonly IReadOnlyDictionary<SmtIdentifier, SmtFunction> _functions;
-
-        public SmtCoreTheory()
+        private SmtCoreTheory()
         {
             SmtSort b = BoolSort.Instance;
             SmtSort.UniqueSortFactory usf = new();
 
             Dictionary<SmtIdentifier, SmtFunction> fd = new();
-            void cf(string name, SmtSort ret, params SmtSort[] args)
+            void cf(SmtIdentifier id, SmtSort ret, params SmtSort[] args)
             {
-                SmtIdentifier id = new(name);
                 if (fd.TryGetValue(id, out SmtFunction? fun))
                 {
                     fun.AddRankTemplate(new SmtFunctionRank(ret, args));
@@ -37,37 +37,39 @@ namespace Semgus.Model.Smt.Theories
                 }
             }
 
-            _boolSortList = new Dictionary<SmtIdentifier, SmtSort>() { { b.Name.Name, b } };
+            Sorts = new Dictionary<SmtIdentifier, SmtSort>() { { b.Name.Name, b } };
 
-            cf("true", b);
-            cf("false", b);
-            cf("not", b, b);
+            var id_and = AndFunctionId;
+            var id_or = OrFunctionId;
+            var id_eq = EqFunctionId;
 
-            cf("and", b, b, b);
-            cf("and", b, b, b, b);
-            cf("and", b, b, b, b, b);
-            cf("and", b, b, b, b, b, b);
-            cf("and", b, b, b, b, b, b, b);
-            cf("and", b, b, b, b, b, b, b, b);
+            cf(new("true"), b);
+            cf(new("false"), b);
+            cf(new("not"), b, b);
 
-            cf("or", b, b, b);
-            cf("or", b, b, b, b);
-            cf("or", b, b, b, b, b);
-            cf("or", b, b, b, b, b, b);
-            cf("or", b, b, b, b, b, b, b);
-            cf("or", b, b, b, b, b, b, b, b);
+            cf(id_and, b, b, b);
+            cf(id_and, b, b, b, b);
+            cf(id_and, b, b, b, b, b);
+            cf(id_and, b, b, b, b, b, b);
+            cf(id_and, b, b, b, b, b, b, b);
+            cf(id_and, b, b, b, b, b, b, b, b);
 
-            cf("xor", b, b, b);
-            cf("=>", b, b, b);
-            cf("=", b, usf.Sort, usf.Sort);
-            cf("distinct", b, usf.Next(), usf.Sort);
-            cf("ite", usf.Next(), b, usf.Sort, usf.Sort);
+            cf(id_or, b, b, b);
+            cf(id_or, b, b, b, b);
+            cf(id_or, b, b, b, b, b);
+            cf(id_or, b, b, b, b, b, b);
+            cf(id_or, b, b, b, b, b, b, b);
+            cf(id_or, b, b, b, b, b, b, b, b);
 
-            _functions = fd;
+            cf(new("!"), b, b);
+            cf(new("xor"), b, b, b);
+            cf(new("=>"), b, b, b);
+            cf(id_eq, b, usf.Sort, usf.Sort);
+            cf(new("distinct"), b, usf.Next(), usf.Sort);
+            cf(new("ite"), usf.Next(), b, usf.Sort, usf.Sort);
+
+            Functions = fd;
         }
 
-        public override IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions => _functions;
-
-        public override IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts => _boolSortList;
     }
 }

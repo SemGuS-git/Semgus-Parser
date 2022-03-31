@@ -284,8 +284,8 @@ namespace Semgus.Parser.Reader.Converters
                                         }
                                         else
                                         {
-                                            _contextProvider.Context.TryGetFunctionDeclaration(new("or"), out SmtFunction? orf);
-                                            var boolsort = GetSortOrDie(new("Bool"));
+                                            _contextProvider.Context.TryGetFunctionDeclaration(SmtCommonIdentifiers.OrFunctionId, out SmtFunction? orf);
+                                            var boolsort = GetSortOrDie(SmtCommonIdentifiers.BoolSortId);
 
                                             // Make sure all terms are of type bool
                                             if (convTerms.Any(t => t.Sort != boolsort))

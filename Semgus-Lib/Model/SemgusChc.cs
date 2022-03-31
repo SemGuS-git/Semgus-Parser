@@ -1,6 +1,5 @@
 ﻿using Semgus.Model.Smt;
 using Semgus.Model.Smt.Terms;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +14,10 @@ namespace Semgus.Model
 
         public SemanticRelation Head { get; }
 
+        // Null when this CHC is not annotated with input/output information 
         public IReadOnlyCollection<SmtVariable>? InputVariables { get; }
+
+        // Null when this CHC is not annotated with input/output information 
         public IReadOnlyCollection<SmtVariable>? OutputVariables { get; }
 
         public IReadOnlyList<SemanticRelation> BodyRelations { get; }

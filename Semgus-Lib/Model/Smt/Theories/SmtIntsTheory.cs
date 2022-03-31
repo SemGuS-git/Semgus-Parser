@@ -6,22 +6,26 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt.Theories
 {
-    internal class SmtIntsTheory : SmtTheory
+    using static SmtCommonIdentifiers;
+
+    internal class SmtIntsTheory : ISmtTheory
     {
+        public static SmtIntsTheory Instance { get; } = new(SmtCoreTheory.Instance);
+
         private class IntSort : SmtSort
         {
-            private IntSort() : base(new SmtSortIdentifier("Int")) { }
+            private IntSort() : base(IntSortId) { }
             public static IntSort Instance { get; } = new();
         }
 
-        private readonly IReadOnlyDictionary<SmtIdentifier, SmtSort> _intSortList;
+        public SmtIdentifier Name { get; } = IntsTheoryId;
+        public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
+        public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
 
-        private readonly IReadOnlyDictionary<SmtIdentifier, SmtFunction> _functions;
-
-        public SmtIntsTheory(SmtCoreTheory core)
+        private SmtIntsTheory(SmtCoreTheory core)
         {
             SmtSort i = IntSort.Instance;
-            SmtSort b = core.Sorts[new SmtIdentifier("Bool")];
+            SmtSort b = core.Sorts[BoolSortId.Name];
 
             Dictionary<SmtIdentifier, SmtFunction> fd = new();
             void cf(string name, SmtSort ret, params SmtSort[] args)
@@ -37,7 +41,7 @@ namespace Semgus.Model.Smt.Theories
                 }
             }
 
-            _intSortList = new Dictionary<SmtIdentifier, SmtSort>() { { i.Name.Name, i } };
+            Sorts = new Dictionary<SmtIdentifier, SmtSort>() { { i.Name.Name, i } };
 
             cf("-", i, i); // Negation
             cf("-", i, i, i); // Subtraction
@@ -51,11 +55,8 @@ namespace Semgus.Model.Smt.Theories
             cf(">=", b, i, i);
             cf(">", b, i, i);
 
-            _functions = fd;
+            Functions = fd;
         }
 
-        public override IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions => _functions;
-
-        public override IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts => _intSortList;
     }
 }

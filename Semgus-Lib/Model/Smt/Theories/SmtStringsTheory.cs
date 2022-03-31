@@ -6,23 +6,26 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt.Theories
 {
-    internal class SmtStringsTheory : SmtTheory
+    using static SmtCommonIdentifiers;
+
+    internal class SmtStringsTheory : ISmtTheory
     {
+        public static SmtStringsTheory Instance { get; } = new(SmtCoreTheory.Instance, SmtIntsTheory.Instance);
+
         private class StringSort : SmtSort
         {
-            private StringSort() : base(new SmtSortIdentifier("String")) { }
+            private StringSort() : base(StringSortId) { }
             public static StringSort Instance { get; } = new();
         }
+        public SmtIdentifier Name { get; } = StringsTheoryId;
+        public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
+        public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
 
-        private readonly IReadOnlyDictionary<SmtIdentifier, SmtSort> _stringSortList;
-
-        private readonly IReadOnlyDictionary<SmtIdentifier, SmtFunction> _functions;
-
-        public SmtStringsTheory(SmtCoreTheory core, SmtIntsTheory ints)
+        private SmtStringsTheory(SmtCoreTheory core, SmtIntsTheory ints)
         {
             SmtSort s = StringSort.Instance;
-            SmtSort i = ints.Sorts[new SmtIdentifier("Int")];
-            SmtSort b = core.Sorts[new SmtIdentifier("Bool")];
+            SmtSort i = ints.Sorts[IntSortId.Name];
+            SmtSort b = core.Sorts[BoolSortId.Name];
 
             Dictionary<SmtIdentifier, SmtFunction> fd = new();
             void cf(string name, SmtSort ret, params SmtSort[] args)
@@ -37,8 +40,8 @@ namespace Semgus.Model.Smt.Theories
                     fd.Add(id, new SmtFunction(id, this, new SmtFunctionRank(ret, args)));
                 }
             }
-
-            _stringSortList = new Dictionary<SmtIdentifier, SmtSort>() { { s.Name.Name, s } };
+            
+            Sorts = new Dictionary<SmtIdentifier, SmtSort>() { { s.Name.Name, s } };
 
             // TODO: regular expression functions
             cf("str.++", s, s, s);
@@ -59,11 +62,7 @@ namespace Semgus.Model.Smt.Theories
             cf("str.to_int", i, s);
             cf("str.from_int", s, i);
 
-            _functions = fd;
+            Functions = fd;
         }
-
-        public override IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions => _functions;
-
-        public override IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts => _stringSortList;
     }
 }

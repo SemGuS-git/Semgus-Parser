@@ -4,7 +4,7 @@
 
 ;;; Metadata
 (set-info :format-version "2.0.0")
-(set-info :author("Jinwoo Kim" "Keith Johnson"))
+(set-info :author("Jinwoo Kim" "Keith Johnson" "Wiley Corning"))
 (set-info :realizable true)
 
 ;;;
@@ -24,7 +24,7 @@
 
   (($t) ; B productions
    ($f)
-   ($! ($!_1 B))
+   ($not ($not_1 B))
    ($and($and_1 B) ($and_2 B))
    ($or($or_1 B) ($or_2 B))
    ($< ($<_1 E) ($<_2 E)))))
@@ -49,10 +49,10 @@
               (E.Sem et1 x y r1)
               (E.Sem et2 x y r2)
               (= r (+ r1 r2)))))
-        (($ite bt etc eta)
+        (($ite bt1 etc eta)
          (exists ((rb Bool) (rc Int) (ra Int))
              (and
-              (B.Sem bt x y rb)
+              (B.Sem bt1 x y rb)
               (E.Sem etc x y rc)
               (E.Sem eta x y ra)
               (= r(ite rb rc ra)))))))
@@ -62,10 +62,10 @@
    (! (match bt ; B.Sem definitions
         (($t (= r true))
          ($f(= r false))
-         (($! bt)
+         (($not bt1)
           (exists ((rb Bool))
               (and
-               (B.Sem bt x y rb)
+               (B.Sem bt1 x y rb)
                (= r(not rb)))))
          (($and bt1 bt2)
           (exists ((rb1 Bool) (rb2 Bool))
@@ -88,6 +88,32 @@
     :input (x y) :output (r))))
 
 ;;;
+;;; [Unstable feature] Hand-written DSL terms and examples of their expected behavior
+;;;
+(set-info :test (
+    (
+        ($< $x $y)
+        (:t 1 2 true)
+        (:t 12 8 false)
+    )
+    (
+        ($+ ($+ $1 $x) $y)
+        (:t 1 2 4)
+        (:t 5 3 9)
+        (:t 0 0 :any)
+    )
+))
+
+(set-info :demo (
+    (
+        ($+ ($+ $1 $x) $y)
+        (:t 12 64 :any :any)
+    )
+))
+
+(set-info :solution (max2 ($ite ($< $x $y) $y $x)))
+
+;;;
 ;;; Function to synthesize - a term rooted at E
 ;;;
 (synth-fun max2() E) ; Using the default universe of terms rooted at E
@@ -97,6 +123,18 @@
 ;;;
 (constraint (E.Sem max2 4 2 4))
 (constraint (E.Sem max2 2 5 5))
+(constraint (E.Sem max2 2 (+ 3 4) 7))
+
+;;;
+;;; [Unstable feature] Expected solutions to synthesis problems
+;;;
+(set-info :solution (
+    (
+        max2
+        ($ite ($< $x $y) $y $x)
+        ($+ $0 ($ite ($< $x $y) $y $x))
+    )
+))
 
 ;;;
 ;;; Constraints - logical specification
