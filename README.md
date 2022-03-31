@@ -3,7 +3,8 @@ A C# parsing library for SemGuS problems. We also provide a standalone tool for 
 SemGuS files. Find the latest release and binaries on the [Releases page](https://github.com/SemGuS-git/Semgus-Parser/releases).
 
 ## Installation
-To install the stand-alone parsing tool, find the binary for your operating system on the [Releases page](https://github.com/SemGuS-git/Semgus-Parser/releases). Unzip it and put the `SemgusParser` (or `SemgusParser.exe`) in a convenient location. No other dependencies are required.
+To install the stand-alone parsing tool, find the binary for your operating system on the [Releases page](https://github.com/SemGuS-git/Semgus-Parser/releases). Unzip it and put the `SemgusParser` (or `SemgusParser.exe`) in a convenient location. No other dependencies are required. You may have to mark it 
+executable on Linux and macOS; just run `chmod a+x SemgusParser` in the folder with the binary.
 
 If you have the .NET 6 SDK installed, the parsing tool can also be installed automatically through NuGet:
 ```
