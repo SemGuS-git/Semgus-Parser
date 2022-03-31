@@ -122,7 +122,8 @@ jobs:
         run: |
           mkdir -p release_files
           for asset_folder in assets/*; do
-            rm -f "${asset_folder}/*.pdb"
+            rm -f "${asset_folder}"/*.pdb
+            find "${asset_folder}" -type f ! -name '*.*' -print -exec chmod a+x {} \;
             zip -j -r "release_files/$(basename ${asset_folder}).zip" "${asset_folder}"
           done
 
