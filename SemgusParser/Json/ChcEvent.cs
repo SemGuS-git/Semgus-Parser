@@ -36,6 +36,6 @@ namespace Semgus.Parser.Json
             }
         }
 
-        public record ConstructorModel(SmtIdentifier Name, IEnumerable<SmtIdentifier> Arguments, IEnumerable<SmtIdentifier> ArgumentSorts, SmtIdentifier ReturnSort);
+        public record ConstructorModel(SmtIdentifier Name, IEnumerable<SmtIdentifier> Arguments, IEnumerable<SmtSortIdentifier> ArgumentSorts, SmtSortIdentifier ReturnSort);
     }
 }

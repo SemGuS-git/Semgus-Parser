@@ -26,11 +26,18 @@ namespace Semgus.Parser.Tests.Issues
     /// </summary>
     public class Issue46
     {
+        private ISmtContextProvider FakeSmtCtx(SmtContext ctx)
+        {
+            var fake = A.Fake<ISmtContextProvider>();
+            A.CallTo(() => fake.Context).Returns(ctx);
+            return fake;
+        }
+
         [Fact]
         public void RejectsInvalidNullaryOp()
         {
             SmtIdentifier ntId = new("E");
-            SmtIdentifier ttId = new("Term");
+            SmtSortIdentifier ttId = new("Term");
             SmtIdentifier opId = new("op-that-does-not-exist");
             SymbolToken opSymbol = new(opId.Symbol, SexprPosition.Default);
 
@@ -38,14 +45,14 @@ namespace Semgus.Parser.Tests.Issues
             SemgusTermType tt = new(ttId);
             smtCtx.AddSortDeclaration(tt);
 
-            List<(SmtIdentifier, SmtSort)> ntMap = new()
+            List<(SmtIdentifier, SmtSortIdentifier)> ntMap = new()
             {
-                (ntId, tt)
+                (ntId, ttId)
             };
 
-            List<(SmtIdentifier, SmtSort, IList<SemgusToken>)> prods = new()
+            List<(SmtIdentifier, SmtSortIdentifier, IList<SemgusToken>)> prods = new()
             {
-                (ntId, tt, new List<SemgusToken>() { opSymbol })
+                (ntId, ttId, new List<SemgusToken>() { opSymbol })
             };
 
             SynthFunCommand.GrammarForm gf = new(ntMap, prods);
@@ -55,9 +62,10 @@ namespace Semgus.Parser.Tests.Issues
 
             SynthFunCommand sfc = new(
                 A.Fake<ISemgusProblemHandler>(),
-                A.Fake<ISmtContextProvider>(),
+                FakeSmtCtx(smtCtx),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
+                A.Fake<ISourceMap>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             Assert.Throws<FatalParseException>(() => sfc.CreateGrammarFromForm(gf));
@@ -67,7 +75,7 @@ namespace Semgus.Parser.Tests.Issues
         public void RejectsInvalidArity()
         {
             SmtIdentifier ntId = new("E");
-            SmtIdentifier ttId = new("Term");
+            SmtSortIdentifier ttId = new("Term");
             SmtIdentifier opId = new("op");
             SymbolToken opSymbol = new(opId.Symbol, SexprPosition.Default);
             SymbolToken ntSymbol = new(ntId.Symbol, SexprPosition.Default);
@@ -85,14 +93,14 @@ namespace Semgus.Parser.Tests.Issues
             tt.AddConstructor(new(opId, tt, tt));
             smtCtx.AddSortDeclaration(tt);
 
-            List<(SmtIdentifier, SmtSort)> ntMap = new()
+            List<(SmtIdentifier, SmtSortIdentifier)> ntMap = new()
             {
-                (ntId, tt)
+                (ntId, ttId)
             };
 
-            List<(SmtIdentifier, SmtSort, IList<SemgusToken>)> prods = new()
+            List<(SmtIdentifier, SmtSortIdentifier, IList<SemgusToken>)> prods = new()
             {
-                (ntId, tt, new List<SemgusToken>() { cons })
+                (ntId, ttId, new List<SemgusToken>() { cons })
             };
 
             SynthFunCommand.GrammarForm gf = new(ntMap, prods);
@@ -102,9 +110,10 @@ namespace Semgus.Parser.Tests.Issues
 
             SynthFunCommand sfc = new(
                 A.Fake<ISemgusProblemHandler>(),
-                A.Fake<ISmtContextProvider>(),
+                FakeSmtCtx(smtCtx),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
+                A.Fake<ISourceMap>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             Assert.Throws<FatalParseException>(() => sfc.CreateGrammarFromForm(gf));
@@ -114,7 +123,7 @@ namespace Semgus.Parser.Tests.Issues
         public void RejectsMalformed()
         {
             SmtIdentifier ntId = new("E");
-            SmtIdentifier ttId = new("Term");
+            SmtSortIdentifier ttId = new("Term");
             SmtIdentifier opId = new("op");
             SymbolToken opSymbol = new(opId.Symbol, SexprPosition.Default);
 
@@ -124,14 +133,14 @@ namespace Semgus.Parser.Tests.Issues
             tt.AddConstructor(new(opId, tt, tt));
             smtCtx.AddSortDeclaration(tt);
 
-            List<(SmtIdentifier, SmtSort)> ntMap = new()
+            List<(SmtIdentifier, SmtSortIdentifier)> ntMap = new()
             {
-                (ntId, tt)
+                (ntId, ttId)
             };
 
-            List<(SmtIdentifier, SmtSort, IList<SemgusToken>)> prods = new()
+            List<(SmtIdentifier, SmtSortIdentifier, IList<SemgusToken>)> prods = new()
             {
-                (ntId, tt, new List<SemgusToken>() { opSymbol })
+                (ntId, ttId, new List<SemgusToken>() { opSymbol })
             };
 
             SynthFunCommand.GrammarForm gf = new(ntMap, prods);
@@ -140,9 +149,10 @@ namespace Semgus.Parser.Tests.Issues
 
             SynthFunCommand sfc = new(
                 A.Fake<ISemgusProblemHandler>(),
-                A.Fake<ISmtContextProvider>(),
+                FakeSmtCtx(smtCtx),
                 A.Fake<ISemgusContextProvider>(),
                 converter,
+                A.Fake<ISourceMap>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             Assert.Throws<FatalParseException>(() => sfc.CreateGrammarFromForm(gf));

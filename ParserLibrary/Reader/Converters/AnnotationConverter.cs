@@ -86,7 +86,5 @@ namespace Semgus.Parser.Reader.Converters
             to = attributes;
             return true;
         }
-
-        private record ParameterizedSortForm(SmtIdentifier Identifier, [Rest] IList<SmtSort> Parameters) { }
     }
 }

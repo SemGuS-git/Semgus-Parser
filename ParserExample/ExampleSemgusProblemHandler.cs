@@ -17,7 +17,7 @@ namespace Semgus.Parser.Example
             Console.WriteLine("declare-term-types: ");
             foreach (var tt in termTypes)
             {
-                Console.Write("  " + tt.Name.Symbol + " -->");
+                Console.Write("  " + tt.Name + " -->");
                 bool firstConstructor = true;
                 foreach (var cons in tt.Constructors)
                 {

@@ -22,6 +22,7 @@ namespace Semgus.Parser.Commands
         private readonly ISemgusContextProvider _semgusCtxProvider;
         private readonly ISmtScopeProvider _scopeProvider;
         private readonly ISmtConverter _converter;
+        private readonly ISourceMap _sourceMap;
         private readonly ILogger<FunctionDefinitionCommands> _logger;
 
         public FunctionDefinitionCommands(ISemgusProblemHandler handler,
@@ -29,6 +30,7 @@ namespace Semgus.Parser.Commands
                                     ISemgusContextProvider semgusCtxProvider,
                                     ISmtScopeProvider scopeProvider,
                                     ISmtConverter converter,
+                                    ISourceMap sourceMap,
                                     ILogger<FunctionDefinitionCommands> logger)
         {
             _handler = handler;
@@ -36,10 +38,11 @@ namespace Semgus.Parser.Commands
             _semgusCtxProvider = semgusCtxProvider;
             _scopeProvider = scopeProvider;
             _converter = converter;
+            _sourceMap = sourceMap;
             _logger = logger;
         }
-        public record DefinitionSignature(SmtIdentifier Name, IList<(SmtIdentifier Id, SmtSort Sort)> Args, SmtSort Ret);
-        public record DeclarationSignature(SmtIdentifier Name, IList<SmtSort> Args, SmtSort Ret);
+        public record DefinitionSignature(SmtIdentifier Name, IList<(SmtIdentifier Id, SmtSortIdentifier Sort)> Args, SmtSortIdentifier Ret);
+        public record DeclarationSignature(SmtIdentifier Name, IList<SmtSortIdentifier> Args, SmtSortIdentifier Ret);
 
         [Command("define-funs-rec")]
         public void DefineFunsRec(IList<DefinitionSignature> signatures, IList<SemgusToken> definitions)
@@ -48,7 +51,7 @@ namespace Semgus.Parser.Commands
 
             if (signatures.Count != definitions.Count)
             {
-                _logger.LogParseErrorAndThrow($"number of signatures ({signatures.Count}) does not match number of definitions {definitions.Count}", default);
+                throw _logger.LogParseErrorAndThrow($"number of signatures ({signatures.Count}) does not match number of definitions {definitions.Count}", _sourceMap[signatures]);
             }
 
             List<(SmtFunction Decl, SmtFunctionRank Rank)> declarations = new();
@@ -67,7 +70,7 @@ namespace Semgus.Parser.Commands
         }
 
         [Command("define-fun")]
-        public void DefineFun(SmtIdentifier id, IList<(SmtIdentifier Id, SmtSort Sort)> args, SmtSort returnSort, SemgusToken definition)
+        public void DefineFun(SmtIdentifier id, IList<(SmtIdentifier Id, SmtSortIdentifier Sort)> args, SmtSortIdentifier returnSort, SemgusToken definition)
         {
             using var logScope = _logger.BeginScope($"while processing `define-fun` for {id}:");
 
@@ -77,7 +80,7 @@ namespace Semgus.Parser.Commands
         }
 
         [Command("define-fun-rec")]
-        public void DefineFunRec(SmtIdentifier id, IList<(SmtIdentifier Id, SmtSort Sort)> args, SmtSort returnSort, SemgusToken definition)
+        public void DefineFunRec(SmtIdentifier id, IList<(SmtIdentifier Id, SmtSortIdentifier Sort)> args, SmtSortIdentifier returnSort, SemgusToken definition)
         {
             using var logScope = _logger.BeginScope($"while processing `define-fun-rec` for {id}:");
 
@@ -87,7 +90,7 @@ namespace Semgus.Parser.Commands
         }
 
         [Command("declare-fun")]
-        public void DeclareFun(SmtIdentifier id, IList<SmtSort> args, SmtSort returnSort)
+        public void DeclareFun(SmtIdentifier id, IList<SmtSortIdentifier> args, SmtSortIdentifier returnSort)
         {
             using var logScope = _logger.BeginScope($"while processing `declare-fun` for {id}:");
 
@@ -96,18 +99,20 @@ namespace Semgus.Parser.Commands
         }
 
         [Command("declare-const")]
-        public void DeclareConst(SmtIdentifier id, SmtSort sort)
+        public void DeclareConst(SmtIdentifier id, SmtSortIdentifier sort)
         {
             using var logScope = _logger.BeginScope($"while processing `declare-const` for {id}:");
 
-            var (decl, _) = ProcessFunctionDeclaration(id, Enumerable.Empty<SmtSort>(), sort);
+            var (decl, _) = ProcessFunctionDeclaration(id, Enumerable.Empty<SmtSortIdentifier>(), sort);
             _smtCtxProvider.Context.AddFunctionDeclaration(decl);
         }
 
-        private (SmtFunction, SmtFunctionRank) ProcessFunctionDeclaration(SmtIdentifier name, IEnumerable<SmtSort> args, SmtSort returnSort)
+        private (SmtFunction, SmtFunctionRank) ProcessFunctionDeclaration(SmtIdentifier name, IEnumerable<SmtSortIdentifier> argIds, SmtSortIdentifier returnSortId)
         {
             using var logScope = _logger.BeginScope($"processing declaration for {name}:");
 
+            var returnSort = _smtCtxProvider.Context.GetSortOrDie(returnSortId, _sourceMap, _logger);
+            var args = argIds.Select(argId => _smtCtxProvider.Context.GetSortOrDie(argId, _sourceMap, _logger));
             var rank = new SmtFunctionRank(returnSort, args.ToArray());
             var decl = new SmtFunction(name, SmtTheory.UserDefined, rank);
 
@@ -126,17 +131,17 @@ namespace Semgus.Parser.Commands
 
             if (!_converter.TryConvert(token, out SmtTerm? term))
             {
-                _logger.LogParseErrorAndThrow($"Cannot convert function term: " + term, token.Position);
+                throw _logger.LogParseErrorAndThrow($"Cannot convert function term: " + term, token.Position);
             }
 
             if (term.Sort == ErrorSort.Instance)
             {
-                _logger.LogParseErrorAndThrow("Error encountered resolving term for definition of function " + decl.Name, token.Position);
+                throw _logger.LogParseErrorAndThrow("Error encountered resolving term for definition of function " + decl.Name, token.Position);
             }
 
             if (term.Sort != rank.ReturnSort)
             {
-                _logger.LogParseErrorAndThrow("Function return sort doesn't match term sort: " + decl.Name, token.Position);
+                throw _logger.LogParseErrorAndThrow("Function return sort doesn't match term sort: " + decl.Name, token.Position);
             }
 
             SmtLambdaBinder lambda = new(term, scopeCtx.Scope, arguments);
@@ -150,7 +155,7 @@ namespace Semgus.Parser.Commands
             using var logScope = _logger.BeginScope($"processing CHC for {decl.Name}:");
 
             // Rule: must return bool
-            var boolSort = _smtCtxProvider.Context.GetSortDeclaration(new SmtIdentifier("Bool"));
+            var boolSort = _smtCtxProvider.Context.GetSortOrDie(new SmtSortIdentifier("Bool"), _sourceMap, _logger);
             if (rank.ReturnSort != boolSort)
             {
                 return; // Not a semantic relation
@@ -200,7 +205,7 @@ namespace Semgus.Parser.Commands
                             var vv = head.Arguments.FirstOrDefault(a => a.Name == v.IdentifierValue);
                             if (vv is null)
                             {
-                                _logger.LogParseError($"Malformed input annotation for relation {decl.Name}: {v.IdentifierValue} not in parameter list.", default);
+                                _logger.LogParseError($"Malformed input annotation for relation {decl.Name}: {v.IdentifierValue} not in parameter list.", _sourceMap[v]);
                             }
                             else
                             {
@@ -209,13 +214,13 @@ namespace Semgus.Parser.Commands
                         }
                         else
                         {
-                            _logger.LogParseError($"Malformed input annotation for relation {decl.Name}: expecting list of identifiers, but got type: {v.Type}", default);
+                            _logger.LogParseError($"Malformed input annotation for relation {decl.Name}: expecting list of identifiers, but got type: {v.Type}", _sourceMap[v]);
                         }
                     }
                 }
                 else
                 {
-                    _logger.LogParseError($"Malformed input annotation for relation {decl.Name}: expecting list of variable identifiers.", default);
+                    _logger.LogParseError($"Malformed input annotation for relation {decl.Name}: expecting list of variable identifiers.", _sourceMap[inputAttr]);
                 }
             }
 
@@ -232,7 +237,7 @@ namespace Semgus.Parser.Commands
                             var vv = head.Arguments.FirstOrDefault(a => a.Name == v.IdentifierValue);
                             if (vv is null)
                             {
-                                _logger.LogParseError($"Malformed output annotation for relation {decl.Name}: {v.IdentifierValue} not in parameter list.", default);
+                                _logger.LogParseError($"Malformed output annotation for relation {decl.Name}: {v.IdentifierValue} not in parameter list.", _sourceMap[v]);
                             }
                             else
                             {
@@ -241,13 +246,13 @@ namespace Semgus.Parser.Commands
                         }
                         else
                         {
-                            _logger.LogParseError($"Malformed output annotation for relation {decl.Name}: expecting list of identifiers, but got type: {v.Type}", default);
+                            _logger.LogParseError($"Malformed output annotation for relation {decl.Name}: expecting list of identifiers, but got type: {v.Type}", _sourceMap[v]);
                         }
                     }
                 }
                 else
                 {
-                    _logger.LogParseError($"Malformed output annotation for relation {decl.Name}: expecting list of variable identifiers.", default);
+                    _logger.LogParseError($"Malformed output annotation for relation {decl.Name}: expecting list of variable identifiers.", _sourceMap[outputAttr]);
                 }
             }
 
@@ -293,7 +298,7 @@ namespace Semgus.Parser.Commands
                     }
                     if (constraint is not null)
                     {
-                        _logger.LogParseErrorAndThrow($"Multiple constraints in CHC for {binder.Constructor!.Operator} in {decl.Name}. Only one first-order logic constraint is allowed.", default);
+                        throw _logger.LogParseErrorAndThrow($"Multiple constraints in CHC for {binder.Constructor!.Operator} in {decl.Name}. Only one first-order logic constraint is allowed.", _sourceMap[constraint]);
                     }
                     // TODO: check to make sure this doesn't contain semantic relations.
                     constraint = c;

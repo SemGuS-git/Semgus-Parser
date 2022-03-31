@@ -10,7 +10,7 @@ namespace Semgus.Model.Smt.Theories
     {
         private class IntSort : SmtSort
         {
-            private IntSort() : base(new SmtIdentifier("Int")) { }
+            private IntSort() : base(new SmtSortIdentifier("Int")) { }
             public static IntSort Instance { get; } = new();
         }
 
@@ -37,7 +37,7 @@ namespace Semgus.Model.Smt.Theories
                 }
             }
 
-            _intSortList = new Dictionary<SmtIdentifier, SmtSort>() { { i.Name, i } };
+            _intSortList = new Dictionary<SmtIdentifier, SmtSort>() { { i.Name.Name, i } };
 
             cf("-", i, i); // Negation
             cf("-", i, i, i); // Subtraction

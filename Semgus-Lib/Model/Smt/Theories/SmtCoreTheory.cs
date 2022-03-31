@@ -10,7 +10,7 @@ namespace Semgus.Model.Smt.Theories
     {
         private class BoolSort : SmtSort
         {
-            private BoolSort() : base(new SmtIdentifier("Bool")) { }
+            private BoolSort() : base(new SmtSortIdentifier("Bool")) { }
             public static BoolSort Instance { get; } = new();
         }
 
@@ -37,7 +37,7 @@ namespace Semgus.Model.Smt.Theories
                 }
             }
 
-            _boolSortList = new Dictionary<SmtIdentifier, SmtSort>() { { b.Name, b } };
+            _boolSortList = new Dictionary<SmtIdentifier, SmtSort>() { { b.Name.Name, b } };
 
             cf("true", b);
             cf("false", b);

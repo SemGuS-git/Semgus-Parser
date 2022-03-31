@@ -21,14 +21,16 @@ namespace Semgus.Parser.Reader.Converters
         private readonly ISmtConverter _converter;
         private readonly ISmtScopeProvider _scopeProvider;
         private readonly ISmtContextProvider _contextProvider;
+        private readonly ISourceMap _sourceMap;
         private readonly ILogger<TermConverter> _logger;
         
-        public TermConverter(DestructuringHelper helper, ISmtConverter converter, ISmtScopeProvider scopeProvider, ISmtContextProvider contextProvider, ILogger<TermConverter> logger)
+        public TermConverter(DestructuringHelper helper, ISmtConverter converter, ISmtScopeProvider scopeProvider, ISmtContextProvider contextProvider, ISourceMap sourceMap, ILogger<TermConverter> logger)
         {
             _destructuringHelper = helper;
             _converter = converter;
             _scopeProvider = scopeProvider;
             _contextProvider = contextProvider;
+            _sourceMap = sourceMap;
             _logger = logger;
         }
 
@@ -66,7 +68,7 @@ namespace Semgus.Parser.Reader.Converters
                 }
                 else if (_contextProvider.Context.TryGetFunctionDeclaration(qid.Id, out var defn))
                 {
-                    if (defn.TryResolveRank(out var rank, qid.Sort /* No arguments */))
+                    if (defn.TryResolveRank(out var rank, GetSortOrDie(qid.Sort) /* No arguments */))
                     {
                         to = new SmtFunctionApplication(defn, rank, new List<SmtTerm>());
                     }
@@ -141,7 +143,7 @@ namespace Semgus.Parser.Reader.Converters
                                     using var scopeCx = _scopeProvider.CreateNewScope();
                                     foreach (var (id, sort) in ef.Bindings)
                                     {
-                                        scopeCx.Scope.AddVariableBinding(id, sort, SmtVariableBindingType.Existential);
+                                        scopeCx.Scope.AddVariableBinding(id, GetSortOrDie(sort), SmtVariableBindingType.Existential);
                                     }
                                     if (_converter.TryConvert(ef.Child, out SmtTerm? child))
                                     {
@@ -161,7 +163,7 @@ namespace Semgus.Parser.Reader.Converters
                                     using var scopeCx = _scopeProvider.CreateNewScope();
                                     foreach (var (id, sort) in ff.Bindings)
                                     {
-                                        scopeCx.Scope.AddVariableBinding(id, sort, SmtVariableBindingType.Universal);
+                                        scopeCx.Scope.AddVariableBinding(id, GetSortOrDie(sort), SmtVariableBindingType.Universal);
                                     }
                                     if (_converter.TryConvert(ff.Child, out SmtTerm? child))
                                     {
@@ -283,7 +285,7 @@ namespace Semgus.Parser.Reader.Converters
                                         else
                                         {
                                             _contextProvider.Context.TryGetFunctionDeclaration(new("or"), out SmtFunction? orf);
-                                            var boolsort = _contextProvider.Context.GetSortDeclaration(new("Bool"));
+                                            var boolsort = GetSortOrDie(new("Bool"));
 
                                             // Make sure all terms are of type bool
                                             if (convTerms.Any(t => t.Sort != boolsort))
@@ -366,7 +368,7 @@ namespace Semgus.Parser.Reader.Converters
                                 return true;
                             }
 
-                            if (defn.TryResolveRank(out var rank, af.Id.Sort, argSorts))
+                            if (defn.TryResolveRank(out var rank, GetSortOrDie(af.Id.Sort), argSorts))
                             {
                                 to = new SmtFunctionApplication(defn, rank, args);
                             }
@@ -435,14 +437,17 @@ namespace Semgus.Parser.Reader.Converters
             }
         }
 
+        [return: NotNullIfNotNull("id")]
+        private SmtSort? GetSortOrDie(SmtSortIdentifier? id) => _contextProvider.Context.GetSortOrDie(id, _sourceMap, _logger);
+
         // Note: child terms for binders are SemgusTokens, since we need to update the scope before parsing them.
         private record AnnotationForm([Exactly("!")] SmtIdentifier _, SmtTerm Child, [Rest] IList<SemgusToken> Attributes);
         private record LetForm([Exactly("let")] SmtIdentifier _, IList<(SmtIdentifier, SemgusToken)> Bindings, SemgusToken Child);
-        private record ForallForm([Exactly("forall")] SmtIdentifier _, IList<(SmtIdentifier, SmtSort)> Bindings, SemgusToken Child);
-        private record ExistsForm([Exactly("exists")] SmtIdentifier _, IList<(SmtIdentifier, SmtSort)> Bindings, SemgusToken Child);
+        private record ForallForm([Exactly("forall")] SmtIdentifier _, IList<(SmtIdentifier, SmtSortIdentifier)> Bindings, SemgusToken Child);
+        private record ExistsForm([Exactly("exists")] SmtIdentifier _, IList<(SmtIdentifier, SmtSortIdentifier)> Bindings, SemgusToken Child);
         private record MatchPattern(SemgusToken Pattern, [Rest] IList<SemgusToken> Terms);
         private record MatchForm([Exactly("match")] SmtIdentifier _, SmtTerm TermToMatch, IList<MatchPattern> Patterns);
-        private record QualifiedIdentifier([Exactly("as")] SymbolToken? _, SmtIdentifier Id, SmtSort? Sort)
+        private record QualifiedIdentifier([Exactly("as")] SymbolToken? _, SmtIdentifier Id, SmtSortIdentifier? Sort)
         {
             public QualifiedIdentifier(SmtIdentifier Id) : this(null, Id, null) { }
         }

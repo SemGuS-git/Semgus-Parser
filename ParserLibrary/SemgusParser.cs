@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -10,15 +11,23 @@ using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Parser.Commands;
 using Semgus.Parser.Reader;
+using Semgus.Sexpr.Reader;
+
+#nullable enable
 
 namespace Semgus.Parser
 {
-    public class SemgusParser : IDisposable
+    public class SemgusParser : IDisposable, ISourceContextProvider
     {
         /// <summary>
         /// The underlying S-expression reader
         /// </summary>
         private readonly SemgusReader _reader;
+
+        /// <summary>
+        /// Name of file we're reading from, if reading from a file
+        /// </summary>
+        private readonly string? _filename;
 
         /// <summary>
         /// Thing that we need to dispose at the end
@@ -30,14 +39,18 @@ namespace Semgus.Parser
         /// </summary>
         private readonly IDictionary<string, MethodInfo> _commandDispatch;
 
+        /// <summary>
+        /// Service provider for DI
+        /// </summary>
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
         /// Creates a new SemGuS parser from the given file
         /// </summary>
-        /// <param name="filename">Name of file to parser</param>
+        /// <param name="filename">Name of file to parse</param>
         public SemgusParser(string filename) : this(new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read), filename)
         {
+            _filename = filename;
         }
 
         /// <summary>
@@ -92,12 +105,13 @@ namespace Semgus.Parser
             ServiceCollection services = new ServiceCollection();
             services.AddSingleton<ISmtConverter, Reader.Converters.SmtConverter>();
             services.AddSingleton<DestructuringHelper>();
+            services.AddSingleton<ISourceMap, SourceMap>();
             services.AddScoped<ISmtContextProvider, SmtContextProvider>();
             services.AddScoped<ISmtScopeProvider, SmtScopeProvider>();
             services.AddScoped<ISemgusContextProvider, SemgusContextProvider>();
             services.AddLogging(config =>
             {
-                config.AddProvider(new ReaderLoggerProvider(Console.Error));
+                config.AddProvider(new ReaderLoggerProvider(this, Console.Error));
             });
 
             return services.BuildServiceProvider();
@@ -109,7 +123,7 @@ namespace Semgus.Parser
         /// <param name="problem">The parsed problem</param>
         /// <param name="errorStream">TextWriter for errors. Defaults to Console.Error</param>
         /// <returns>True if successfully parsed, false if one or more errors encountered</returns>
-        public bool TryParse(ISemgusProblemHandler handler, TextWriter errorStream = default)
+        public bool TryParse(ISemgusProblemHandler handler, TextWriter? errorStream = default)
         {
             return TryParse(handler, out int _, errorStream);
         }
@@ -121,7 +135,7 @@ namespace Semgus.Parser
         /// <param name="errCount">Count of encountered errors</param>
         /// <param name="errorStream">TextWriter for errors. Defaults to Console.Error</param>
         /// <returns>True if successfully parsed, false if one or more errors encountered</returns>
-        public bool TryParse(ISemgusProblemHandler handler, out int errCount, TextWriter errorStream = default)
+        public bool TryParse(ISemgusProblemHandler handler, out int errCount, TextWriter? errorStream = default)
         {
             if (default == errorStream)
             {
@@ -209,6 +223,32 @@ namespace Semgus.Parser
         public void Dispose()
         {
             ((IDisposable)_streamOrReader).Dispose();
+        }
+
+        /// <summary>
+        /// Tries to get the full line of where an error occurred
+        /// </summary>
+        /// <param name="position">Position to look up</param>
+        /// <returns>Source line</returns>
+        public bool TryGetSourceLine(SexprPosition? position, out string? line)
+        {
+            if (position is null)
+            {
+                line = default;
+                return false;
+            }
+
+            // Make sure this is an approved source
+            // We don't want to be trying to read arbitrary files that have the
+            // same name as other sources (e.g., stdin)
+            if (position.Source == _filename)
+            {
+                line = File.ReadLines(position.Source).Skip(position.Line - 1).FirstOrDefault();
+                return line is not null;
+            }
+
+            line = default;
+            return false;
         }
     }
 }

@@ -14,6 +14,6 @@ namespace Semgus.Parser.Reader
     internal class ErrorSort : SmtSort
     {
         public static ErrorSort Instance { get; } = new ErrorSort();
-        private ErrorSort() : base(new SmtIdentifier("@error")) { }
+        private ErrorSort() : base(new SmtSortIdentifier("@error")) { }
     }
 }

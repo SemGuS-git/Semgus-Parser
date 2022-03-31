@@ -28,7 +28,7 @@ namespace Semgus.Parser.Verifier
             _writer.WriteLine("declare-term-types: ");
             foreach (var tt in termTypes)
             {
-                _writer.Write("  " + tt.Name.Symbol + " -->");
+                _writer.Write("  " + tt.Name + " -->");
                 bool firstConstructor = true;
                 foreach (var cons in tt.Constructors)
                 {

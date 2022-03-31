@@ -17,12 +17,17 @@ namespace Semgus.Parser.Reader.Converters
     /// <summary>
     /// Interface for converting between S-expression tokens and SMT objects
     /// </summary>
-    public class SmtConverter : ISmtConverter
+    internal class SmtConverter : ISmtConverter
     {
         /// <summary>
         /// Service provider that converters will be taken from
         /// </summary>
         private readonly IServiceProvider _provider;
+
+        /// <summary>
+        /// Map for recording where converted objects come from
+        /// </summary>
+        private readonly ISourceMap _sourceMap;
 
         /// <summary>
         /// Cached list of converters
@@ -55,9 +60,10 @@ namespace Semgus.Parser.Reader.Converters
         /// Constructs a new SmtConverter, where converters will be pulled from the given service provider
         /// </summary>
         /// <param name="provider">Service provider in which to look for converters</param>
-        public SmtConverter(IServiceProvider provider)
+        public SmtConverter(IServiceProvider provider, ISourceMap sourceMap)
         {
             _provider = provider;
+            _sourceMap = sourceMap;
         }
 
         /// <summary>
@@ -75,6 +81,10 @@ namespace Semgus.Parser.Reader.Converters
             {
                 if (converter.CanConvert(tFrom, tTo) && converter.TryConvert(tFrom, tTo, from, out to))
                 {
+                    if (tFrom.IsAssignableTo(typeof(SemgusToken)))
+                    {
+                        _sourceMap[to] = ((SemgusToken)from).Position;
+                    }
                     return true;
                 }
             }
