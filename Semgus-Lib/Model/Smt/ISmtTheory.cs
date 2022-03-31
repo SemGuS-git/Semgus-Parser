@@ -10,6 +10,7 @@ namespace Semgus.Model.Smt
 {
     public interface ISmtTheory
     {
+        SmtIdentifier Name { get; }
         IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
         IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
     }

@@ -8,13 +8,14 @@ namespace Semgus.Model.Smt.Theories
 {
     using static SmtCommonIdentifiers;
 
-    public class SmtCoreTheory : ISmtTheory {
+    internal class SmtCoreTheory : ISmtTheory {
         public static SmtCoreTheory Instance { get; } = new();
 
         private class BoolSort : SmtSort {
             private BoolSort() : base(BoolSortId) { }
             public static BoolSort Instance { get; } = new();
         }
+        public SmtIdentifier Name { get; } = CoreTheoryId;
         public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
         public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
 

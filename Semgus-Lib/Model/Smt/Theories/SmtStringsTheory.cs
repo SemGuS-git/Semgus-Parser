@@ -8,7 +8,7 @@ namespace Semgus.Model.Smt.Theories
 {
     using static SmtCommonIdentifiers;
 
-    public class SmtStringsTheory : ISmtTheory
+    internal class SmtStringsTheory : ISmtTheory
     {
         public static SmtStringsTheory Instance { get; } = new(SmtCoreTheory.Instance, SmtIntsTheory.Instance);
 
@@ -17,7 +17,7 @@ namespace Semgus.Model.Smt.Theories
             private StringSort() : base(StringSortId) { }
             public static StringSort Instance { get; } = new();
         }
-
+        public SmtIdentifier Name { get; } = StringsTheoryId;
         public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
         public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
 
