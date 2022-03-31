@@ -73,7 +73,7 @@ jobs:
         # Find anything in the publish directory without an extension and mark it executable
         # This should only be the actual binary that we published
       - name: Mark Executable
-        run: find ../output/${{ matrix.tpm }} -type f ! -name '*.*' -print -exec chmod a+x {} \;
+        run: find output/${{ matrix.tpm }} -type f ! -name '*.*' -print -exec chmod a+x {} \;
 
       - name: Upload
         uses: actions/upload-artifact@v2
