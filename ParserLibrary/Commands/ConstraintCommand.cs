@@ -42,11 +42,11 @@ namespace Semgus.Parser.Commands
             }
             else if (predicate.Sort == ErrorSort.Instance)
             {
-                throw new InvalidOperationException("Term in constraint is in error state: " + predicate);
+                throw _logger.LogParseErrorAndThrow("Term in constraint is in an error state due to previous errors: " + predicate, _sourceMap[predicate]);
             }
             else
             {
-                throw new InvalidOperationException("Term in constraint is not of Bool sort: " + predicate);
+                throw _logger.LogParseErrorAndThrow("Term in constraint is not of Bool sort: " + predicate, _sourceMap[predicate]);
             }
         }
         
