@@ -2,6 +2,17 @@
 A C# parsing library for SemGuS problems. We also provide a standalone tool for verifying and converting
 SemGuS files. Find the latest release and binaries on the [Releases page](https://github.com/SemGuS-git/Semgus-Parser/releases).
 
+## Installation
+To install the stand-alone parsing tool, find the binary for your operating system on the [Releases page](https://github.com/SemGuS-git/Semgus-Parser/releases). Unzip it and put the `SemgusParser` (or `SemgusParser.exe`) in a convenient location. No other dependencies are required.
+
+If you have the .NET 6 SDK installed, the parsing tool can also be installed automatically through NuGet:
+```
+dotnet tool install --global Semgus.Parser.Tool --version 2.0.0-alpha5
+```
+_The version number will not be required once we release a stable version._
+
+The C# parsing library is available in NuGet. Look for the `Semgus.Parser` package (currently available as prerelease-only). 
+
 ## Usage
 
 ```
@@ -10,8 +21,8 @@ SemgusParser [--format <format>] [--mode <mode>] [--output <filename>] -- <input
 Passing `-` as the input filename (or not supplying any filenames) makes the tool read from standard input.
 
 # Format Verification
-Run the tool with a format of `verify` to perform a syntax verification. Note that this option is the default.
-It will additionally print out the problem information, which can be checked for correctness. This output
+Run the tool with a format of `verify` to perform a syntax verification. In addition to syntax verification,
+this format prints out the problem information, which can be checked for correctness. This output
 format is not designed to be machine readable; use the JSON output format instead.
 
 # JSON Converter
