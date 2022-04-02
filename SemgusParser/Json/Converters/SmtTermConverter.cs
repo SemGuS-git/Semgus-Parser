@@ -111,6 +111,26 @@ namespace Semgus.Parser.Json.Converters
                                           forallBinder.Child));
                 return this;
             }
+
+            public object VisitMatchGrouper(SmtMatchGrouper matchGrouper)
+            {
+                throw new NotImplementedException();
+            }
+
+            public object VisitMatchBinder(SmtMatchBinder matchBinder)
+            {
+                throw new NotImplementedException();
+            }
+
+            public object VisitLambdaBinder(SmtLambdaBinder lambdaBinder)
+            {
+                throw new NotImplementedException();
+            }
+
+            public object VisitLetBinder(SmtLetBinder letBinder)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

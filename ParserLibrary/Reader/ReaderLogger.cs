@@ -123,7 +123,8 @@ namespace Semgus.Parser.Reader
             {
                 _writer.WriteLine("Error reported here:");
                 _writer.WriteLine(ctxLine);
-                _writer.WriteLine(new string('-', rls.Position.Column - 1) + "^");
+                _writer.WriteLine(new string('~', rls.Position.Column - 1) + "^");
+                _writer.WriteLine();
             }
         }
 

@@ -21,15 +21,23 @@ namespace Semgus.Parser.Reader.Converters
         private readonly ISmtConverter _converter;
         private readonly ISmtScopeProvider _scopeProvider;
         private readonly ISmtContextProvider _contextProvider;
+        private readonly ISuggestionGenerator _suggestionGenerator;
         private readonly ISourceMap _sourceMap;
         private readonly ILogger<TermConverter> _logger;
         
-        public TermConverter(DestructuringHelper helper, ISmtConverter converter, ISmtScopeProvider scopeProvider, ISmtContextProvider contextProvider, ISourceMap sourceMap, ILogger<TermConverter> logger)
+        public TermConverter(DestructuringHelper helper,
+                             ISmtConverter converter,
+                             ISmtScopeProvider scopeProvider,
+                             ISmtContextProvider contextProvider,
+                             ISuggestionGenerator suggestionGenerator,
+                             ISourceMap sourceMap,
+                             ILogger<TermConverter> logger)
         {
             _destructuringHelper = helper;
             _converter = converter;
             _scopeProvider = scopeProvider;
             _contextProvider = contextProvider;
+            _suggestionGenerator = suggestionGenerator;
             _sourceMap = sourceMap;
             _logger = logger;
         }
@@ -60,6 +68,7 @@ namespace Semgus.Parser.Reader.Converters
                 if (qid is null)
                 {
                     qid = new QualifiedIdentifier(sid!);
+                    _sourceMap[qid] = _sourceMap[sid!];
                 }
 
                 if (_scopeProvider.Scope.TryGetVariableBinding(qid.Id, out var binding))
@@ -82,12 +91,17 @@ namespace Semgus.Parser.Reader.Converters
                 {
                     string msg = "Unable to resolve function or variable: " + qid.Id;
                     to = new ErrorTerm(msg);
-                    msg += "\n    Did you mean:\n";
-                    foreach (var candidate in _contextProvider.Context.GetSimilarFunctionNames(qid.Id))
+
+                    var similar = _suggestionGenerator.GetVariableSuggestions(qid.Id, _contextProvider.Context, _scopeProvider.Scope).ToList();
+                    if (similar.Count > 0)
                     {
-                        msg += $"     - {candidate}\n";
+                        msg += "\n    Did you mean:\n";
+                        foreach (var candidate in similar)
+                        {
+                            msg += $"     - {candidate}\n";
+                        }
                     }
-                    _logger.LogParseError(msg, (from as SemgusToken)?.Position);
+                    _logger.LogParseError(msg, _sourceMap[qid]);
                 }
                 return true;
             }
@@ -184,7 +198,12 @@ namespace Semgus.Parser.Reader.Converters
                                     if (argSort is not SemgusTermType tt)
                                     {
                                         to = new ErrorTerm("Unsupported match expression. Only valid on terms of type term type.");
-                                        _logger.LogParseError("Unsupported match expression. Only valid on terms of type term type.", form.Position);
+
+                                        // Don't re-log if we've already created an error sort
+                                        if (argSort is not ErrorSort)
+                                        {
+                                            _logger.LogParseError("Unsupported match expression. Only valid on terms of type term type.", form.Position);
+                                        }
                                         return true;
                                     }
 
@@ -374,7 +393,7 @@ namespace Semgus.Parser.Reader.Converters
                             }
                             else
                             {
-                                string msg = "Unable to resolve rank for: " + af.Id.Id.Symbol;
+                                string msg = "Unable to resolve rank for: " + af.Id.Id;
                                 to = new ErrorTerm(msg);
                                 msg += $"\n  Looking for signature ({string.Join(' ', argSorts.Select(s => s.Name))}) -> {af.Id.Sort?.Name.ToString() ?? "TBD"}";
                                 msg += $"\n  Available signatures: \n";
@@ -382,19 +401,23 @@ namespace Semgus.Parser.Reader.Converters
                                 {
                                     msg += $"    - ({string.Join(' ', rankTemplate.ArgumentSorts.Select(s => s.Name))}) -> {rankTemplate.ReturnSort.Name}\n";
                                 }
-                                _logger.LogParseError(msg, form.Position);
+                                _logger.LogParseError(msg, _sourceMap[af.Id.Id]);
                             }
                         }
                         else
                         {
                             string msg = "Cannot find function definition for: " + af.Id.Id;
                             to = new ErrorTerm(msg);
-                            msg += "\n    Did you mean:\n";
-                            foreach (var candidate in _contextProvider.Context.GetSimilarFunctionNames(af.Id.Id))
+                            var suggestions = _suggestionGenerator.GetFunctionSuggestions(af.Id.Id, _contextProvider.Context, af.Arguments.Count).ToList();
+                            if (suggestions.Count > 0)
                             {
-                                msg += $"     - {candidate}\n";
+                                msg += "\n    Did you mean:\n";
+                                foreach (var suggestion in suggestions)
+                                {
+                                    msg += $"     - {suggestion}\n";
+                                }
                             }
-                            _logger.LogParseError(msg, form.Position);
+                            _logger.LogParseError(msg, _sourceMap[af.Id.Id]);
                         }
                     }
                     else

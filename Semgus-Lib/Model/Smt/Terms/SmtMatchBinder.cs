@@ -20,7 +20,7 @@ namespace Semgus.Model.Smt.Terms
 
         public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitMatchBinder(this);
         }
     }
 
@@ -41,7 +41,7 @@ namespace Semgus.Model.Smt.Terms
 
         public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitMatchGrouper(this);
         }
     }
 }
