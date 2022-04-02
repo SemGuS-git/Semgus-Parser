@@ -253,7 +253,8 @@ namespace Semgus.Sexpr.Reader
             }
 
             // Save off the current position to use when processing constituents
-            SexprPosition position = CurrentPosition;
+            // Note this is plus one column because we only peeked at the first character
+            SexprPosition position = CurrentPosition.NextColumn();
 
             // Otherwise, read constituents until the next character of another syntax type
             string constituents = ConsumeConstituents();
