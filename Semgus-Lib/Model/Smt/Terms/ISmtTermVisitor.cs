@@ -15,5 +15,9 @@ namespace Semgus.Model.Smt.Terms
         public TOutput VisitDecimalLiteral(SmtDecimalLiteral decimalLiteral);
         public TOutput VisitExistsBinder(SmtExistsBinder existsBinder);
         public TOutput VisitForallBinder(SmtForallBinder forallBinder);
+        public TOutput VisitMatchGrouper(SmtMatchGrouper matchGrouper);
+        public TOutput VisitMatchBinder(SmtMatchBinder matchBinder);
+        public TOutput VisitLambdaBinder(SmtLambdaBinder lambdaBinder);
+        public TOutput VisitLetBinder(SmtLetBinder letBinder);
     }
 }

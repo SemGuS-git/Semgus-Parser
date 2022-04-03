@@ -63,9 +63,14 @@ namespace Semgus.Parser.Commands
                 declarations.Add((decl, rank));
             }
 
+            bool allSuccessful = true;
             for (int ix = 0; ix < declarations.Count; ++ix)
             {
-                ProcessFunctionDefinition(declarations[ix].Decl, declarations[ix].Rank, signatures[ix].Args.Select(a => a.Id), definitions[ix]);
+                allSuccessful &= ProcessFunctionDefinition(declarations[ix].Decl, declarations[ix].Rank, signatures[ix].Args.Select(a => a.Id), definitions[ix]);
+            }
+            if (!allSuccessful)
+            {
+                throw new FatalParseException("Unable to process some function definitions");
             }
         }
 
@@ -75,7 +80,10 @@ namespace Semgus.Parser.Commands
             using var logScope = _logger.BeginScope($"while processing `define-fun` for {id}:");
 
             var (decl, rank) = ProcessFunctionDeclaration(id, args.Select(a => a.Sort), returnSort);
-            ProcessFunctionDefinition(decl, rank, args.Select(a => a.Id), definition);
+            if (!ProcessFunctionDefinition(decl, rank, args.Select(a => a.Id), definition))
+            {
+                throw new FatalParseException("Unable to process function definition for: " + id);
+            }
             _smtCtxProvider.Context.AddFunctionDeclaration(decl);
         }
 
@@ -86,7 +94,10 @@ namespace Semgus.Parser.Commands
 
             var (decl, rank) = ProcessFunctionDeclaration(id, args.Select(a => a.Sort), returnSort);
             _smtCtxProvider.Context.AddFunctionDeclaration(decl);
-            ProcessFunctionDefinition(decl, rank, args.Select(a => a.Id), definition);
+            if (!ProcessFunctionDefinition(decl, rank, args.Select(a => a.Id), definition))
+            {
+                throw new FatalParseException("Unable to process function definition for: " + id);
+            }
         }
 
         [Command("declare-fun")]
@@ -119,7 +130,7 @@ namespace Semgus.Parser.Commands
             return (decl, rank);
         }
 
-        private void ProcessFunctionDefinition(SmtFunction decl, SmtFunctionRank rank, IEnumerable<SmtIdentifier> arguments, SemgusToken token)
+        private bool ProcessFunctionDefinition(SmtFunction decl, SmtFunctionRank rank, IEnumerable<SmtIdentifier> arguments, SemgusToken token)
         {
             using var logScope = _logger.BeginScope($"processing definition for {decl.Name}:");
             using var scopeCtx = _scopeProvider.CreateNewScope();
@@ -134,20 +145,22 @@ namespace Semgus.Parser.Commands
                 throw _logger.LogParseErrorAndThrow($"Cannot convert function term: " + term, token.Position);
             }
 
-            if (term.Sort == ErrorSort.Instance)
+            if (term.Sort == ErrorSort.Instance || term.Accept(new TermErrorSearcher()))
             {
-                throw _logger.LogParseErrorAndThrow("Error encountered resolving term for definition of function " + decl.Name, token.Position);
+                return false;
             }
 
             if (term.Sort != rank.ReturnSort)
             {
-                throw _logger.LogParseErrorAndThrow("Function return sort doesn't match term sort: " + decl.Name, token.Position);
+                _logger.LogParseError("Function return sort doesn't match term sort: " + decl.Name, token.Position);
+                return false;
             }
 
             SmtLambdaBinder lambda = new(term, scopeCtx.Scope, arguments);
             decl.AddDefinition(rank, lambda);
 
             MaybeProcessChcDefinition(decl, rank, lambda);
+            return true;
         }
 
         private void MaybeProcessChcDefinition(SmtFunction decl, SmtFunctionRank rank, SmtLambdaBinder defn)

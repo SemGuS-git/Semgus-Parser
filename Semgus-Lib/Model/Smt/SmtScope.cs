@@ -31,7 +31,16 @@ namespace Semgus.Model.Smt
             }
         }
 
+        /// <summary>
+        /// All variable bindings local to this scope
+        /// </summary>
         public IReadOnlyCollection<SmtVariableBinding> LocalBindings { get => _variableBindings.Values; }
+
+        /// <summary>
+        /// All variable bindings in this scope and parent scopes
+        /// </summary>
+        public IEnumerable<SmtVariableBinding> Bindings
+            => LocalBindings.Concat(Parent?.Bindings ?? Enumerable.Empty<SmtVariableBinding>());
 
         public SmtVariableBinding AddVariableBinding(SmtIdentifier id, SmtSort sort, SmtVariableBindingType bindingType)
         {

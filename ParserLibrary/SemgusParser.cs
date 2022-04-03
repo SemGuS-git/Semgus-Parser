@@ -105,6 +105,7 @@ namespace Semgus.Parser
             ServiceCollection services = new ServiceCollection();
             services.AddSingleton<ISmtConverter, Reader.Converters.SmtConverter>();
             services.AddSingleton<DestructuringHelper>();
+            services.AddSingleton<ISuggestionGenerator, DidYouMean>();
             services.AddSingleton<ISourceMap, SourceMap>();
             services.AddScoped<ISmtContextProvider, SmtContextProvider>();
             services.AddScoped<ISmtScopeProvider, SmtScopeProvider>();
@@ -201,7 +202,7 @@ namespace Semgus.Parser
                             {
                                 // Details should be logged when thrown
                                 errorStream.WriteLine($"\nTerminated parsing `{commandName.Name}` command due to fatal error.");
-                                errorStream.WriteLine("--------------------\n");
+                                errorStream.WriteLine($"{new string('=', 80)}\n");
                                 errCount += 1;
                             }
                             catch (InvalidOperationException ioe)

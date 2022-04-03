@@ -42,9 +42,11 @@ namespace Semgus.Parser.Commands
                 _semgusProvider.Context.AddConstraint(predicate);
                 _problemHandler.OnConstraint(_smtProvider.Context, _semgusProvider.Context, predicate);
             }
-            else if (predicate.Sort == ErrorSort.Instance)
+            else if (predicate.Sort == ErrorSort.Instance || predicate.Accept(new TermErrorSearcher()))
             {
-                throw _logger.LogParseErrorAndThrow("Term in constraint is in an error state due to previous errors: " + predicate, _sourceMap[predicate]);
+                // No need to log the error again, since it should have been logged
+                // when the error term was originally encountered. This is just noise.
+                throw new FatalParseException("Term in constraint is in an error state due to previous errors: " + predicate, _sourceMap[predicate]);
             }
             else
             {
