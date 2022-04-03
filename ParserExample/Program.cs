@@ -128,27 +128,6 @@ namespace Semgus.Parser.Example {
 
         public static void Main4(string[] args)
         {
-            string data = @"
-            (set-info :test)
-
-            (synth-fun QQQ ((x Int)) Bool)
-            (declare-term-types ((A 0) (B 0))
-               (((q) (x (x1 Int)))
-                ((qwer (qwer1 Bool) (qwer2 A)) (asdf (asdf1 B)))))
-            (define-funs-rec ((f ((x Int) (y Bool)) Bool)) ((= 42 (+ x (ite y 4 5)))))
-
-            (define-funs-rec ((E.Sem ((t A) (x Int) (y Int)) Bool))
-                ((match t
-                   ((q (= x y))
-                    ((x a7) (= y a7))))))
-
-            (constraint (= 7 (+ 1 2)))
-            (constraint true)
-            (constraint (= 5 6))
-
-            (check-synth)
-
-";
             var stream = new MemoryStream();
             var writer = new StreamWriter(stream);
             //writer.Write(data);

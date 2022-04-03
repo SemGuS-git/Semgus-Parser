@@ -21,17 +21,28 @@ namespace Semgus.Parser.Reader
 
     internal class SmtScopeProvider : ISmtScopeProvider, ISmtScopeProvider.ISmtScopeContext
     {
-        public SmtScope Scope { get; private set; }
+        private SmtScope? _scope;
+        public SmtScope Scope
+        {
+            get
+            {
+                if (_scope == null)
+                {
+                    throw new InvalidOperationException("Attempt to get a null scope.");
+                }
+                return _scope;
+            }
+        }
 
         public ISmtScopeProvider.ISmtScopeContext CreateNewScope()
         {
-            Scope = new SmtScope(Scope);
+            _scope = new SmtScope(_scope);
             return this;
         }
 
         public void Dispose()
         {
-            Scope = Scope.Parent;
+            _scope = Scope.Parent;
         }
     }
 }

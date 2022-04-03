@@ -11,8 +11,6 @@ using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Model.Smt.Terms;
 
-#nullable enable
-
 namespace Semgus.Parser.Reader.Converters
 {
     internal class TermConverter : AbstractConverter

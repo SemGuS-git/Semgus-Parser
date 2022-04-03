@@ -8,7 +8,9 @@ using Semgus.Parser.Reader;
 
 using Xunit;
 
-namespace ParserTests
+using static Semgus.Parser.Tests.NullableAssertions;
+
+namespace Semgus.Parser.Tests
 {
     public class ReaderTests
     {
@@ -25,17 +27,21 @@ namespace ParserTests
 ");
             SemgusToken tok = reader.Read();
             var cons = Assert.IsType<ConsToken>(tok);
+            AssertNotNull(cons);
 
-            Assert.True(cons.TryPop(out SymbolToken symb, out cons, out _, out _));
+            AssertTrue(cons.TryPop(out SymbolToken? symb, out cons, out _, out _));
             Assert.Equal("list", symb.Name);
+            AssertNotNull(cons);
 
-            Assert.True(cons.TryPop(out NumeralToken num, out cons, out _, out _));
+            AssertTrue(cons.TryPop(out NumeralToken? num, out cons, out _, out _));
             Assert.Equal(1, num.Value);
+            AssertNotNull(cons);
 
-            Assert.True(cons.TryPop(out num, out cons, out _, out _));
+            AssertTrue(cons.TryPop(out num, out cons, out _, out _));
             Assert.Equal(2, num.Value);
+            AssertNotNull(cons);
 
-            Assert.True(cons.TryPop(out num, out cons, out _, out _));
+            AssertTrue(cons.TryPop(out num, out cons, out _, out _));
             Assert.Equal(3, num.Value);
 
             Assert.Null(cons);

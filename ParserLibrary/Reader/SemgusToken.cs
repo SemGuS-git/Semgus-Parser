@@ -10,7 +10,7 @@ namespace Semgus.Parser.Reader
     /// <summary>
     /// Base class of tokens in the Semgus specification format
     /// </summary>
-    public abstract record SemgusToken(SexprPosition Position)
+    public abstract record SemgusToken(SexprPosition? Position)
     {
         public abstract TResult Accept<TResult>(ISemgusTokenVisitor<TResult> visitor);
 
@@ -28,7 +28,7 @@ namespace Semgus.Parser.Reader
     /// <summary>
     /// A symbol token
     /// </summary>
-    public record SymbolToken(string Name, SexprPosition Position) : SemgusToken(Position)
+    public record SymbolToken(string Name, SexprPosition? Position) : SemgusToken(Position)
     {
         public override TResult Accept<TResult>(ISemgusTokenVisitor<TResult> visitor) => visitor.VisitSymbol(this);
 
@@ -53,7 +53,7 @@ namespace Semgus.Parser.Reader
     /// A keyword token. Essentially just a specialized type of symbol.
     /// Note that the name does not include the leading colon.
     /// </summary>
-    public record KeywordToken(string Name, SexprPosition Position) : SemgusToken(Position)
+    public record KeywordToken(string Name, SexprPosition? Position) : SemgusToken(Position)
     {
         public override TResult Accept<TResult>(ISemgusTokenVisitor<TResult> visitor) => visitor.VisitKeyword(this);
 
@@ -66,7 +66,7 @@ namespace Semgus.Parser.Reader
     /// escape sequences present in the source (e.g., \n) are not unescaped. The only preprocessing
     /// done is to translate "" --> ".
     /// </summary>
-    public record StringToken(string Value, SexprPosition Position) : SemgusToken(Position)
+    public record StringToken(string Value, SexprPosition? Position) : SemgusToken(Position)
     {
         public override TResult Accept<TResult>(ISemgusTokenVisitor<TResult> visitor) => visitor.VisitString(this);
 
@@ -76,7 +76,7 @@ namespace Semgus.Parser.Reader
     /// <summary>
     /// A literal natural number (including 0)
     /// </summary>
-    public record NumeralToken(long Value, SexprPosition Position) : SemgusToken(Position)
+    public record NumeralToken(long Value, SexprPosition? Position) : SemgusToken(Position)
     {
         public override TResult Accept<TResult>(ISemgusTokenVisitor<TResult> visitor) => visitor.VisitNumeral(this);
 
@@ -86,7 +86,7 @@ namespace Semgus.Parser.Reader
     /// <summary>
     /// A literal real number (encoded as a double-precision binary float)
     /// </summary>
-    public record DecimalToken(double Value, SexprPosition Position) : SemgusToken(Position)
+    public record DecimalToken(double Value, SexprPosition? Position) : SemgusToken(Position)
     {
         public override TResult Accept<TResult>(ISemgusTokenVisitor<TResult> visitor) => visitor.VisitDecimal(this);
 
@@ -96,7 +96,7 @@ namespace Semgus.Parser.Reader
     /// <summary>
     /// A literal bit vector
     /// </summary>
-    public record BitVectorToken(BitArray Value, SexprPosition Position) : SemgusToken(Position)
+    public record BitVectorToken(BitArray Value, SexprPosition? Position) : SemgusToken(Position)
     {
         public override TResult Accept<TResult>(ISemgusTokenVisitor<TResult> visitor) => visitor.VisitBitVector(this);
 
@@ -107,8 +107,8 @@ namespace Semgus.Parser.Reader
     {
         public bool IsNil();
         public SemgusToken First();
-        public IConsOrNil Rest();
-        public SexprPosition Position { get; }
+        public IConsOrNil? Rest();
+        public SexprPosition? Position { get; }
     }
 
     /// <summary>
@@ -117,7 +117,7 @@ namespace Semgus.Parser.Reader
     /// sub-type of everything else (including cons), but since multiple inheritance isn't 
     /// supported, we just shoe-horn it in as an independent token type.
     /// </summary>
-    public record NilToken(SexprPosition Position) : SemgusToken(Position), IConsOrNil
+    public record NilToken(SexprPosition? Position) : SemgusToken(Position), IConsOrNil
     {
         public override TResult Accept<TResult>(ISemgusTokenVisitor<TResult> visitor) => visitor.VisitNil(this);
 
@@ -125,7 +125,7 @@ namespace Semgus.Parser.Reader
 
         public bool IsNil() => true;
         public SemgusToken First() => this;
-        public IConsOrNil Rest() => this;
+        public IConsOrNil? Rest() => this;
     }
 
     /// <summary>
@@ -135,7 +135,7 @@ namespace Semgus.Parser.Reader
     /// a function, but C# doesn't have a built-in list type that lets you do this.
     /// So we go the traditional route and build our own linked lists with conses.
     /// </summary>
-    public record ConsToken(SemgusToken Head, SemgusToken Tail, SexprPosition Position) : SemgusToken(Position), IConsOrNil
+    public record ConsToken(SemgusToken Head, SemgusToken Tail, SexprPosition? Position) : SemgusToken(Position), IConsOrNil
     {
         public override TResult Accept<TResult>(ISemgusTokenVisitor<TResult> visitor) => visitor.VisitCons(this);
 
@@ -166,6 +166,6 @@ namespace Semgus.Parser.Reader
 
         public bool IsNil() => false;
         public SemgusToken First() => Head;
-        public IConsOrNil Rest() => Tail as IConsOrNil;
+        public IConsOrNil? Rest() => Tail as IConsOrNil;
     }
 }

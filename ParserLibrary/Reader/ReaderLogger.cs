@@ -10,8 +10,6 @@ using Microsoft.Extensions.Logging;
 
 using Semgus.Sexpr.Reader;
 
-#nullable enable
-
 namespace Semgus.Parser.Reader
 {
     /// <summary>

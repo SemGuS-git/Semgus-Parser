@@ -38,6 +38,7 @@ namespace ParserTests
         [InlineData("+",1,2)]
         [InlineData("+", 100, 0)]
         [InlineData("+", 5, 2)]
+#pragma warning disable xUnit1026 // Theory methods should use all of their parameters
         public void ParsePositiveIntegerAddition(string op, int a, int b) {/* TODO
             var codeText = $"({op} {Encode(a)} {Encode(b)})";
 
@@ -57,6 +58,7 @@ namespace ParserTests
 
             AssertIntLiteral(formula.List[1], a);
             AssertIntLiteral(formula.List[2], b);*/
+#pragma warning restore xUnit1026 // Theory methods should use all of their parameters
         }
 
         static string Encode(int literal) => literal < 0 ? $"(- {-literal})" : $"{literal}";

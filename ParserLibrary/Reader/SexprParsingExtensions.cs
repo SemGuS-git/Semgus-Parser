@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 using Semgus.Sexpr.Reader;
@@ -7,7 +8,7 @@ namespace Semgus.Parser.Reader
 {
     public static class SexprParsingExtensions
     {
-        public static bool TryPop<TSexpr>(this ConsToken cons, out TSexpr head, out ConsToken tail, out string err, out SexprPosition errPos)
+        public static bool TryPop<TSexpr>(this ConsToken cons, [NotNullWhen(true)] out TSexpr? head, out ConsToken? tail, [NotNullWhen(false)] out string? err, out SexprPosition? errPos)
         where TSexpr : SemgusToken
         {
             if (cons is null)
@@ -54,9 +55,9 @@ namespace Semgus.Parser.Reader
             }
         }
 
-        public static void WriteParseError(this TextWriter writer, string err, SexprPosition errPos)
+        public static void WriteParseError(this TextWriter writer, string err, SexprPosition? errPos)
         {
-            writer.Write($"{errPos.Source}:{errPos.Line}:{errPos.Column}: error: ");
+            writer.Write($"{errPos?.Source}:{errPos?.Line}:{errPos?.Column}: error: ");
             writer.WriteLine(err);
         }
     }

@@ -11,8 +11,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-#nullable enable
-
 namespace Semgus.Parser.Commands
 {
     internal class FunctionDefinitionCommands

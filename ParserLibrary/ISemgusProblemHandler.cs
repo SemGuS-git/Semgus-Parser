@@ -8,8 +8,6 @@ using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Model.Smt.Terms;
 
-#nullable enable
-
 namespace Semgus.Parser
 {
     /// <summary>
