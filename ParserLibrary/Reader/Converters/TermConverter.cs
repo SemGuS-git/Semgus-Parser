@@ -155,7 +155,17 @@ namespace Semgus.Parser.Reader.Converters
                                     using var scopeCx = _scopeProvider.CreateNewScope();
                                     foreach (var (id, sort) in ef.Bindings)
                                     {
-                                        scopeCx.Scope.AddVariableBinding(id, GetSortOrDie(sort), SmtVariableBindingType.Existential);
+                                        if (!scopeCx.Scope.TryAddVariableBinding(id,
+                                                                                 GetSortOrDie(sort),
+                                                                                 SmtVariableBindingType.Existential,
+                                                                                 _contextProvider.Context,
+                                                                                 out var binding,
+                                                                                 out var error))
+                                        {
+                                            _logger.LogParseError("invalid variable name: " + error, _sourceMap[id]);
+                                            to = new ErrorTerm(error);
+                                            return true;
+                                        }
                                     }
                                     if (_converter.TryConvert(ef.Child, out SmtTerm? child))
                                     {
@@ -175,7 +185,15 @@ namespace Semgus.Parser.Reader.Converters
                                     using var scopeCx = _scopeProvider.CreateNewScope();
                                     foreach (var (id, sort) in ff.Bindings)
                                     {
-                                        scopeCx.Scope.AddVariableBinding(id, GetSortOrDie(sort), SmtVariableBindingType.Universal);
+                                        if (!scopeCx.Scope.TryAddVariableBinding(id, GetSortOrDie(sort), SmtVariableBindingType.Universal,
+                                                                                 _contextProvider.Context,
+                                                                                 out var binding,
+                                                                                 out var error))
+                                        {
+                                            _logger.LogParseError("invalid variable name: " + error, _sourceMap[id]);
+                                            to = new ErrorTerm(error);
+                                            return true;
+                                        }
                                     }
                                     if (_converter.TryConvert(ff.Child, out SmtTerm? child))
                                     {
@@ -231,7 +249,18 @@ namespace Semgus.Parser.Reader.Converters
                                             else
                                             {
                                                 // It's just a symbol to bind to the whole term
-                                                var vb = scopeCtx.Scope.AddVariableBinding(symbol, argSort, SmtVariableBindingType.Bound);
+                                                if (!scopeCtx.Scope.TryAddVariableBinding(symbol,
+                                                                                          argSort,
+                                                                                          SmtVariableBindingType.Bound,
+                                                                                          _contextProvider.Context,
+                                                                                          out var vb,
+                                                                                          out var error))
+                                                {
+                                                    _logger.LogParseError($"cannot bind match pattern `{symbol}`: " + error, _sourceMap[symbol]);
+                                                    to = new ErrorTerm(error);
+                                                    return true;
+                                                }
+
                                                 bindings.Add(new SmtMatchVariableBinding(vb, SmtMatchVariableBinding.FullTerm));
                                                 constructor = default;
                                             }
@@ -261,7 +290,17 @@ namespace Semgus.Parser.Reader.Converters
                                             }
                                             for (int argIx = 0; argIx < constructor.Children.Length; ++argIx)
                                             {
-                                                var vb = scopeCtx.Scope.AddVariableBinding(consList[argIx + 1], constructor.Children[argIx], SmtVariableBindingType.Bound);
+                                                if (!scopeCtx.Scope.TryAddVariableBinding(consList[argIx + 1],
+                                                                                          constructor.Children[argIx],
+                                                                                          SmtVariableBindingType.Bound,
+                                                                                          _contextProvider.Context,
+                                                                                          out var vb,
+                                                                                          out var error))
+                                                {
+                                                    _logger.LogParseError($"cannot bind match variable `{consList[argIx + 1]}`: " + error, _sourceMap[consList[argIx + 1]]);
+                                                    to = new ErrorTerm(error);
+                                                    return true;
+                                                }
                                                 bindings.Add(new SmtMatchVariableBinding(vb, argIx));
                                             }
                                         }

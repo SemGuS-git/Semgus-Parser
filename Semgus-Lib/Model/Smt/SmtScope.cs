@@ -7,15 +7,32 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt
 {
+    /// <summary>
+    /// Holds information about bound variables in SMT terms
+    /// </summary>
     public class SmtScope
     {
+        /// <summary>
+        /// The parent scope
+        /// </summary>
         public SmtScope? Parent { get; private set; }
+
+        /// <summary>
+        /// Constructs a new scope with the given parent
+        /// </summary>
+        /// <param name="parent">Parent scope, or null if no parent</param>
         public SmtScope(SmtScope? parent)
         {
             Parent = parent;
             _variableBindings = new();
         }
 
+        /// <summary>
+        /// Gets a variable binding from this scope or the closest parent with the variable bound
+        /// </summary>
+        /// <param name="id">Identifier of variable to get</param>
+        /// <param name="binding">Binding information about the variable</param>
+        /// <returns>True if successfully gotten the variable binding information</returns>
         public bool TryGetVariableBinding(SmtIdentifier id, [NotNullWhen(true)] out SmtVariableBinding? binding)
         {
             if (_variableBindings.TryGetValue(id, out binding)) {
@@ -42,17 +59,45 @@ namespace Semgus.Model.Smt
         public IEnumerable<SmtVariableBinding> Bindings
             => LocalBindings.Concat(Parent?.Bindings ?? Enumerable.Empty<SmtVariableBinding>());
 
-        public SmtVariableBinding AddVariableBinding(SmtIdentifier id, SmtSort sort, SmtVariableBindingType bindingType)
+        /// <summary>
+        /// Attempts to add a new variable binding to this scope
+        /// </summary>
+        /// <param name="id">Variable identifier to add</param>
+        /// <param name="sort">Sort of variable</param>
+        /// <param name="bindingType">Type of binding</param>
+        /// <param name="context">SMT context (for checking for shadowing theory symbols)</param>
+        /// <param name="binding">The created binding</param>
+        /// <param name="error">Reason for failure to add binding</param>
+        /// <returns>True if successfully added, false if not</returns>
+        public bool TryAddVariableBinding(SmtIdentifier id,
+                                          SmtSort sort,
+                                          SmtVariableBindingType bindingType,
+                                          SmtContext context,
+                                          [NotNullWhen(true)]  out SmtVariableBinding? binding,
+                                          [NotNullWhen(false)] out string? error)
         {
-            var binding = new SmtVariableBinding(id, sort, bindingType, this);
+            if (context.TryGetFunctionDeclaration(id, out var alreadyBound)
+                && alreadyBound.Theory != SmtTheory.UserDefined)
+            {
+                binding = default;
+                error = $"cannot shadow theory symbol `{id}` from theory {alreadyBound.Theory.Name}";
+                return false;
+            }
+
+            binding = new SmtVariableBinding(id, sort, bindingType, this);
             if (!_variableBindings.TryAdd(id, binding))
             {
-                throw new InvalidOperationException($"Identifer {id.Symbol} already bound in this scope.");
+                error = $"identifer `{id}` already bound in this scope.";
+                return false;
             }
-            // TODO: it's an error to shadow theory symbols
-            return binding;
+
+            error = default;
+            return true;
         }
 
+        /// <summary>
+        /// Bindings in this scope
+        /// </summary>
         private readonly Dictionary<SmtIdentifier, SmtVariableBinding> _variableBindings;
     }
 }

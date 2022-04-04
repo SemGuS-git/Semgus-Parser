@@ -135,7 +135,15 @@ namespace Semgus.Parser.Commands
 
             foreach (var (id, sort) in arguments.Zip(rank.ArgumentSorts))
             {
-                scopeCtx.Scope.AddVariableBinding(id, sort, SmtVariableBindingType.Lambda);
+                if (!scopeCtx.Scope.TryAddVariableBinding(id,
+                                                          sort,
+                                                          SmtVariableBindingType.Lambda,
+                                                          _smtCtxProvider.Context,
+                                                          out var binding,
+                                                          out var error))
+                {
+                    throw _logger.LogParseErrorAndThrow($"invalid function parameter name: " + error, _sourceMap[id]);
+                }
             }
 
             if (!_converter.TryConvert(token, out SmtTerm? term))
