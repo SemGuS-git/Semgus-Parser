@@ -1,16 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-using Semgus.Model.Smt;
-using Semgus.Parser.Reader.Converters;
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-#nullable enable
 
 namespace Semgus.Parser.Reader.Converters
 {
@@ -83,7 +78,11 @@ namespace Semgus.Parser.Reader.Converters
                 {
                     if (tFrom.IsAssignableTo(typeof(SemgusToken)))
                     {
-                        _sourceMap[to] = ((SemgusToken)from).Position;
+                        var pos = ((SemgusToken)from).Position;
+                        if (pos is not null)
+                        {
+                            _sourceMap[to] = pos;
+                        }
                     }
                     return true;
                 }

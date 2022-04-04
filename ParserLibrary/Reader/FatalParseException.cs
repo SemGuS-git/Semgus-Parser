@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 using Semgus.Sexpr.Reader;
 
-#nullable enable
-
 namespace Semgus.Parser.Reader
 {
     internal class FatalParseException : Exception

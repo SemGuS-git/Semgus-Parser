@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-using Semgus.Model.Smt;
+﻿using Semgus.Model.Smt;
 
 using System;
 using System.Collections.Generic;
@@ -9,8 +7,6 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
-
-#nullable enable
 
 namespace Semgus.Parser.Reader
 {
@@ -55,6 +51,11 @@ namespace Semgus.Parser.Reader
             {
                 var param = paramInfo[paramIx];
                 var type = param.ParameterType;
+
+                if (form is null)
+                {
+                    throw new InvalidOperationException("Expected a proper list, but got a null tail");
+                }
 
                 // Check if we're out of parameters to match against
                 if (form.IsNil())// !(param.IsOptional || param.GetCustomAttribute<RestAttribute>() != null))
@@ -172,7 +173,7 @@ namespace Semgus.Parser.Reader
 
         internal static IConsOrNil Advance(IConsOrNil cons)
         {
-            IConsOrNil rest = cons.Rest();
+            IConsOrNil? rest = cons.Rest();
             if (rest is null)
             {
                 throw new Exception("Expected a proper list at " + ((SemgusToken)cons).Position);

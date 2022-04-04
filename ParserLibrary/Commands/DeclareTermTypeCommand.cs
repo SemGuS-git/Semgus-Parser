@@ -11,8 +11,6 @@ using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Parser.Reader;
 
-#nullable enable
-
 namespace Semgus.Parser.Commands
 {
     /// <summary>

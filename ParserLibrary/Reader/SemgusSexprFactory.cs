@@ -10,17 +10,17 @@ namespace Semgus.Parser.Reader
 {
     public class SemgusSexprFactory : ISexprFactory<SemgusToken>
     {
-        public SemgusToken ConstructCons(SemgusToken head, SemgusToken tail, SexprPosition position = null)
+        public SemgusToken ConstructCons(SemgusToken head, SemgusToken tail, SexprPosition? position = null)
         {
             return new ConsToken(head, tail, position);
         }
 
-        public SemgusToken ConstructDecimal(double value, SexprPosition position = null)
+        public SemgusToken ConstructDecimal(double value, SexprPosition? position = null)
         {
             return new DecimalToken(value, position);
         }
 
-        public SemgusToken ConstructKeyword(ReadOnlySpan<char> keyword, SexprPosition position = null)
+        public SemgusToken ConstructKeyword(ReadOnlySpan<char> keyword, SexprPosition? position = null)
         {
             string name;
             if (':' == keyword[0])
@@ -34,7 +34,7 @@ namespace Semgus.Parser.Reader
             return new KeywordToken(name, position);
         }
 
-        public SemgusToken ConstructList(IList<SemgusToken> list, SexprPosition position = null)
+        public SemgusToken ConstructList(IList<SemgusToken> list, SexprPosition? position = null)
         {
             if (0 == list.Count)
             {
@@ -53,12 +53,12 @@ namespace Semgus.Parser.Reader
             }
         }
 
-        public SemgusToken ConstructNil(SexprPosition position = null)
+        public SemgusToken ConstructNil(SexprPosition? position = null)
         {
             return new NilToken(position);
         }
 
-        public SemgusToken ConstructNumeral(long value, SexprPosition position = null)
+        public SemgusToken ConstructNumeral(long value, SexprPosition? position = null)
         {
             return new NumeralToken(value, position);
         }
@@ -68,17 +68,17 @@ namespace Semgus.Parser.Reader
             return new SentinelToken(identifier);
         }
 
-        public SemgusToken ConstructString(ReadOnlySpan<char> str, SexprPosition position = null)
+        public SemgusToken ConstructString(ReadOnlySpan<char> str, SexprPosition? position = null)
         {
             return new StringToken(str.ToString(), position);
         }
 
-        public SemgusToken ConstructSymbol(ReadOnlySpan<char> name, SexprPosition position = null)
+        public SemgusToken ConstructSymbol(ReadOnlySpan<char> name, SexprPosition? position = null)
         {
             return new SymbolToken(name.ToString(), position);
         }
 
-        public SemgusToken ConstructBitVector(BitArray bv, SexprPosition position = null)
+        public SemgusToken ConstructBitVector(BitArray bv, SexprPosition? position = null)
         {
             return new BitVectorToken(bv, position);
         }

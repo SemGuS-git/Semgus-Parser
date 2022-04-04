@@ -21,6 +21,6 @@ namespace Semgus.Parser.Reader
         /// <summary>
         /// The current SMT context
         /// </summary>
-        public SmtContext Context { get; set; }
+        public SmtContext Context { get; set; } = null!;
     }
 }

@@ -13,8 +13,6 @@ using Semgus.Parser.Commands;
 using Semgus.Parser.Reader;
 using Semgus.Sexpr.Reader;
 
-#nullable enable
-
 namespace Semgus.Parser
 {
     public class SemgusParser : IDisposable, ISourceContextProvider
@@ -193,9 +191,16 @@ namespace Semgus.Parser
                                     }
                                 }
 
-                                if (!destructuringHelper.TryDestructureAndInvoke(command, ((IConsOrNil)cons).Rest(), instance))
+                                var commandBody = ((IConsOrNil)cons).Rest();
+                                if (commandBody is null)
                                 {
-                                    errorStream.WriteLine("Failed to find matching command signature for: " + commandName.Name);
+                                    errorStream.WriteLine($"error: body for command {commandName} is not a proper list.");
+                                    errCount += 1;
+                                }
+                                else if (!destructuringHelper.TryDestructureAndInvoke(command, commandBody, instance))
+                                {
+                                    errorStream.WriteLine("error: failed to find matching command signature for: " + commandName.Name);
+                                    errCount += 1;
                                 }
                             }
                             catch (FatalParseException)

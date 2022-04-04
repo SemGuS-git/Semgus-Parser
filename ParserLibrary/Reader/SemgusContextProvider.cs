@@ -21,6 +21,6 @@ namespace Semgus.Parser.Reader
         /// <summary>
         /// The current SemGuS context
         /// </summary>
-        public SemgusContext Context { get; set; }
+        public SemgusContext Context { get; set; } = null!;
     }
 }
