@@ -35,6 +35,9 @@ The roadmap for next-up features includes:
 * Support for bit vectors, including full support for indexed identifiers and parameteric sorts
 * Arbitrary `let` and `match` terms
 
+If there is an unsupported feature that you would like added, drop us a line by submitting an issue (or commenting on an existing one).
+This will help us prioritize what to put on our roadmap.
+
 ## Installation
 To install the stand-alone parsing tool, find the binary for your operating system on the [Releases page](https://github.com/SemGuS-git/Semgus-Parser/releases). Unzip it and put the `semgus-parser` (or `semgus-parser.exe`) in a convenient location. No other dependencies are required. You may have to mark it
 executable on Linux and macOS; just run `chmod a+x semgus-parser` in the folder with the binary.
