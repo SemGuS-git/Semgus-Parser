@@ -2,22 +2,53 @@
 A C# parsing library for SemGuS problems. We also provide a standalone tool for verifying and converting
 SemGuS files. Find the latest release and binaries on the [Releases page](https://github.com/SemGuS-git/Semgus-Parser/releases).
 
+### Features
+* Parses SemGuS problems from SMT-LIB2 source files
+* Displays constrained Horn clauses (CHCs) and other problem data in a human-inspectable format
+* Converts SMT-LIB2 SemGuS problems into JSON for consumption by other tools
+* Allows programatic access via a C# API
+
+### Examples
+To verify the syntax of a problem file and display details in a human-inspectable format, run:
+```
+semgus-parser <input.sem>
+```
+
+To convert a problem file to JSON, run:
+```
+semgus-parser --format json --mode batch --output <output.json> -- <input.sem>
+```
+
+### Caveats and Considerations
+This project is under active development and does not yet support all SMT-LIB2 features. The following theories are currently supported:
+* Core
+* Ints
+* Strings
+
+Unsupported SMT-LIB2 features include:
+* Indexed identifiers, e.g., `(_ move up)`
+* Parametric sorts, including the theory of bit vectors
+* Theory functions annotated with `:left-assoc`, `:right-assoc`, `:chainable`, and `:pairwise`. Certain Core functions currently have hard-coded versions of various arities.
+* Some terms, including `let` and arbitrary `match` expressions (other than those used to define semantics in SemGuS)
+
+The roadmap for next-up features includes:
+* Support for bit vectors, including full support for indexed identifiers and parameteric sorts
+* Arbitrary `let` and `match` terms
+
 ## Installation
-To install the stand-alone parsing tool, find the binary for your operating system on the [Releases page](https://github.com/SemGuS-git/Semgus-Parser/releases). Unzip it and put the `SemgusParser` (or `SemgusParser.exe`) in a convenient location. No other dependencies are required. You may have to mark it 
-executable on Linux and macOS; just run `chmod a+x SemgusParser` in the folder with the binary.
+To install the stand-alone parsing tool, find the binary for your operating system on the [Releases page](https://github.com/SemGuS-git/Semgus-Parser/releases). Unzip it and put the `semgus-parser` (or `semgus-parser.exe`) in a convenient location. No other dependencies are required. You may have to mark it
+executable on Linux and macOS; just run `chmod a+x semgus-parser` in the folder with the binary.
 
 If you have the .NET 6 SDK installed, the parsing tool can also be installed automatically through NuGet:
 ```
-dotnet tool install --global Semgus.Parser.Tool --version 2.0.0-alpha5
+dotnet tool install --global Semgus.Parser.Tool
 ```
-_The version number will not be required once we release a stable version._
-
-The C# parsing library is available in NuGet. Look for the `Semgus.Parser` package (currently available as prerelease-only). 
+The C# parsing library is available in NuGet. Look for the `Semgus.Parser` package.
 
 ## Usage
 
 ```
-SemgusParser [--format <format>] [--mode <mode>] [--output <filename>] -- <input.sem> ...
+semgus-parser [--format <format>] [--mode <mode>] [--output <filename>] -- <input.sem> ...
 ```
 Passing `-` as the input filename (or not supplying any filenames) makes the tool read from standard input.
 
@@ -33,7 +64,7 @@ the problem, usable by other non-.NET tools that cannot directly link with this 
 ## Usage
 
 ```
-SemgusParser --format json [--mode stream|batch] [--output <filename.json>] -- <input.sem> ...
+semgus-parser --format json [--mode stream|batch] [--output <filename.json>] -- <input.sem> ...
 ```
 Passing `-` as the input filename (or not supplying any filenames) makes the tool read from standard input.
 
@@ -163,7 +194,7 @@ Example:
 #### `constraint`
 A Boolean predicate term.
 ```
-{ "$event": "constraint", "$type": "semgus", "constraint": <term> } 
+{ "$event": "constraint", "$type": "semgus", "constraint": <term> }
 ```
 The term is defined as above.
 #### `synth-fun`
