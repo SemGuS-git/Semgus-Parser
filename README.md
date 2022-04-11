@@ -1,4 +1,7 @@
-# SemGuS-Parser
+# SemGuS Parser
+[![.NET Actions Status](https://github.com/SemGuS-git/Semgus-Parser/workflows/.NET/badge.svg)](https://github.com/SemGuS-git/Semgus-Parser/actions)
+[![NuGet Badge](https://buildstats.info/nuget/Semgus.Parser?includePreReleases=true&dWidth=0)](https://www.nuget.org/packages/Semgus.Parser/)
+
 A C# parsing library for SemGuS problems. We also provide a standalone tool for verifying and converting
 SemGuS files. Find the latest release and binaries on the [Releases page](https://github.com/SemGuS-git/Semgus-Parser/releases).
 
