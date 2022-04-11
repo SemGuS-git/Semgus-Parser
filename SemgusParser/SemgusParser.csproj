@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -14,9 +14,20 @@
     <Authors>The SemGuS Team</Authors>
     <Company>University of Wisconsin-Madison</Company>
     <Product>SemGuS</Product>
-    <PackageProjectUrl>https://semgus.org/</PackageProjectUrl>
+    <PackageProjectUrl>http://semgus.org/</PackageProjectUrl>
     <Description>Command line tool for parsing semantics-guided synthesis (SemGuS) problem files.</Description>
+    <AssemblyName>semgus-parser</AssemblyName>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/SemGuS-git/Semgus-Parser</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -10,8 +10,19 @@
     <Authors>The SemGuS Team</Authors>
     <Company>University of Wisconsin-Madison</Company>
     <Product>SemGuS</Product>
-    <PackageProjectUrl>https://semgus.org/</PackageProjectUrl>
+    <PackageProjectUrl>http://semgus.org/</PackageProjectUrl>
     <Description>Common types for semantics-guided synthesis (SemGuS) tooling.</Description>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/SemGuS-git/Semgus-Parser</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <AssemblyName>Semgus.Common</AssemblyName>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
