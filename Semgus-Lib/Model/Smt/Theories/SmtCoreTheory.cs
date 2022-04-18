@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +19,37 @@ namespace Semgus.Model.Smt.Theories
         public SmtIdentifier Name { get; } = CoreTheoryId;
         public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
         public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
+        public IReadOnlySet<SmtIdentifier> PrimarySortSymbols { get; }
+        public IReadOnlySet<SmtIdentifier> PrimaryFunctionSymbols { get; }
+
+        /// <summary>
+        /// Gets the requested sort (for the Bool sort)
+        /// </summary>
+        /// <param name="ssi">Sort identifier</param>
+        /// <param name="sort">The Bool sort</param>
+        /// <returns>True if requesting the Bool sort, false if not</returns>
+        public bool TryGetSort(SmtSortIdentifier ssi, [NotNullWhen(true)] out SmtSort? sort)
+        {
+            if (ssi == BoolSortId)
+            {
+                sort = BoolSort.Instance;
+                return true;
+            }
+            else
+            {
+                sort = default;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets the requested function
+        /// </summary>
+        /// <param name="fid">Function identifier</param>
+        /// <param name="function">The requested function</param>
+        /// <returns>True if successfully got function, false otherwise</returns>
+        public bool TryGetFunction(SmtIdentifier fid, [NotNullWhen(true)] out SmtFunction? function)
+            => Functions.TryGetValue(fid, out function);
 
         private SmtCoreTheory()
         {
@@ -38,6 +70,7 @@ namespace Semgus.Model.Smt.Theories
             }
 
             Sorts = new Dictionary<SmtIdentifier, SmtSort>() { { b.Name.Name, b } };
+            PrimarySortSymbols = new HashSet<SmtIdentifier>() { b.Name.Name };
 
             var id_and = AndFunctionId;
             var id_or = OrFunctionId;
@@ -69,7 +102,7 @@ namespace Semgus.Model.Smt.Theories
             cf(new("ite"), usf.Next(), b, usf.Sort, usf.Sort);
 
             Functions = fd;
+            PrimaryFunctionSymbols = new HashSet<SmtIdentifier>(fd.Keys);
         }
-
     }
 }

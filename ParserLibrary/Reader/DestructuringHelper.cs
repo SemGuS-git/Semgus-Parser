@@ -110,9 +110,10 @@ namespace Semgus.Parser.Reader
                 var exactly = param.GetCustomAttribute<ExactlyAttribute>();
                 if (exactly is not null)
                 {
-                    if (type == typeof(SmtIdentifier) && _conv.TryConvert(item, out SmtIdentifier? id))
+                    if (type == typeof(SmtIdentifier))
                     {
-                        if (id.Symbol == exactly.Identifier)
+                        if (_conv.TryConvert(item, out SmtIdentifier? id) &&
+                            id.Symbol == exactly.Identifier)
                         {
                             parameters[paramIx] = id;
                         }
@@ -121,9 +122,10 @@ namespace Semgus.Parser.Reader
                             return false;
                         }
                     }
-                    else if (type == typeof(SymbolToken) && _conv.TryConvert(item, out SymbolToken? token))
+                    else if (type == typeof(SymbolToken))
                     {
-                        if (token.Name == exactly.Identifier)
+                        if (_conv.TryConvert(item, out SymbolToken? token)
+                            && token.Name == exactly.Identifier)
                         {
                             parameters[paramIx] = token;
                         }

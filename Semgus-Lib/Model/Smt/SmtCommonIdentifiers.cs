@@ -9,6 +9,7 @@ namespace Semgus.Model.Smt {
         public static SmtIdentifier CoreTheoryId { get; } = new("Core");
         public static SmtIdentifier IntsTheoryId { get; } = new("Ints");
         public static SmtIdentifier StringsTheoryId { get; } = new("Strings");
+        public static SmtIdentifier BitVectorsTheoryId { get; } = new("BitVectors");
 
         public static SmtSortIdentifier BoolSortId { get; } = new("Bool");
         public static SmtSortIdentifier IntSortId { get; } = new("Int");

@@ -6,8 +6,38 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt
 {
-    public sealed record SmtIdentifier(string Symbol, params string[] Indices)
+    public sealed record SmtIdentifier(string Symbol, params SmtIdentifier.Index[] Indices)
     {
+        public sealed class Index
+        {
+            public Index(string symbol)
+            {
+                StringValue = symbol;
+            }
+
+            public Index(long numeral)
+            {
+                NumeralValue = numeral;
+                StringValue = numeral.ToString();
+            }
+
+            public readonly string StringValue;
+            public readonly long? NumeralValue;
+
+            public override int GetHashCode()
+            {
+                return StringValue.GetHashCode() + (NumeralValue.HasValue ? 1 : 0);
+            }
+
+            public override bool Equals(object? obj)
+            {
+                return obj is not null &&
+                    obj is Index i &&
+                    i.StringValue == this.StringValue &&
+                    i.NumeralValue == this.NumeralValue;
+            }
+        }
+
         public bool Equals(SmtIdentifier? other)
         {
             if (other == null)
@@ -29,9 +59,9 @@ namespace Semgus.Model.Smt
             {
                 int hash = 17;
                 hash = hash * 23 + Symbol.GetHashCode();
-                foreach (string s in Indices)
+                foreach (Index i in Indices)
                 {
-                    hash = hash * 23 + s.GetHashCode();
+                    hash = hash * 23 + i.GetHashCode();
                 }
                 return hash;
             }
@@ -45,7 +75,7 @@ namespace Semgus.Model.Smt
             }
             else
             {
-                return $"(_ {Symbol} ...todo...)";
+                return $"(_ {Symbol} {string.Join(' ', Indices.Select(i => i.StringValue))})";
             }
         }
     }
