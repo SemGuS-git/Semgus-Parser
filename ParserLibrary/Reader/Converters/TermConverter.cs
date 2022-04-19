@@ -436,7 +436,12 @@ namespace Semgus.Parser.Reader.Converters
                                 msg += $"\n  Available signatures: \n";
                                 foreach (var rankTemplate in defn.RankTemplates)
                                 {
-                                    msg += $"    - ({string.Join(' ', rankTemplate.ArgumentSorts.Select(s => s.Name))}) -> {rankTemplate.ReturnSort.Name}\n";
+                                    msg += $"    - ({string.Join(' ', rankTemplate.ArgumentSorts.Select(s => s.Name))}) -> {rankTemplate.ReturnSort.Name}";
+                                    if (rankTemplate.ValidationComment != null)
+                                    {
+                                        msg += $"  [{rankTemplate.ValidationComment}]";
+                                    }
+                                    msg += "\n";
                                 }
                                 _logger.LogParseError(msg, _sourceMap[af.Id.Id]);
                             }

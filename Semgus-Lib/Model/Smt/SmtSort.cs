@@ -32,6 +32,30 @@ namespace Semgus.Model.Smt
             { }
         }
 
+        public class WildcardSort : SmtSort
+        {
+            public WildcardSort(SmtSortIdentifier name) : base(name)
+            { }
+
+            public bool Matches(SmtSort other)
+            {
+                if (Name.Name.Symbol == other.Name.Name.Symbol
+                    && Name.Name.Indices.Length == other.Name.Name.Indices.Length)
+                {
+                    for (int ix = 0; ix < Name.Name.Indices.Length; ix++)
+                    {
+                        if (Name.Name.Indices[ix].StringValue != "*"
+                            && Name.Name.Indices[ix].StringValue != other.Name.Name.Indices[ix].StringValue)
+                        {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            }
+        }
+
         public class UniqueSortFactory
         {
             private class UniqueSort : SmtSort
