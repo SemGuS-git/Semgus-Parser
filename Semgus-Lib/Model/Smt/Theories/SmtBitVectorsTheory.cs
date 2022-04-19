@@ -9,21 +9,46 @@ using static Semgus.Model.Smt.SmtCommonIdentifiers;
 
 namespace Semgus.Model.Smt.Theories
 {
-
+    /// <summary>
+    /// The theory of fixed-size bit vectors
+    /// </summary>
     internal class SmtBitVectorsTheory : ISmtTheory
     {
+        /// <summary>
+        /// A singleton theory instance
+        /// </summary>
         public static SmtBitVectorsTheory Instance { get; } = new(SmtCoreTheory.Instance);
 
-        private sealed class BitVectorsSort : SmtSort
+        /// <summary>
+        /// Underlying bit vector sort
+        /// </summary>
+        internal sealed class BitVectorsSort : SmtSort
         {
+            /// <summary>
+            /// Cache of instantiated sorts. We need this since sorts are compared by reference
+            /// </summary>
             private static readonly IDictionary<long, BitVectorsSort> _sortCache = new Dictionary<long, BitVectorsSort>();
 
+            /// <summary>
+            /// Size of bit vectors in this sort. Must be greater than 0
+            /// </summary>
             public long Size { get; }
+
+            /// <summary>
+            /// Constructs a new bit vector sort of the given size
+            /// </summary>
+            /// <param name="size">Size of bit vectors in this sort</param>
             private BitVectorsSort(long size) : base(new(new SmtIdentifier(BitVectorSortPrimaryId.Symbol,
                                                                       new SmtIdentifier.Index(size))))
             {
                 Size = size;
             }
+
+            /// <summary>
+            /// Gets the bit vector sort for the given size
+            /// </summary>
+            /// <param name="size">Size of bit vectors</param>
+            /// <returns>The bit vector sort for the given size</returns>
             public static BitVectorsSort GetSort(long size)
             {
                 if (_sortCache.ContainsKey(size))
@@ -38,18 +63,33 @@ namespace Semgus.Model.Smt.Theories
             }
         }
 
+        /// <summary>
+        /// This theory's name
+        /// </summary>
         public SmtIdentifier Name { get; } = BitVectorsTheoryId;
+
+        #region Deprecated
         public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
         public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts
             => throw new NotImplementedException();
+        #endregion
 
+        /// <summary>
+        /// The primary (i.e., non-indexed) sort symbols (e.g., "BitVec")
+        /// </summary>
         public IReadOnlySet<SmtIdentifier> PrimarySortSymbols { get; }
 
+        /// <summary>
+        /// The primary (i.e., non-indexed) function symbols
+        /// </summary>
         public IReadOnlySet<SmtIdentifier> PrimaryFunctionSymbols { get; }
 
+        /// <summary>
+        /// Constructs an instance of the theory of bit vectors
+        /// </summary>
+        /// <param name="core">Reference to the core theory</param>
         private SmtBitVectorsTheory(SmtCoreTheory core)
         {
-            SmtSort i = SmtIntsTheory.Instance.Sorts[IntSortId.Name];
             SmtSort b = core.Sorts[BoolSortId.Name];
 
             Dictionary<SmtIdentifier, SmtFunction> fd = new();
@@ -104,9 +144,17 @@ namespace Semgus.Model.Smt.Theories
             cf("bvult", argSortsEqual, argSortsEqualCmt, r => r.ReturnSort, b, bv0, bv0);
 
             Functions = fd;
-            PrimaryFunctionSymbols = new HashSet<SmtIdentifier>(fd.Keys);
+            var primary = new HashSet<SmtIdentifier>(fd.Keys);
+            primary.Add(new SmtIdentifier("extract"));
+            PrimaryFunctionSymbols = primary;
         }
 
+        /// <summary>
+        /// Looks up a sort symbol in this theory
+        /// </summary>
+        /// <param name="sortId">The sort ID</param>
+        /// <param name="resolvedSort">The resolved sort</param>
+        /// <returns>True if successfully gotten</returns>
         public bool TryGetSort(SmtSortIdentifier sortId, [NotNullWhen(true)] out SmtSort? resolvedSort)
         {
             if (sortId.Arity == 0 && sortId.Name.Symbol == "BitVec")
@@ -130,8 +178,58 @@ namespace Semgus.Model.Smt.Theories
             return false;
         }
 
+        /// <summary>
+        /// Looks up a function in this theory
+        /// </summary>
+        /// <param name="functionId">The function ID to look up</param>
+        /// <param name="resolvedFunction">The resolved function</param>
+        /// <returns>True if successfully gotten</returns>
         public bool TryGetFunction(SmtIdentifier functionId, [NotNullWhen(true)] out SmtFunction? resolvedFunction)
-            =>
-                Functions.TryGetValue(functionId, out resolvedFunction);
+        {
+            //
+            // This needs to be constructed on the fly
+            //
+            if (functionId.Symbol == "extract")
+            {
+                if (functionId.Indices.Length != 2 ||
+                    !functionId.Indices[0].NumeralValue.HasValue ||
+                    functionId.Indices[0].NumeralValue!.Value < 0 ||
+                    !functionId.Indices[1].NumeralValue.HasValue ||
+                    functionId.Indices[1].NumeralValue!.Value < 0 ||
+                    functionId.Indices[0].NumeralValue!.Value < functionId.Indices[1].NumeralValue!.Value)
+                {
+                    resolvedFunction = new SmtFunction(
+                        new SmtIdentifier("extract", new SmtIdentifier.Index("i"), new SmtIdentifier.Index("j")),
+                        this,
+                        new SmtFunctionRank(
+                            new SmtSort.GenericSort(new(new SmtIdentifier("BitVec", new SmtIdentifier.Index("n")))),
+                            new SmtSort.GenericSort(new(new SmtIdentifier("BitVec", new SmtIdentifier.Index("m")))))
+                        {
+                            ValidationComment = "i,j,m,n are numerals, m > i >= j > 0, n = i - j + 1"
+                        });
+                    return true; // No rank will be resolved, but we show a decent message
+                }
+
+                long i = functionId.Indices[0].NumeralValue!.Value;
+                long j = functionId.Indices[1].NumeralValue!.Value;
+
+                resolvedFunction = new SmtFunction(
+                    functionId,
+                    this,
+                    new SmtFunctionRank(
+                        BitVectorsSort.GetSort(i - j + 1),
+                        new SmtSort.WildcardSort(new(new SmtIdentifier("BitVec", new SmtIdentifier.Index("*"))))
+                        )
+                    {
+                        Validator = r => ((BitVectorsSort)r.ArgumentSorts[0]).Size > i,
+                        ValidationComment = "Size of input must be greater than " + i
+                    });
+                return true;
+            }
+            else
+            {
+                return Functions.TryGetValue(functionId, out resolvedFunction);
+            }
+        }
     }
 }

@@ -35,5 +35,14 @@ namespace Semgus.Parser.Tests
         {
             Assert.True(condition);
         }
+
+        /// <summary>
+        /// Asserts that the given condition is false
+        /// </summary>
+        /// <param name="condition">The condition to check</param>
+        public static void AssertFalse([DoesNotReturnIf(true)] bool condition)
+        {
+            Assert.False(condition);
+        }
     }
 }

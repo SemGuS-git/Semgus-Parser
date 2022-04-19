@@ -18,6 +18,12 @@
     <AssemblyName>Semgus.Common</AssemblyName>
   </PropertyGroup>
 
+  <!-- Let our test assembly poke at our internals -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Semgus.Parser.Tests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Include="..\README.md">
       <Pack>True</Pack>

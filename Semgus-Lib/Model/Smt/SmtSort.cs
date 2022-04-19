@@ -37,6 +37,19 @@ namespace Semgus.Model.Smt
         public bool IsSortParameter { get; protected set; } = false;
 
         /// <summary>
+        /// An arbitrary generic sort
+        /// </summary>
+        internal class GenericSort : SmtSort
+        {
+            /// <summary>
+            /// Constructs a new generic sort
+            /// </summary>
+            /// <param name="name">The sort name</param>
+            public GenericSort(SmtSortIdentifier name) : base(name)
+            { }
+        }
+
+        /// <summary>
         /// A sort containing wildcard parameters. Useful in rank templates.
         /// Indices in the sort name may be '*', which will match anything.
         /// </summary>
