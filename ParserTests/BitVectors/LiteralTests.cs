@@ -38,7 +38,6 @@ namespace Semgus.Parser.Tests.BitVectors
         [InlineData("#x0055", 85, 16)]
         [InlineData("#xDEADBEEF", 3735928559, 32)]
         [InlineData("#xDEADBEEFDEADBEEF", 16045690984833335023, 64)]
-        // [InlineData("#x00000000000000001", 1, 68)]
         public void ReadsLiterals(string text, ulong value, long size)
         {
             SemgusReader reader = new(text);
