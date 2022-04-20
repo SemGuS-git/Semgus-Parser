@@ -1,0 +1,4 @@
+--format
+json
+--
+data/bitvec.sl
