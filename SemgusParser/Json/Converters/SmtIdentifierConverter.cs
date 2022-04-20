@@ -29,12 +29,27 @@ namespace Semgus.Parser.Json.Converters
                 throw new InvalidOperationException("Attepted to serialize the wrong thing.");
             }
 
-            if (id.Indices.Length > 1)
+            if (id.Indices.Length > 0)
             {
-                throw new InvalidOperationException("Indexed identifiers not yet supported by the JSON serializer.");
+                writer.WriteStartArray();
+                writer.WriteValue(id.Symbol);
+                foreach (var index in id.Indices)
+                {
+                    if (index.NumeralValue is not null)
+                    {
+                        writer.WriteValue(index.NumeralValue.Value);
+                    }
+                    else
+                    {
+                        writer.WriteValue(index.StringValue);
+                    }
+                }
+                writer.WriteEndArray();
             }
-
-            serializer.Serialize(writer, id.Symbol);
+            else
+            {
+                serializer.Serialize(writer, id.Symbol);
+            }
         }
     }
 }
