@@ -28,54 +28,55 @@ namespace Semgus.Model.Smt
                 SmtCoreTheory.Instance,
                 SmtIntsTheory.Instance,
                 SmtStringsTheory.Instance,
+                SmtBitVectorsTheory.Instance
             };
         }
 
         /// <summary>
-        /// All functions currently in the global context
+        /// All primary function symbols currently in the global context
         /// </summary>
-        public IEnumerable<SmtFunction> Functions
+        public IEnumerable<SmtIdentifier> Functions
         {
             get
             {
                 foreach(var level in _assertionStack)
                 {
-                    foreach (var (_, function) in level.Functions)
+                    foreach (var (fnId, _) in level.Functions)
                     {
-                        yield return function;
+                        yield return fnId;
                     }
                 }
 
                 foreach (var theory in _theories)
                 {
-                    foreach (var (_, function) in theory.Functions)
+                    foreach (var fnId in theory.PrimaryFunctionSymbols)
                     {
-                        yield return function;
+                        yield return fnId;
                     }
                 }
             }
         }
 
         /// <summary>
-        /// All sorts currently in the global context
+        /// All primary sort symbols currently in the global context
         /// </summary>
-        public IEnumerable<SmtSort> Sorts
+        public IEnumerable<SmtIdentifier> Sorts
         {
             get
             {
                 foreach (var level in _assertionStack)
                 {
-                    foreach (var (_, sort) in level.Sorts)
+                    foreach (var (sortId, _) in level.Sorts)
                     {
-                        yield return sort;
+                        yield return sortId;
                     }
                 }
 
                 foreach (var theory in _theories)
                 {
-                    foreach (var (_, sort) in theory.Sorts)
+                    foreach (var sortId in theory.PrimarySortSymbols)
                     {
-                        yield return sort;
+                        yield return sortId;
                     }
                 }
             }
@@ -94,7 +95,7 @@ namespace Semgus.Model.Smt
 
             foreach (var theory in _theories)
             {
-                if (theory.Functions.ContainsKey(id) || theory.Sorts.ContainsKey(id))
+                if (theory.PrimaryFunctionSymbols.Contains(id) || theory.PrimarySortSymbols.Contains(id))
                 {
                     return true;
                 }
@@ -116,7 +117,7 @@ namespace Semgus.Model.Smt
 
             foreach (var theory in _theories)
             {
-                if (theory.Sorts.ContainsKey(id.Name))
+                if (theory.PrimarySortSymbols.Contains(id.Name))
                 {
                     return true;
                 }
@@ -165,9 +166,8 @@ namespace Semgus.Model.Smt
 
             foreach (var theory in _theories)
             {
-                if (theory.Functions.ContainsKey(id))
+                if (theory.TryGetFunction(id, out function))
                 {
-                    function = theory.Functions[id];
                     return true;
                 }
             }
@@ -201,9 +201,8 @@ namespace Semgus.Model.Smt
 
             foreach (var theory in _theories)
             {
-                if (theory.Sorts.ContainsKey(id.Name))
+                if (theory.TryGetSort(id, out sort))
                 {
-                    sort = theory.Sorts[id.Name];
                     return true;
                 }
             }

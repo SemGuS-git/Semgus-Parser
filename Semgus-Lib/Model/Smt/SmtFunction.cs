@@ -88,7 +88,12 @@ namespace Semgus.Model.Smt
                     }
                 }
 
-                if (templateSort != concreteSort)
+                if (template.ArgumentSorts[ix] is SmtSort.WildcardSort wild
+                    && wild.Matches(argumentSorts[ix]))
+                {
+                    // No-op
+                }
+                else if (templateSort != concreteSort)
                 {
                     rank = default;
                     return false;
@@ -124,15 +129,17 @@ namespace Semgus.Model.Smt
                     return false;
                 }
 
-                // By this point, we validated that the provided sorts fulfill the template
-                rank = new SmtFunctionRank(retSort, argumentSorts);
-                return true;
+                returnSort = retSort;
             }
-            else
+
+            // By this point, we validated that the provided sorts fulfill the template
+            rank = new SmtFunctionRank(returnSort ?? template.ReturnSort, argumentSorts);
+            returnSort = template.ReturnSortDeriver(rank);
+            if (returnSort != rank.ReturnSort)
             {
-                rank = template;
-                return true;
+                rank = new SmtFunctionRank(returnSort, argumentSorts);
             }
+            return template.Validator(rank);
         }
     }
 }

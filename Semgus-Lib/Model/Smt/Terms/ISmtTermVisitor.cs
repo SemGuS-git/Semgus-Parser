@@ -13,6 +13,7 @@ namespace Semgus.Model.Smt.Terms
         public TOutput VisitStringLiteral(SmtStringLiteral stringLiteral);
         public TOutput VisitNumeralLiteral(SmtNumeralLiteral numeralLiteral);
         public TOutput VisitDecimalLiteral(SmtDecimalLiteral decimalLiteral);
+        public TOutput VisitBitVectorLiteral(SmtBitVectorLiteral bitVectorLiteral);
         public TOutput VisitExistsBinder(SmtExistsBinder existsBinder);
         public TOutput VisitForallBinder(SmtForallBinder forallBinder);
         public TOutput VisitMatchGrouper(SmtMatchGrouper matchGrouper);

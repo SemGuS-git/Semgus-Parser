@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -160,6 +161,44 @@ namespace Semgus.Model.Smt.Terms
             return visitor.VisitStringLiteral(this);
         }
     }
-    
-    // TODO: Bitvectors
+
+    /// <summary>
+    /// Literals for bit vectors
+    /// </summary>
+    public class SmtBitVectorLiteral : SmtLiteral
+    {
+        public override object BoxedValue => Value;
+
+        /// <summary>
+        /// The literal value
+        /// </summary>
+        public BitArray Value { get; }
+
+        /// <summary>
+        /// Constructs a new string literal with the given value
+        /// </summary>
+        /// <param name="ctx">Current SMT context</param>
+        /// <param name="value">Literal value</param>
+        public SmtBitVectorLiteral(SmtContext ctx, BitArray value) : base(GetSortOrDie(ctx, SmtCommonIdentifiers.BitVectorSortId[value.Length]))
+        {
+            Value = value;
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"#b{string.Join("", Value.Cast<bool>().Select(b => b?"1":"0"))}";
+        }
+
+        /// <summary>
+        /// Accepts a visitor for this term
+        /// </summary>
+        /// <typeparam name="TOutput">Visitation output type</typeparam>
+        /// <param name="visitor">The visitor</param>
+        /// <returns>Output of the visitor</returns>
+        public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
+        {
+            return visitor.VisitBitVectorLiteral(this);
+        }
+    }
 }

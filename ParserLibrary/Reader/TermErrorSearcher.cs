@@ -36,6 +36,9 @@ namespace Semgus.Parser.Reader
         public bool VisitStringLiteral(SmtStringLiteral stringLiteral)
             => false;
 
+        public bool VisitBitVectorLiteral(SmtBitVectorLiteral bitVectorLiteral)
+            => false;
+
         public bool VisitVariable(SmtVariable variable)
             => variable.Sort is ErrorSort;
 

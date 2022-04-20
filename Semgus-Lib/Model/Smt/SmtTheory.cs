@@ -1,4 +1,6 @@
 ﻿
+using System.Diagnostics.CodeAnalysis;
+
 namespace Semgus.Model.Smt {
     public static class SmtTheory {
         /// <summary>
@@ -16,6 +18,20 @@ namespace Semgus.Model.Smt {
             public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts => throw new NotImplementedException();
 
             public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions => throw new NotImplementedException();
+
+            public IReadOnlySet<SmtIdentifier> PrimarySortSymbols => throw new NotImplementedException();
+
+            public IReadOnlySet<SmtIdentifier> PrimaryFunctionSymbols => throw new NotImplementedException();
+
+            public bool TryGetFunction(SmtIdentifier functionId, [NotNullWhen(true)] out SmtFunction? resolvedFunction)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool TryGetSort(SmtSortIdentifier sortId, [NotNullWhen(true)] out SmtSort? resolvedSort)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

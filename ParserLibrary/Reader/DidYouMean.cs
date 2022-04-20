@@ -32,7 +32,9 @@ namespace Semgus.Parser.Reader
         /// <returns>Enumeration of suggested function identifiers</returns>
         public IEnumerable<SmtIdentifier> GetFunctionSuggestions(SmtIdentifier id, SmtContext context, int arity)
         {
-            var fns = context.Functions
+            var fns = context.Functions // TODO: does this work? Maybe we need a broader lookup
+                .Select(fid => { context.TryGetFunctionDeclaration(fid, out var fn); return fn!; })
+                .Where(fn => fn is not null)
                 .Where(fn => arity == -1 || fn.RankTemplates.Any(rt => rt.Arity == arity))
                 .Select(fn => new { fn.Name, Distance = ComputeEditDistance(id.Symbol, fn.Name.Symbol) })
                 .Where(p => p.Distance <= MaxEditDistanceForSimilarity)
@@ -66,6 +68,8 @@ namespace Semgus.Parser.Reader
                     .Where(p => p.Distance <= MaxEditDistanceForSimilarity);
 
             var globals = context.Functions
+                .Select(fid => { context.TryGetFunctionDeclaration(fid, out var fn); return fn!; })
+                .Where(fn => fn is not null)
                 .Where(fn => fn.RankTemplates.Any(rt => rt.Arity == 0))
                 .Select(f => (Id: f.Name, Distance: ComputeEditDistance(id.Symbol, f.Name.Symbol)))
                 .Where(p => p.Distance <= MaxEditDistanceForSimilarity);

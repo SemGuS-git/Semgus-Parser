@@ -1,6 +1,6 @@
 # SemGuS Parser
 [![.NET Actions Status](https://github.com/SemGuS-git/Semgus-Parser/workflows/.NET/badge.svg)](https://github.com/SemGuS-git/Semgus-Parser/actions)
-[![NuGet Badge](https://buildstats.info/nuget/Semgus.Parser?includePreReleases=true&dWidth=0)](https://www.nuget.org/packages/Semgus.Parser/)
+[![NuGet Badge](https://buildstats.info/nuget/Semgus.Parser?dWidth=0)](https://www.nuget.org/packages/Semgus.Parser/)
 
 A C# parsing library for SemGuS problems. We also provide a standalone tool for verifying and converting
 SemGuS files. Find the latest release and binaries on the [Releases page](https://github.com/SemGuS-git/Semgus-Parser/releases).
@@ -26,17 +26,21 @@ semgus-parser --format json --mode batch --output <output.json> -- <input.sem>
 This project is under active development and does not yet support all SMT-LIB2 features. The following theories are currently supported:
 * Core
 * Ints
-* Strings
+* Strings (except regular expressions)
+* Bit vectors
+
+New additions:
+* Indexed identifiers, e.g. `(_ move up)` (planned for v2.1.0, not yet released)
+* Bit vectors (planned for v2.1.0, not yet released)
 
 Unsupported SMT-LIB2 features include:
-* Indexed identifiers, e.g., `(_ move up)`
-* Parametric sorts, including the theory of bit vectors
+* Parametric sorts
 * Theory functions annotated with `:left-assoc`, `:right-assoc`, `:chainable`, and `:pairwise`. Certain Core functions currently have hard-coded versions of various arities.
 * Some terms, including `let` and arbitrary `match` expressions (other than those used to define semantics in SemGuS)
 
 The roadmap for next-up features includes:
-* Support for bit vectors, including full support for indexed identifiers and parameteric sorts
 * Arbitrary `let` and `match` terms
+* Converting SyGuS problems to CHCs on the fly
 
 If there is an unsupported feature that you would like added, drop us a line by submitting an issue (or commenting on an existing one).
 This will help us prioritize what to put on our roadmap.
