@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using System.Text;
 
 namespace Semgus.Sexpr.Reader
@@ -202,11 +203,22 @@ namespace Semgus.Sexpr.Reader
         {
             // We expect a sequence of hex digits. We read all remaining constituents and report errors if not the case
             string hex = reader.ConsumeConstituents();
-            if (!long.TryParse(hex, System.Globalization.NumberStyles.HexNumber, default, out long number))
+
+            BitArray bits = new BitArray(hex.Length * 4);
+            foreach (char nibble in hex)
             {
-                throw new InvalidOperationException("Expected hexadecimal number, but got: " + hex);
+                if (!byte.TryParse(nibble.ToString(), System.Globalization.NumberStyles.HexNumber, default, out byte value))
+                {
+                    throw new InvalidOperationException("Expected hexadecimal number, but got: #x" + hex);
+                }
+                for (int i = 0; i < 4; ++i)
+                {
+                    bits.LeftShift(1);
+                    bits.Set(0, (value & 0b1000) > 0);
+                    value <<= 1;
+                }
             }
-            return reader.SexprFactory.ConstructNumeral(number, pos);
+            return reader.SexprFactory.ConstructBitVector(bits, pos);
         }
 
         /// <summary>
@@ -227,7 +239,7 @@ namespace Semgus.Sexpr.Reader
             for (int i = 0; i < bitvector.Length; ++i)
             {
                 char bit = bitvector[i];
-                int bvIx = bitvector.Length - i; // The first character in the string is the MSb
+                int bvIx = bitvector.Length - i - 1; // The first character in the string is the MSb
                 
                 switch (bit)
                 {

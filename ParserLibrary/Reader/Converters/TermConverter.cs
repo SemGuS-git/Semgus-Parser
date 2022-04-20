@@ -494,7 +494,8 @@ namespace Semgus.Parser.Reader.Converters
                     return true;
 
                 case BitVectorToken bvt:
-                    throw new NotImplementedException("Literal bit vectors not yet supported.");
+                    to = new SmtBitVectorLiteral(_contextProvider.Context, bvt.Value);
+                    return true;
 
                 default:
                     to = default;

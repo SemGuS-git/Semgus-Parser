@@ -131,6 +131,16 @@ namespace Semgus.Parser.Json.Converters
             {
                 throw new NotImplementedException();
             }
+
+            private record BitVectorModel(int Size, IEnumerable<byte> Bytes) : TermModel("bitvector");
+            public object VisitBitVectorLiteral(SmtBitVectorLiteral bitVectorLiteral)
+            {
+                var bv = bitVectorLiteral.Value;
+                byte[] bytes = new byte[bv.Length / 8];
+                bv.CopyTo(bytes, 0);
+                _serializer.Serialize(_writer, new BitVectorModel(bv.Length, bytes));
+                return this;
+            }
         }
     }
 }
