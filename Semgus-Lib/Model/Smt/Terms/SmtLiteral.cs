@@ -187,7 +187,7 @@ namespace Semgus.Model.Smt.Terms
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"\"#b{string.Join("", Value.Cast<bool>().Select(b => b?"1":"0"))}\"";
+            return $"#b{string.Join("", Value.Cast<bool>().Select(b => b?"1":"0"))}";
         }
 
         /// <summary>

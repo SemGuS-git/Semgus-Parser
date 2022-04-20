@@ -1,0 +1,24 @@
+declare-term-types: 
+  BV --> $bv();
+check-synth
+CHC: (BV.Sem term x1) <= true
+    [constructor: ($bv)]
+Constraint: (BV.Sem fn (concat #b0000 #b1111))
+Constraint: (BV.Sem fn (concat #b1 #b0001100))
+Constraint: (BV.Sem fn (concat #b1111 #b0101))
+Constraint: (BV.Sem fn ((_ extract 7 0) #b11111111))
+Constraint: (BV.Sem fn ((_ extract 15 8) #b01010101010101011111111111111111))
+Constraint: (BV.Sem fn (bvnot #b11111111))
+Constraint: (BV.Sem fn (bvneg #b11111111))
+Constraint: (BV.Sem fn (bvand #b01010101 #b11011101))
+Constraint: (BV.Sem fn (bvor #b01010101 #b11011101))
+Constraint: (BV.Sem fn (bvadd #b01010101 #b11011101))
+Constraint: (BV.Sem fn (bvmul #b01010101 #b11011101))
+Constraint: (BV.Sem fn (bvudiv #b01010101 #b11011101))
+Constraint: (BV.Sem fn (bvurem #b01010101 #b11011101))
+Constraint: (BV.Sem fn (bvshl #b01010101 #b11011101))
+Constraint: (BV.Sem fn (bvshr #b01010101 #b11011101))
+Constraint: (BV.Sem fn (ite (bvult #b1011001111010101 #b0101110100111011) #b11111111 #b00000000))
+Function to Synthesize: fn
+Grammar: @BV__agtt [BV]
+@BV__agtt --> $bv
