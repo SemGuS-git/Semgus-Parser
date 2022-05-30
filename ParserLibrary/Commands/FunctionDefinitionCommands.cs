@@ -338,10 +338,33 @@ namespace Semgus.Parser.Commands
                     if (c is SmtFunctionApplication cAppl)
                     {
                         var cRank = cAppl.Rank;
-                        if (cRank.ReturnSort == boolSort && cRank.Arity > 0 && cRank.ArgumentSorts[0] is SemgusTermType && cAppl.Arguments.All(a => a is SmtVariable))
+                        if (cRank.ReturnSort == boolSort && cRank.Arity > 0 && cRank.ArgumentSorts[0] is SemgusTermType)
                         {
+                            List<SmtVariable> args = new();
+                            foreach (var a in cAppl.Arguments)
+                            {
+                                if (a is SmtVariable aVar)
+                                {
+                                    // The argument is a variable - great, just add it.
+                                    args.Add(aVar);
+                                }
+                                else
+                                {
+                                    // The argument is some other SMT term `t` - needs some transformations
+                                    // We generate a fresh variable `v` and add (= v t) to the constraints
+                                    SmtIdentifier varName = GensymUtils.Gensym("_CHC_VAR");
+                                    SmtVariableBinding varBinding = new(varName, a.Sort, SmtVariableBindingType.Universal, bodyScope);
+                                    SmtVariable varObj = new(varName, varBinding);
+                                    args.Add(varObj);
+                                    bodyBindings.Add(varBinding);
+                                    constraints.Add(SmtTermBuilder.Apply(_smtCtxProvider.Context,
+                                                                         SmtCommonIdentifiers.EqFunctionId,
+                                                                         varObj, a));
+                                }
+                            }
+
                             // Semantic relation. Probably.
-                            relList.Add(new(cAppl.Definition, cRank, cAppl.Arguments.Select(a => (a as SmtVariable)!).ToList()));
+                            relList.Add(new(cAppl.Definition, cRank, args));
                             continue;
                         }
                     }
