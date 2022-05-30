@@ -40,5 +40,32 @@ namespace Semgus.Parser
                 return sort;
             }
         }
+
+        /// <summary>
+        /// Attempts to resolve a function with the given name, or throws a parse exception if not able
+        /// </summary>
+        /// <param name="ctx">This SmtContext</param>
+        /// <param name="id">The function identifier to resolve</param>
+        /// <param name="sourceMap">Source map for error message generation</param>
+        /// <param name="logger">Logger to log with</param>
+        /// <returns>The resolved function</returns>
+        /// <exception>FatalParseException when unable to resolve function</exception>
+        [return: NotNullIfNotNull("id")]
+        public static SmtFunction? GetFunctionOrDie<T>(this SmtContext ctx, SmtIdentifier? id, ISourceMap sourceMap, ILogger<T> logger)
+        {
+            if (id is null)
+            {
+                return null;
+            }
+
+            if (!ctx.TryGetFunctionDeclaration(id, out SmtFunction? function))
+            {
+                throw logger.LogParseErrorAndThrow($"Undeclared function: {id}", sourceMap[id]);
+            }
+            else
+            {
+                return function;
+            }
+        }
     }
 }

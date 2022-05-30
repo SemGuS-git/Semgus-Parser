@@ -29,5 +29,7 @@ namespace Semgus.Model.Smt {
         public static SmtIdentifier AndFunctionId { get; } = new("and");
         public static SmtIdentifier OrFunctionId { get; } = new("or");
         public static SmtIdentifier EqFunctionId { get; } = new("=");
+        public static SmtIdentifier TrueConstantId { get; } = new("true");
+        public static SmtIdentifier FalseConstantId { get; } = new("false");
     }
 }
