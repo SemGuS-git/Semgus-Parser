@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 
 namespace Semgus.Parser.Commands
 {
+    /// <summary>
+    /// Handles function definitions and declarations
+    /// </summary>
     internal class FunctionDefinitionCommands
     {
         private readonly ISemgusProblemHandler _handler;
@@ -39,9 +42,15 @@ namespace Semgus.Parser.Commands
             _sourceMap = sourceMap;
             _logger = logger;
         }
-        public record DefinitionSignature(SmtIdentifier Name, IList<(SmtIdentifier Id, SmtSortIdentifier Sort)> Args, SmtSortIdentifier Ret);
-        public record DeclarationSignature(SmtIdentifier Name, IList<SmtSortIdentifier> Args, SmtSortIdentifier Ret);
 
+        /// <summary>
+        /// Record holding a function definition
+        /// </summary>
+        /// <param name="Name">Name of function to define</param>
+        /// <param name="Args">Function arguments (name and sort)</param>
+        /// <param name="Ret">Function return value</param>
+        public record DefinitionSignature(SmtIdentifier Name, IList<(SmtIdentifier Id, SmtSortIdentifier Sort)> Args, SmtSortIdentifier Ret);
+        
         [Command("define-funs-rec")]
         public void DefineFunsRec(IList<DefinitionSignature> signatures, IList<SemgusToken> definitions)
         {
@@ -116,6 +125,13 @@ namespace Semgus.Parser.Commands
             _smtCtxProvider.Context.AddFunctionDeclaration(decl);
         }
 
+        /// <summary>
+        /// Processes a function declaration into a function object and rank
+        /// </summary>
+        /// <param name="name">The function name</param>
+        /// <param name="argIds">Name of argument sorts</param>
+        /// <param name="returnSortId">Name of return sort</param>
+        /// <returns>The function object and rank</returns>
         private (SmtFunction, SmtFunctionRank) ProcessFunctionDeclaration(SmtIdentifier name, IEnumerable<SmtSortIdentifier> argIds, SmtSortIdentifier returnSortId)
         {
             using var logScope = _logger.BeginScope($"processing declaration for {name}:");
@@ -128,6 +144,14 @@ namespace Semgus.Parser.Commands
             return (decl, rank);
         }
 
+        /// <summary>
+        /// Processes a function definition and adds it to the current context
+        /// </summary>
+        /// <param name="decl">The function object</param>
+        /// <param name="rank">The function rank</param>
+        /// <param name="arguments">The argument names</param>
+        /// <param name="token">The function body</param>
+        /// <returns>True if successfully processed</returns>
         private bool ProcessFunctionDefinition(SmtFunction decl, SmtFunctionRank rank, IEnumerable<SmtIdentifier> arguments, SemgusToken token)
         {
             using var logScope = _logger.BeginScope($"processing definition for {decl.Name}:");
@@ -169,6 +193,12 @@ namespace Semgus.Parser.Commands
             return true;
         }
 
+        /// <summary>
+        /// Tries to process a function definition as a CHC
+        /// </summary>
+        /// <param name="decl">The function object</param>
+        /// <param name="rank">The function rank</param>
+        /// <param name="defn">The top-level lambda binder</param>
         private void MaybeProcessChcDefinition(SmtFunction decl, SmtFunctionRank rank, SmtLambdaBinder defn)
         {
             using var logScope = _logger.BeginScope($"processing CHC for {decl.Name}:");
@@ -302,28 +332,66 @@ namespace Semgus.Parser.Commands
                 }
 
                 List<SemgusChc.SemanticRelation> relList = new();
-                SmtTerm? constraint = default;
+                List<SmtTerm> constraints = new();
                 foreach (var c in bodyParts)
                 {
                     if (c is SmtFunctionApplication cAppl)
                     {
                         var cRank = cAppl.Rank;
-                        if (cRank.ReturnSort == boolSort && cRank.Arity > 0 && cRank.ArgumentSorts[0] is SemgusTermType && cAppl.Arguments.All(a => a is SmtVariable))
+                        if (cRank.ReturnSort == boolSort && cRank.Arity > 0 && cRank.ArgumentSorts[0] is SemgusTermType)
                         {
+                            List<SmtVariable> args = new();
+                            foreach (var a in cAppl.Arguments)
+                            {
+                                if (a is SmtVariable aVar)
+                                {
+                                    // The argument is a variable - great, just add it.
+                                    args.Add(aVar);
+                                }
+                                else
+                                {
+                                    // The argument is some other SMT term `t` - needs some transformations
+                                    // We generate a fresh variable `v` and add (= v t) to the constraints
+                                    SmtIdentifier varName = GensymUtils.Gensym("_CHC_VAR");
+                                    SmtVariableBinding varBinding = new(varName, a.Sort, SmtVariableBindingType.Universal, bodyScope);
+                                    SmtVariable varObj = new(varName, varBinding);
+                                    args.Add(varObj);
+                                    bodyBindings.Add(varBinding);
+                                    constraints.Add(SmtTermBuilder.Apply(_smtCtxProvider.Context,
+                                                                         SmtCommonIdentifiers.EqFunctionId,
+                                                                         varObj, a));
+                                }
+                            }
+
                             // Semantic relation. Probably.
-                            relList.Add(new(cAppl.Definition, cRank, cAppl.Arguments.Select(a => (a as SmtVariable)!).ToList()));
+                            relList.Add(new(cAppl.Definition, cRank, args));
                             continue;
                         }
                     }
-                    if (constraint is not null)
-                    {
-                        throw _logger.LogParseErrorAndThrow($"Multiple constraints in CHC for {binder.Constructor!.Operator} in {decl.Name}. Only one first-order logic constraint is allowed.", _sourceMap[constraint]);
-                    }
                     // TODO: check to make sure this doesn't contain semantic relations.
-                    constraint = c;
+                    constraints.Add(c);
                 }
 
-                _semgusCtxProvider.Context.AddChc(new SemgusChc(head, relList, constraint!, binder, headBindings.Concat(bodyBindings), inputs, outputs));
+                // Create a single constraint term by combining into an `and`, if necessary
+                SmtTerm constraint;
+                if (constraints.Count == 0)
+                {
+                    constraint = SmtTermBuilder.Apply(_smtCtxProvider.Context, SmtCommonIdentifiers.TrueConstantId);
+                }
+                else if (constraints.Count == 1)
+                {
+                    constraint = constraints[0];
+                }
+                else
+                {
+                    constraint = SmtTermBuilder.Apply(
+                        _smtCtxProvider.Context,
+                        SmtCommonIdentifiers.AndFunctionId,
+                        constraints.ToArray()
+                    );
+                }
+
+                _semgusCtxProvider.Context.AddChc(new SemgusChc(head, relList, constraint, binder, headBindings.Concat(bodyBindings), inputs, outputs));
             }
 
             foreach (var pat in grouper.Binders)
