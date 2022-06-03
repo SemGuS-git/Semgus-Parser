@@ -32,9 +32,37 @@ namespace Semgus.Parser.Commands
         }
 
         [Command("synth-fun")]
-        public void SynthFun(SmtIdentifier name, IList<SmtConstant> args, SmtSortIdentifier retId, GrammarForm? grammarForm = default)
+        public void SynthFun(SmtIdentifier name, IList<SmtConstant> args, SmtSortIdentifier retId, SemgusToken? grammarPredecl = default, SemgusToken? grammarBlock = default)
         {
             using var logscope = _logger.BeginScope($"while processing `synth-fun` for {name.Symbol}:");
+
+            // Handle the grammar block (semi-)gracefully
+            GrammarForm? grammarForm = default;
+            if ((grammarPredecl is null) != (grammarBlock is null))
+            {
+                // This reports an unknown position for some reason...
+                throw _logger.LogParseErrorAndThrow("Grammar must consist of a predeclaration list and a production list, but only got one of these.", _sourceMap[(grammarPredecl ?? grammarBlock)!]);
+            }
+            else if (grammarPredecl is not null && grammarBlock is not null)
+            {
+                IList<(SmtIdentifier Name, SmtSortIdentifier Sort)>? ntDecls;
+                using (var grammarPredeclScope = _logger.BeginScope($"while processing grammar predeclaration:"))
+                {
+                    if (!_converter.TryConvert(grammarPredecl, out ntDecls))
+                    {
+                        throw _logger.LogParseErrorAndThrow("Malformed grammar predeclaration.", _sourceMap[grammarPredecl]);
+                    }
+                }
+                IList<(SmtIdentifier Name, SmtSortIdentifier Sort, IList<SemgusToken> Productions)>? productions;
+                using (var grammarParseScope = _logger.BeginScope($"while processing grammar block:"))
+                {
+                    if (!_converter.TryConvert(grammarBlock, out productions))
+                    {
+                        throw _logger.LogParseErrorAndThrow("Malformed grammar block.", _sourceMap[grammarBlock]);
+                    }
+                }
+                grammarForm = new(ntDecls, productions);
+            }
 
             var ret = _smtContext.Context.GetSortOrDie(retId, _sourceMap, _logger);
 
