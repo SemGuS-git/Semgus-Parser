@@ -32,7 +32,7 @@ namespace Semgus.Parser.Commands
         }
 
         [Command("synth-fun")]
-        public void SynthFun(SmtIdentifier name, IList<SmtConstant> args, SmtSortIdentifier retId, GrammarForm? grammarForm = default)
+        public void SynthFun(SmtIdentifier name, IList<SmtConstant> args, SmtSortIdentifier retId, [Rest] GrammarForm? grammarForm = default)
         {
             using var logscope = _logger.BeginScope($"while processing `synth-fun` for {name.Symbol}:");
 
