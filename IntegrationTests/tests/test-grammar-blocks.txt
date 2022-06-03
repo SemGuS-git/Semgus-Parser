@@ -1,0 +1,5 @@
+{"name":"E","$event":"declare-term-type","$type":"semgus"}
+{"name":"E","constructors":[{"name":"$a","children":[]},{"name":"$b","children":[]},{"name":"$c","children":[]},{"name":"$d","children":[]},{"name":"$e","children":[]}],"$event":"define-term-type","$type":"semgus"}
+{"name":"f","termType":"E","grammar":{"nonTerminals":[{"name":"nt_E","termType":"E"}],"productions":[{"instance":"nt_E","operator":"$a","occurrences":[]},{"instance":"nt_E","operator":"$b","occurrences":[]},{"instance":"nt_E","operator":"$c","occurrences":[]},{"instance":"nt_E","operator":"$d","occurrences":[]},{"instance":"nt_E","operator":"$e","occurrences":[]}]},"$event":"synth-fun","$type":"semgus"}
+{"$event":"check-synth","$type":"semgus"}
+{"$type":"meta","$event":"end-of-stream"}
