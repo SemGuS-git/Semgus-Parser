@@ -24,10 +24,17 @@ namespace Semgus.Parser
         /// </summary>
         /// <param name="prefix">Symbol prefix. Defaults to _G</param>
         /// <returns>A fresh identifier</returns>
-        public static SmtIdentifier Gensym(string prefix = "_G")
+        public static SmtIdentifier Gensym(string prefix = "_G", string? index = default)
         {
             long ix = Interlocked.Increment(ref _gensym_counter);
-            return new SmtIdentifier(prefix, new SmtIdentifier.Index(ix));
+            if (index is null)
+            {
+                return new SmtIdentifier(prefix, new SmtIdentifier.Index(ix));
+            }
+            else
+            {
+                return new SmtIdentifier(prefix, new SmtIdentifier.Index(index), new SmtIdentifier.Index(ix));
+            }
         }
     }
 }

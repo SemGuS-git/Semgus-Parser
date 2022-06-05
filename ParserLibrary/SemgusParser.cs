@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Parser.Commands;
+using Semgus.Parser.Commands.Sygus;
 using Semgus.Parser.Reader;
 using Semgus.Sexpr.Reader;
 
@@ -99,6 +100,9 @@ namespace Semgus.Parser
             procClass(typeof(FunctionDefinitionCommands));
             procClass(typeof(ConstraintCommand));
             procClass(typeof(CheckSynthCommand));
+
+            // SyGuS extensions
+            procClass(typeof(SetLogicCommand));
 
             ServiceCollection services = new ServiceCollection();
             services.AddSingleton<ISmtConverter, Reader.Converters.SmtConverter>();
