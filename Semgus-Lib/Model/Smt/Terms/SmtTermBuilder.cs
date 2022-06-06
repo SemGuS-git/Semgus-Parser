@@ -82,5 +82,21 @@ namespace Semgus.Model.Smt.Terms
 
             return new SmtFunctionApplication(function, rank, args.ToList());
         }
+
+        public static SmtTerm Forall(SmtContext ctx, SmtScope toBind, SmtTerm child)
+            => Forall(ctx, _defaultErrorHandler, toBind, child);
+
+        public static SmtTerm Forall(SmtContext ctx, Action<object, string> onError, SmtScope toBind, SmtTerm child)
+        {
+            return new SmtForallBinder(child, toBind);
+        }
+
+        public static SmtTerm Exists(SmtContext ctx, SmtScope toBind, SmtTerm child)
+            => Exists(ctx, _defaultErrorHandler, toBind, child);
+
+        public static SmtTerm Exists(SmtContext ctx, Action<object, string> onError, SmtScope toBind, SmtTerm child)
+        {
+            return new SmtExistsBinder(child, toBind);
+        }
     }
 }

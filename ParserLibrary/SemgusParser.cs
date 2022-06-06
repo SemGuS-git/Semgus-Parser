@@ -103,6 +103,7 @@ namespace Semgus.Parser
 
             // SyGuS extensions
             procClass(typeof(SetLogicCommand));
+            procClass(typeof(DeclareVarCommand));
 
             ServiceCollection services = new ServiceCollection();
             services.AddSingleton<ISmtConverter, Reader.Converters.SmtConverter>();

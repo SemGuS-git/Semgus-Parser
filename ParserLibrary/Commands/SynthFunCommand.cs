@@ -49,7 +49,7 @@ namespace Semgus.Parser.Commands
             else if (ret is not SemgusTermType)
             {
                 // SyGuS-style synthfun
-                var (grammar, termTypes, startTT, chcs) = GrammarBlockHelper.ConvertSygusGrammar(grammarForm, args, _smtContext.Context, _converter, _sourceMap, _logger);
+                var (grammar, termTypes, startTT, startRel, chcs) = GrammarBlockHelper.ConvertSygusGrammar(grammarForm, args, _smtContext.Context, _converter, _sourceMap, _logger);
                 var rank = new SmtFunctionRank(startTT);
                 var decl = new SmtFunction(GensymUtils.Gensym("_SyTerm", name.Symbol), SmtTheory.UserDefined, rank);
 
@@ -60,7 +60,12 @@ namespace Semgus.Parser.Commands
                 }
                 _smtContext.Context.AddFunctionDeclaration(decl);
                 _handler.OnSynthFun(_smtContext.Context, name, args, ret);
-                _semgusContext.Context.AddSynthFun(new(decl, rank, grammar));
+                var sf = new SemgusSynthFun(decl, rank, grammar);
+                _semgusContext.Context.AddSynthFun(sf);
+
+                var sygRank = new SmtFunctionRank(ret, args.Select(a => _smtContext.Context.GetSortOrDie(a.Item2, _sourceMap, _logger)).ToArray());
+                var sygDecl = new SmtFunction(name, SmtTheory.UserDefined, sygRank);
+                _semgusContext.Context.AddSygusSynthFun(decl, startRel, sygDecl, sygRank);
             }
             else
             {

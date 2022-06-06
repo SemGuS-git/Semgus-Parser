@@ -63,7 +63,7 @@ namespace Semgus.Parser.Commands
                                             SemgusChc.SemanticRelation Relation,
                                             SmtFunction Function,
                                             SmtFunctionRank Rank);
-        public static (SemgusGrammar, IReadOnlyList<SemgusTermType>, SemgusTermType, IReadOnlyCollection<SemgusChc>) ConvertSygusGrammar<T>(SynthFunCommand.GrammarForm grammar, IList<(SmtIdentifier, SmtSortIdentifier)> args, SmtContext ctx, ISmtConverter converter, ISourceMap sourceMap, ILogger<T> logger)
+        public static (SemgusGrammar, IReadOnlyList<SemgusTermType>, SemgusTermType, SmtFunction, IReadOnlyCollection<SemgusChc>) ConvertSygusGrammar<T>(SynthFunCommand.GrammarForm grammar, IList<(SmtIdentifier, SmtSortIdentifier)> args, SmtContext ctx, ISmtConverter converter, ISourceMap sourceMap, ILogger<T> logger)
         {
             IDictionary<SmtIdentifier, TermTypeData> data = new Dictionary<SmtIdentifier, TermTypeData>();
             IDictionary<SmtIdentifier, SemanticRelationData> semRelInfo = new Dictionary<SmtIdentifier, SemanticRelationData>();
@@ -108,9 +108,9 @@ namespace Semgus.Parser.Commands
                 argSorts[^1] = datum.Sort;
                 SmtIdentifier outputVarId = GensymUtils.Gensym("_SyOut", "o");
                 argVars[^1] = new(outputVarId, new SmtVariableBinding(outputVarId, datum.Sort, SmtVariableBindingType.Universal, headScope));
-                
-                SmtFunction semFunc = new(GensymUtils.Gensym("_SySem", name.Symbol), SmtTheory.UserDefined);
+
                 SmtFunctionRank semRank = new(ctx.GetSortOrDie(SmtCommonIdentifiers.BoolSortId, sourceMap, logger), argSorts);
+                SmtFunction semFunc = new(GensymUtils.Gensym("_SySem", name.Symbol), SmtTheory.UserDefined, semRank);
 
                 SemgusChc.SemanticRelation semRel = new(semFunc, semRank, argVars);
                 semRelInfo.Add(name, new(name, headScope, termVarId, outputVarId, inputVars, new List<SmtVariable>() { argVars[^1] }, semRel, semFunc, semRank));
@@ -260,7 +260,7 @@ namespace Semgus.Parser.Commands
                     chcs.Add(GenerateChc(constructor, bodyRels, constraint, matchBindings, bodyScope, ttDatum, semDatum));
                 }
             }
-            return (new SemgusGrammar(data.Values.Select(d => d.NonTerminal), newProds), data.Values.Select(d => d.TermType).ToList(), data[grammar.ntDecls[0].Name].TermType, chcs);
+            return (new SemgusGrammar(data.Values.Select(d => d.NonTerminal), newProds), data.Values.Select(d => d.TermType).ToList(), data[grammar.ntDecls[0].Name].TermType, semRelInfo[grammar.ntDecls[0].Name].Function, chcs);
         }
 
         private static SemgusChc GenerateChc(SemgusTermType.Constructor constructor, IList<SemgusChc.SemanticRelation> bodyRels, SmtTerm constraint, IList<SmtMatchVariableBinding> matchBindings, SmtScope bodyScope, TermTypeData ttDatum, SemanticRelationData semDatum)
