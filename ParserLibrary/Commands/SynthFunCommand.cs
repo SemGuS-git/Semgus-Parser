@@ -49,7 +49,7 @@ namespace Semgus.Parser.Commands
             else if (ret is not SemgusTermType)
             {
                 // SyGuS-style synthfun
-                var (grammar, termTypes, startTT, startRel, chcs) = GrammarBlockHelper.ConvertSygusGrammar(grammarForm, args, _smtContext.Context, _converter, _sourceMap, _logger);
+                var (grammar, termTypes, startTT, startRel, chcs) = GrammarBlockHelper.ConvertSygusGrammar(grammarForm!, args, _smtContext.Context, _converter, _sourceMap, _logger);
                 var rank = new SmtFunctionRank(startTT);
                 var decl = new SmtFunction(GensymUtils.Gensym("_SyTerm", name.Symbol), SmtTheory.UserDefined, rank);
 
