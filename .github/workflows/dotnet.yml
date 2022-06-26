@@ -129,6 +129,9 @@ jobs:
           for asset_folder in assets/*; do
             rm -f "${asset_folder}"/*.pdb
             find "${asset_folder}" -type f ! -name '*.*' -print -exec chmod a+x {} \;
+            parent="$(dirname "${asset_folder}")"
+            folder="$(basename "${asset_folder}")"
+            mv "${parent}/${folder}" "${parent}/${folder/#semgus-parser-}"
           done
       
       - name: Publish package
