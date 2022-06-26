@@ -114,7 +114,11 @@ namespace Semgus.Parser.Commands
             // Add the universal binding term
             if (universalBindings.Count > 0)
             {
-                predicate = SmtTermBuilder.Forall(smtCtx, universalScope.Scope, predicate);
+                // Don't add the bindings if not referenced
+                if (predicate.Accept(new VariableSearcher(universalBindings.Select(b => b.Id))))
+                {
+                    predicate = SmtTermBuilder.Forall(smtCtx, universalScope.Scope, predicate);
+                }
             }
 
             // Transform the SyGuS function to the SemGuS relation
@@ -135,6 +139,80 @@ namespace Semgus.Parser.Commands
             }
 
             return predicate;
+        }
+
+        private class VariableSearcher : ISmtTermVisitor<bool>
+        {
+            private readonly List<SmtIdentifier> _names;
+
+            public VariableSearcher(IEnumerable<SmtIdentifier> names)
+            {
+                _names = names.ToList();
+            }
+
+            public bool VisitBitVectorLiteral(SmtBitVectorLiteral bitVectorLiteral)
+                => false;
+
+            public bool VisitDecimalLiteral(SmtDecimalLiteral decimalLiteral)
+                => false;
+
+            public bool VisitExistsBinder(SmtExistsBinder existsBinder)
+                => existsBinder.Child.Accept(this);
+
+            public bool VisitForallBinder(SmtForallBinder forallBinder)
+                => forallBinder.Child.Accept(this);
+
+            public bool VisitFunctionApplication(SmtFunctionApplication functionApplication)
+            {
+                bool anyVariables = false;
+                foreach (var arg in functionApplication.Arguments)
+                {
+                    anyVariables |= arg.Accept(this);
+                }
+                return anyVariables;
+            }
+
+            public bool VisitLambdaBinder(SmtLambdaBinder lambdaBinder)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool VisitLetBinder(SmtLetBinder letBinder)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool VisitMatchBinder(SmtMatchBinder matchBinder)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool VisitMatchGrouper(SmtMatchGrouper matchGrouper)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool VisitNumeralLiteral(SmtNumeralLiteral numeralLiteral)
+            {
+                return false;
+            }
+
+            public bool VisitStringLiteral(SmtStringLiteral stringLiteral)
+            {
+                return false;
+            }
+
+            public bool VisitVariable(SmtVariable variable)
+            {
+                foreach (var name in _names)
+                {
+                    if (variable.Name == name)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
         }
 
         private record TransformData(SmtFunctionApplication Application, SmtScope Bindings);

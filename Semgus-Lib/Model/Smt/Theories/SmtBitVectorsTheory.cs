@@ -138,7 +138,7 @@ namespace Semgus.Model.Smt.Theories
             cf("bvudiv", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
             cf("bvurem", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
             cf("bvshl", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvshr", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
+            cf("bvlshr", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
 
             // Comparison: argument sizes the same, and returns Boolean
             cf("bvult", argSortsEqual, argSortsEqualCmt, r => r.ReturnSort, b, bv0, bv0);

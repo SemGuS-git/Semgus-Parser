@@ -160,6 +160,21 @@ namespace Semgus.Parser.Commands
                                                           new SmtNumeralLiteral(ctx, numToken.Value));
 
                     }
+                    else if (converter.TryConvert(production, out BitVectorToken? bvToken))
+                    {
+                        string val = "#*";
+                        for (int ix = bvToken.Value.Length - 1; ix >= 0; ix--)
+                        {
+                            val += bvToken.Value[ix] ? "1" : "0";
+                        }
+                        constructor = new(GensymUtils.Gensym("_SyProd", val));
+                        newProds.Add(new(ttDatum.NonTerminal, constructor, Enumerable.Empty<SemgusGrammar.NonTerminal>()));
+                        constraint = SmtTermBuilder.Apply(ctx,
+                                                          SmtCommonIdentifiers.EqFunctionId,
+                                                          outputVar,
+                                                          new SmtBitVectorLiteral(ctx, bvToken.Value));
+
+                    }
                     else if (converter.TryConvert(production, out SmtIdentifier? identifier))
                     {
                         // Options: an input variable, a constant, or another non-terminal
@@ -250,7 +265,35 @@ namespace Semgus.Parser.Commands
                                                                                op,
                                                                                outVars.ToArray()));
                     }
-
+                    else if (converter.TryConvert(production, out IList<SemgusToken>? tokens)
+                            && tokens.Count == 2
+                            && converter.TryConvert(tokens[0], out SmtIdentifier? maybeMinus)
+                            && maybeMinus == SmtCommonIdentifiers.MinusFunctionId
+                            && (tokens[1] is NumeralToken || tokens[1] is DecimalToken))
+                    {
+                        if (tokens[1] is NumeralToken nt)
+                        {
+                            constructor = new(GensymUtils.Gensym("_SyProd", $"-{nt.Value}"));
+                            newProds.Add(new(ttDatum.NonTerminal, constructor, Enumerable.Empty<SemgusGrammar.NonTerminal>()));
+                            constraint = SmtTermBuilder.Apply(ctx,
+                                                              SmtCommonIdentifiers.EqFunctionId,
+                                                              outputVar,
+                                                              new SmtNumeralLiteral(ctx, -nt.Value));
+                        }
+                        else if (tokens[1] is DecimalToken dt)
+                        {
+                            constructor = new(GensymUtils.Gensym("_SyProd", $"-{dt.Value}D"));
+                            newProds.Add(new(ttDatum.NonTerminal, constructor, Enumerable.Empty<SemgusGrammar.NonTerminal>()));
+                            constraint = SmtTermBuilder.Apply(ctx,
+                                                              SmtCommonIdentifiers.EqFunctionId,
+                                                              outputVar,
+                                                              new SmtDecimalLiteral(ctx, -dt.Value));
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException();
+                        }
+                    }
                     else
                     {
                         throw new InvalidOperationException();

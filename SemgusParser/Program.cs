@@ -5,6 +5,7 @@ using System.CommandLine.Invocation;
 using System.IO;
 
 using Semgus.Parser.Json;
+using Semgus.Parser.Sexpr;
 using Semgus.Parser.Verifier;
 
 namespace Semgus.Parser
@@ -20,6 +21,7 @@ namespace Semgus.Parser
         public enum OutputFormat
         {
             Json,
+            Sexpr,
             Verify
         }
 
@@ -197,6 +199,10 @@ namespace Semgus.Parser
 
                 case OutputFormat.Json:
                     handler = new JsonHandler(writer, mode);
+                    break;
+
+                case OutputFormat.Sexpr:
+                    handler = new SexprHandler(writer);
                     break;
 
                 default:
