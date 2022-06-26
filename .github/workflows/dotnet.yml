@@ -144,7 +144,7 @@ jobs:
           else
             VERSION="0.0.${GITHUB_RUN_ATTEMPT}-r${GITHUB_SHA}"
           fi
-	  mvn -Drevision="$VERSION" --batch-mode clean assembly:single deploy
+          mvn -Drevision="$VERSION" --batch-mode clean assembly:single deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
