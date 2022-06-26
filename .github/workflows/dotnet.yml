@@ -137,7 +137,14 @@ jobs:
           done
       
       - name: Publish package
-        run: mvn --batch-mode clean assembly:single deploy
+        run: |
+          refArray=(${GITHUB_REF//\// })
+          if [ "${refArray[1]}" == "tags" ]; then
+            VERSION="${refArray[2]/v}"
+          else
+            VERSION="0.0.${GITHUB_RUN_ATTEMPT}-r${GITHUB_SHA}"
+          fi
+	  mvn -Drevision="$VERSION" --batch-mode clean assembly:single deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

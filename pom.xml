@@ -4,8 +4,12 @@
 
   <groupId>org.semgus</groupId>
   <artifactId>parser</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>${revision}</version>
 
+  <properties>
+    <revision>1.0-SNAPSHOT</revision>
+  </properties>
+  
   <build>
     <plugins>
       <plugin>
