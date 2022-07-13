@@ -66,7 +66,7 @@ namespace Semgus.Parser.Verifier
             _writer.WriteLine("set-info: " + attr.Keyword + " " + attr.Value);
         }
 
-        public void OnSynthFun(SmtContext ctx, SmtIdentifier name, IList<SmtConstant> args, SmtSort sort)
+        public void OnSynthFun(SmtContext ctx, SmtIdentifier name, IList<(SmtIdentifier, SmtSortIdentifier)> args, SmtSort sort)
         {
         }
 
