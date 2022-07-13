@@ -1,0 +1,69 @@
+declare-term-types: 
+  (_ _SyTT Start 1) --> _SyProd((_ _SyTT ntString 2));
+  (_ _SyTT ntString 2) --> _SyProd() | _SyProd() | _SyProd() | _SyProd() | _SyProd((_ _SyTT ntString 2), (_ _SyTT ntString 2)) | _SyProd((_ _SyTT ntString 2), (_ _SyTT ntInt 3)) | _SyProd((_ _SyTT ntInt 3)) | _SyProd((_ _SyTT ntString 2), (_ _SyTT ntInt 3), (_ _SyTT ntInt 3));
+  (_ _SyTT ntInt 3) --> _SyProd() | _SyProd() | _SyProd() | _SyProd((_ _SyTT ntInt 3), (_ _SyTT ntInt 3)) | _SyProd((_ _SyTT ntInt 3), (_ _SyTT ntInt 3)) | _SyProd((_ _SyTT ntString 2)) | _SyProd((_ _SyTT ntString 2)) | _SyProd((_ _SyTT ntString 2), (_ _SyTT ntString 2), (_ _SyTT ntInt 3));
+  (_ _SyTT ntBool 4) --> _SyProd() | _SyProd();
+check-synth
+CHC: ((_ _SySem Start 7) (_ _SyTerm t 5) name (_ _SyOut o 6)) <= ((_ _SySem ntString 10) (_ _SyTerm t 8) name (_ _SyOut o 6)) ^ true
+    [constructor: ((_ _SyProd StartTontString 17) (_ _SyTerm t 8))]     [inputs: name]     [outputs: (_ _SyOut o 6)]
+CHC: ((_ _SySem ntString 10) (_ _SyTerm t 8) name (_ _SyOut o 9)) <= (= (_ _SyOut o 9) name)
+    [constructor: ((_ _SyProd name 18))]     [inputs: name]     [outputs: (_ _SyOut o 9)]
+CHC: ((_ _SySem ntString 10) (_ _SyTerm t 8) name (_ _SyOut o 9)) <= (= (_ _SyOut o 9) " ")
+    [constructor: ((_ _SyProd " " 19))]     [inputs: name]     [outputs: (_ _SyOut o 9)]
+CHC: ((_ _SySem ntString 10) (_ _SyTerm t 8) name (_ _SyOut o 9)) <= (= (_ _SyOut o 9) ".")
+    [constructor: ((_ _SyProd "." 20))]     [inputs: name]     [outputs: (_ _SyOut o 9)]
+CHC: ((_ _SySem ntString 10) (_ _SyTerm t 8) name (_ _SyOut o 9)) <= (= (_ _SyOut o 9) "Dr.")
+    [constructor: ((_ _SyProd "Dr." 21))]     [inputs: name]     [outputs: (_ _SyOut o 9)]
+CHC: ((_ _SySem ntString 10) (_ _SyTerm t 8) name (_ _SyOut o 9)) <= ((_ _SySem ntString 10) (_ _SyTerm 1 22) name (_ _SyOut 1 23)) ^ ((_ _SySem ntString 10) (_ _SyTerm 2 24) name (_ _SyOut 2 25)) ^ (= (_ _SyOut o 9) (str.++ (_ _SyOut 1 23) (_ _SyOut 2 25)))
+    [constructor: ((_ _SyProd str.++ 26) (_ _SyTerm 1 22) (_ _SyTerm 2 24))]     [inputs: name]     [outputs: (_ _SyOut o 9)]
+CHC: ((_ _SySem ntString 10) (_ _SyTerm t 8) name (_ _SyOut o 9)) <= ((_ _SySem ntString 10) (_ _SyTerm 1 27) name (_ _SyOut 1 28)) ^ ((_ _SySem ntInt 13) (_ _SyTerm 2 29) name (_ _SyOut 2 30)) ^ (= (_ _SyOut o 9) (str.at (_ _SyOut 1 28) (_ _SyOut 2 30)))
+    [constructor: ((_ _SyProd str.at 31) (_ _SyTerm 1 27) (_ _SyTerm 2 29))]     [inputs: name]     [outputs: (_ _SyOut o 9)]
+CHC: ((_ _SySem ntString 10) (_ _SyTerm t 8) name (_ _SyOut o 9)) <= ((_ _SySem ntInt 13) (_ _SyTerm 1 32) name (_ _SyOut 1 33)) ^ (= (_ _SyOut o 9) (str.from_int (_ _SyOut 1 33)))
+    [constructor: ((_ _SyProd str.from_int 34) (_ _SyTerm 1 32))]     [inputs: name]     [outputs: (_ _SyOut o 9)]
+CHC: ((_ _SySem ntString 10) (_ _SyTerm t 8) name (_ _SyOut o 9)) <= ((_ _SySem ntString 10) (_ _SyTerm 1 35) name (_ _SyOut 1 36)) ^ ((_ _SySem ntInt 13) (_ _SyTerm 2 37) name (_ _SyOut 2 38)) ^ ((_ _SySem ntInt 13) (_ _SyTerm 3 39) name (_ _SyOut 3 40)) ^ (= (_ _SyOut o 9) (str.substr (_ _SyOut 1 36) (_ _SyOut 2 38) (_ _SyOut 3 40)))
+    [constructor: ((_ _SyProd str.substr 41) (_ _SyTerm 1 35) (_ _SyTerm 2 37) (_ _SyTerm 3 39))]     [inputs: name]     [outputs: (_ _SyOut o 9)]
+CHC: ((_ _SySem ntInt 13) (_ _SyTerm t 11) name (_ _SyOut o 12)) <= (= (_ _SyOut o 12) 0)
+    [constructor: ((_ _SyProd 0 42))]     [inputs: name]     [outputs: (_ _SyOut o 12)]
+CHC: ((_ _SySem ntInt 13) (_ _SyTerm t 11) name (_ _SyOut o 12)) <= (= (_ _SyOut o 12) 1)
+    [constructor: ((_ _SyProd 1 43))]     [inputs: name]     [outputs: (_ _SyOut o 12)]
+CHC: ((_ _SySem ntInt 13) (_ _SyTerm t 11) name (_ _SyOut o 12)) <= (= (_ _SyOut o 12) 2)
+    [constructor: ((_ _SyProd 2 44))]     [inputs: name]     [outputs: (_ _SyOut o 12)]
+CHC: ((_ _SySem ntInt 13) (_ _SyTerm t 11) name (_ _SyOut o 12)) <= ((_ _SySem ntInt 13) (_ _SyTerm 1 45) name (_ _SyOut 1 46)) ^ ((_ _SySem ntInt 13) (_ _SyTerm 2 47) name (_ _SyOut 2 48)) ^ (= (_ _SyOut o 12) (+ (_ _SyOut 1 46) (_ _SyOut 2 48)))
+    [constructor: ((_ _SyProd + 49) (_ _SyTerm 1 45) (_ _SyTerm 2 47))]     [inputs: name]     [outputs: (_ _SyOut o 12)]
+CHC: ((_ _SySem ntInt 13) (_ _SyTerm t 11) name (_ _SyOut o 12)) <= ((_ _SySem ntInt 13) (_ _SyTerm 1 50) name (_ _SyOut 1 51)) ^ ((_ _SySem ntInt 13) (_ _SyTerm 2 52) name (_ _SyOut 2 53)) ^ (= (_ _SyOut o 12) (- (_ _SyOut 1 51) (_ _SyOut 2 53)))
+    [constructor: ((_ _SyProd - 54) (_ _SyTerm 1 50) (_ _SyTerm 2 52))]     [inputs: name]     [outputs: (_ _SyOut o 12)]
+CHC: ((_ _SySem ntInt 13) (_ _SyTerm t 11) name (_ _SyOut o 12)) <= ((_ _SySem ntString 10) (_ _SyTerm 1 55) name (_ _SyOut 1 56)) ^ (= (_ _SyOut o 12) (str.len (_ _SyOut 1 56)))
+    [constructor: ((_ _SyProd str.len 57) (_ _SyTerm 1 55))]     [inputs: name]     [outputs: (_ _SyOut o 12)]
+CHC: ((_ _SySem ntInt 13) (_ _SyTerm t 11) name (_ _SyOut o 12)) <= ((_ _SySem ntString 10) (_ _SyTerm 1 58) name (_ _SyOut 1 59)) ^ (= (_ _SyOut o 12) (str.to_int (_ _SyOut 1 59)))
+    [constructor: ((_ _SyProd str.to_int 60) (_ _SyTerm 1 58))]     [inputs: name]     [outputs: (_ _SyOut o 12)]
+CHC: ((_ _SySem ntInt 13) (_ _SyTerm t 11) name (_ _SyOut o 12)) <= ((_ _SySem ntString 10) (_ _SyTerm 1 61) name (_ _SyOut 1 62)) ^ ((_ _SySem ntString 10) (_ _SyTerm 2 63) name (_ _SyOut 2 64)) ^ ((_ _SySem ntInt 13) (_ _SyTerm 3 65) name (_ _SyOut 3 66)) ^ (= (_ _SyOut o 12) (str.indexof (_ _SyOut 1 62) (_ _SyOut 2 64) (_ _SyOut 3 66)))
+    [constructor: ((_ _SyProd str.indexof 67) (_ _SyTerm 1 61) (_ _SyTerm 2 63) (_ _SyTerm 3 65))]     [inputs: name]     [outputs: (_ _SyOut o 12)]
+CHC: ((_ _SySem ntBool 16) (_ _SyTerm t 14) name (_ _SyOut o 15)) <= (= (_ _SyOut o 15) true)
+    [constructor: ((_ _SyProd true 68))]     [inputs: name]     [outputs: (_ _SyOut o 15)]
+CHC: ((_ _SySem ntBool 16) (_ _SyTerm t 14) name (_ _SyOut o 15)) <= (= (_ _SyOut o 15) false)
+    [constructor: ((_ _SyProd false 69))]     [inputs: name]     [outputs: (_ _SyOut o 15)]
+Constraint: (exists (((_ _SyOut o 71) String)) (and ((_ _SySem Start 7) (_ _SyTerm f 70) "Nancy" (_ _SyOut o 71)) (= (_ _SyOut o 71) "Dr. Nancy")))
+Constraint: (exists (((_ _SyOut o 72) String)) (and ((_ _SySem Start 7) (_ _SyTerm f 70) "Andrew" (_ _SyOut o 72)) (= (_ _SyOut o 72) "Dr. Andrew")))
+Constraint: (exists (((_ _SyOut o 73) String)) (and ((_ _SySem Start 7) (_ _SyTerm f 70) "Jan" (_ _SyOut o 73)) (= (_ _SyOut o 73) "Dr. Jan")))
+Constraint: (exists (((_ _SyOut o 74) String)) (and ((_ _SySem Start 7) (_ _SyTerm f 70) "Mariya" (_ _SyOut o 74)) (= (_ _SyOut o 74) "Dr. Mariya")))
+Function to Synthesize: (_ _SyTerm f 70)
+Grammar: Start [(_ _SyTT Start 1)] ntString [(_ _SyTT ntString 2)] ntInt [(_ _SyTT ntInt 3)] ntBool [(_ _SyTT ntBool 4)]
+Start --> ((_ _SyProd StartTontString 17) ntString)
+ntString --> (_ _SyProd name 18)
+ntString --> (_ _SyProd " " 19)
+ntString --> (_ _SyProd "." 20)
+ntString --> (_ _SyProd "Dr." 21)
+ntString --> ((_ _SyProd str.++ 26) ntString ntString)
+ntString --> ((_ _SyProd str.at 31) ntString ntInt)
+ntString --> ((_ _SyProd str.from_int 34) ntInt)
+ntString --> ((_ _SyProd str.substr 41) ntString ntInt ntInt)
+ntInt --> (_ _SyProd 0 42)
+ntInt --> (_ _SyProd 1 43)
+ntInt --> (_ _SyProd 2 44)
+ntInt --> ((_ _SyProd + 49) ntInt ntInt)
+ntInt --> ((_ _SyProd - 54) ntInt ntInt)
+ntInt --> ((_ _SyProd str.len 57) ntString)
+ntInt --> ((_ _SyProd str.to_int 60) ntString)
+ntInt --> ((_ _SyProd str.indexof 67) ntString ntString ntInt)
+ntBool --> (_ _SyProd true 68)
+ntBool --> (_ _SyProd false 69)

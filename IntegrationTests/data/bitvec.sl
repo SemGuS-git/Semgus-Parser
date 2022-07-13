@@ -34,7 +34,7 @@
 (constraint (BV.Sem fn (bvudiv #xAA #xBB)))
 (constraint (BV.Sem fn (bvurem #xAA #xBB)))
 (constraint (BV.Sem fn (bvshl  #xAA #xBB)))
-(constraint (BV.Sem fn (bvshr  #xAA #xBB)))
+(constraint (BV.Sem fn (bvlshr  #xAA #xBB)))
 
 ;; Comparison
 (constraint (BV.Sem fn (ite (bvult #xABCD #xDCBA) #xFF #x00)))

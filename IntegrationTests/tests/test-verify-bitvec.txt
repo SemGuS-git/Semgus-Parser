@@ -17,7 +17,7 @@ Constraint: (BV.Sem fn (bvmul #b01010101 #b11011101))
 Constraint: (BV.Sem fn (bvudiv #b01010101 #b11011101))
 Constraint: (BV.Sem fn (bvurem #b01010101 #b11011101))
 Constraint: (BV.Sem fn (bvshl #b01010101 #b11011101))
-Constraint: (BV.Sem fn (bvshr #b01010101 #b11011101))
+Constraint: (BV.Sem fn (bvlshr #b01010101 #b11011101))
 Constraint: (BV.Sem fn (ite (bvult #b1011001111010101 #b0101110100111011) #b11111111 #b00000000))
 Function to Synthesize: fn
 Grammar: @BV__agtt [BV]
