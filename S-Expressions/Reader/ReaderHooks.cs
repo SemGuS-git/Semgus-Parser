@@ -112,7 +112,7 @@ namespace Semgus.Sexpr.Reader
                     builder.Append(c);
                 }
             }
-            return reader.ProcessConstituents(builder.ToString(), pos, allAlphabetic: true);
+            return reader.ProcessConstituents(builder.ToString().AsSpan(), pos, allAlphabetic: true);
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace Semgus.Sexpr.Reader
                 {
                     if (!reader.TryPeekCharacter(out char peeked, out _) || c != peeked)
                     {
-                        return reader.SexprFactory.ConstructString(builder.ToString(), pos);
+                        return reader.SexprFactory.ConstructString(builder.ToString().AsSpan(), pos);
                     }
                     else
                     {
@@ -213,7 +213,7 @@ namespace Semgus.Sexpr.Reader
                 }
                 for (int i = 0; i < 4; ++i)
                 {
-                    bits.LeftShift(1);
+                    bits.ShiftLeft();
                     bits.Set(0, (value & 0b1000) > 0);
                     value <<= 1;
                 }

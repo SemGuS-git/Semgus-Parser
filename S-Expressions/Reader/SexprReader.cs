@@ -259,7 +259,7 @@ namespace Semgus.Sexpr.Reader
             // Otherwise, read constituents until the next character of another syntax type
             string constituents = ConsumeConstituents();
 
-            return ProcessConstituents(constituents, position);
+            return ProcessConstituents(constituents.AsSpan(), position);
         }
 
         /// <summary>
@@ -351,11 +351,11 @@ namespace Semgus.Sexpr.Reader
 
                 if (isDecimal)
                 {
-                    return _sexprFactory.ConstructDecimal(double.Parse(original), position);
+                    return _sexprFactory.ConstructDecimal(double.Parse(original.ToString()), position);
                 }
                 else
                 {
-                    return _sexprFactory.ConstructNumeral(long.Parse(original), position);
+                    return _sexprFactory.ConstructNumeral(long.Parse(original.ToString()), position);
                 }
             }
 
@@ -390,11 +390,11 @@ namespace Semgus.Sexpr.Reader
 
             if (isKeyword)
             {
-                return _sexprFactory.ConstructKeyword(thing, position);
+                return _sexprFactory.ConstructKeyword(thing.AsSpan(), position);
             }
             else
             {
-                return _sexprFactory.ConstructSymbol(thing, position);
+                return _sexprFactory.ConstructSymbol(thing.AsSpan(), position);
             }
         }
 
