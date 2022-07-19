@@ -19,7 +19,7 @@ namespace Semgus.Model.Smt.Theories
             public static StringSort Instance { get; } = new();
         }
         public SmtIdentifier Name { get; } = StringsTheoryId;
-        public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
+        public IReadOnlyDictionary<SmtIdentifier, IApplicable> Functions { get; }
         public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
         public IReadOnlySet<SmtIdentifier> PrimarySortSymbols { get; }
         public IReadOnlySet<SmtIdentifier> PrimaryFunctionSymbols { get; }
@@ -50,7 +50,7 @@ namespace Semgus.Model.Smt.Theories
         /// <param name="fid">Function identifier</param>
         /// <param name="function">The requested function</param>
         /// <returns>True if successfully got function, false otherwise</returns>
-        public bool TryGetFunction(SmtIdentifier fid, [NotNullWhen(true)] out SmtFunction? function)
+        public bool TryGetFunction(SmtIdentifier fid, [NotNullWhen(true)] out IApplicable? function)
             => Functions.TryGetValue(fid, out function);
 
         private SmtStringsTheory(SmtCoreTheory core, SmtIntsTheory ints)
@@ -95,7 +95,7 @@ namespace Semgus.Model.Smt.Theories
             cf("str.to_int", i, s);
             cf("str.from_int", s, i);
 
-            Functions = fd;
+            Functions = fd.ToDictionary(kvp => kvp.Key, kvp => (IApplicable)kvp.Value);
             PrimaryFunctionSymbols = new HashSet<SmtIdentifier>(fd.Keys);
         }
     }

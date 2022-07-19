@@ -17,13 +17,13 @@ namespace Semgus.Model.Smt {
 
             public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts => throw new NotImplementedException();
 
-            public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions => throw new NotImplementedException();
+            public IReadOnlyDictionary<SmtIdentifier, IApplicable> Functions => throw new NotImplementedException();
 
             public IReadOnlySet<SmtIdentifier> PrimarySortSymbols => throw new NotImplementedException();
 
             public IReadOnlySet<SmtIdentifier> PrimaryFunctionSymbols => throw new NotImplementedException();
 
-            public bool TryGetFunction(SmtIdentifier functionId, [NotNullWhen(true)] out SmtFunction? resolvedFunction)
+            public bool TryGetFunction(SmtIdentifier functionId, [NotNullWhen(true)] out IApplicable? resolvedFunction)
             {
                 throw new NotImplementedException();
             }

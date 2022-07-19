@@ -51,14 +51,14 @@ namespace Semgus.Parser
         /// <returns>The resolved function</returns>
         /// <exception>FatalParseException when unable to resolve function</exception>
         [return: NotNullIfNotNull("id")]
-        public static SmtFunction? GetFunctionOrDie<T>(this SmtContext ctx, SmtIdentifier? id, ISourceMap sourceMap, ILogger<T> logger)
+        public static IApplicable? GetFunctionOrDie<T>(this SmtContext ctx, SmtIdentifier? id, ISourceMap sourceMap, ILogger<T> logger)
         {
             if (id is null)
             {
                 return null;
             }
 
-            if (!ctx.TryGetFunctionDeclaration(id, out SmtFunction? function))
+            if (!ctx.TryGetFunctionDeclaration(id, out IApplicable? function))
             {
                 throw logger.LogParseErrorAndThrow($"Undeclared function: {id}", sourceMap[id]);
             }

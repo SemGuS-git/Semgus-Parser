@@ -30,7 +30,8 @@ namespace Semgus.Parser.Tests.BitVectors
         public void TrueForWrongArguments()
         {
             SmtContext ctx = new();
-            AssertTrue(ctx.TryGetFunctionDeclaration(new("extract"), out SmtFunction? function));
+            AssertTrue(ctx.TryGetFunctionDeclaration(new("extract"), out IApplicable? appl));
+            var function = Assert.IsType<SmtFunction>(appl);
             Assert.Equal(InvalidName, function.Name);
             Assert.Single(function.RankTemplates);
         }
@@ -50,7 +51,8 @@ namespace Semgus.Parser.Tests.BitVectors
         {
             SmtContext ctx = new();
             SmtIdentifier fnId = new("extract", new SmtIdentifier.Index(i), new SmtIdentifier.Index(j));
-            AssertTrue(ctx.TryGetFunctionDeclaration(fnId, out SmtFunction? function));
+            AssertTrue(ctx.TryGetFunctionDeclaration(fnId, out IApplicable? appl));
+            var function = Assert.IsType<SmtFunction>(appl);
             Assert.Equal(InvalidName, function.Name);
             Assert.Single(function.RankTemplates);
         }
@@ -64,7 +66,8 @@ namespace Semgus.Parser.Tests.BitVectors
         {
             SmtContext ctx = new();
             SmtIdentifier fnId = new("extract", new SmtIdentifier.Index(i), new SmtIdentifier.Index(j));
-            AssertTrue(ctx.TryGetFunctionDeclaration(fnId, out SmtFunction? function));
+            AssertTrue(ctx.TryGetFunctionDeclaration(fnId, out IApplicable? appl));
+            var function = Assert.IsType<SmtFunction>(appl);
             Assert.Single(function.RankTemplates);
             var rank = function.RankTemplates.First();
 
@@ -81,7 +84,7 @@ namespace Semgus.Parser.Tests.BitVectors
             long n = i - j + 1;
             SmtContext ctx = new();
             SmtIdentifier fnId = new("extract", new SmtIdentifier.Index(i), new SmtIdentifier.Index(j));
-            AssertTrue(ctx.TryGetFunctionDeclaration(fnId, out SmtFunction? function));
+            AssertTrue(ctx.TryGetFunctionDeclaration(fnId, out IApplicable? function));
 
             var argSort = SmtBitVectorsTheory.BitVectorsSort.GetSort(m);
             var retSort = SmtBitVectorsTheory.BitVectorsSort.GetSort(n);
@@ -110,7 +113,7 @@ namespace Semgus.Parser.Tests.BitVectors
             long n = np ?? i - j + 1;
             SmtContext ctx = new();
             SmtIdentifier fnId = new("extract", new SmtIdentifier.Index(i), new SmtIdentifier.Index(j));
-            AssertTrue(ctx.TryGetFunctionDeclaration(fnId, out SmtFunction? function));
+            AssertTrue(ctx.TryGetFunctionDeclaration(fnId, out IApplicable? function));
 
             var argSort = SmtBitVectorsTheory.BitVectorsSort.GetSort(m);
             var retSort = SmtBitVectorsTheory.BitVectorsSort.GetSort(n);

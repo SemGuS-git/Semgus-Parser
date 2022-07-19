@@ -68,7 +68,7 @@ namespace Semgus.Model.Smt.Terms
         /// <exception cref="InvalidOperationException">On unhandled errors</exception>
         public static SmtTerm Apply(SmtContext ctx, Action<object, string> onError, SmtIdentifier id, params SmtTerm[] args)
         {
-            if (!ctx.TryGetFunctionDeclaration(id, out SmtFunction? function))
+            if (!ctx.TryGetFunctionDeclaration(id, out IApplicable? function))
             {
                 onError(id, $"Unable to resolve function: {id}");
                 throw new InvalidOperationException();

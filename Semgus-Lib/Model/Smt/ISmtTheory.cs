@@ -23,8 +23,8 @@ namespace Semgus.Model.Smt
         bool TryGetSort(SmtSortIdentifier sortId, [NotNullWhen(true)] out SmtSort? resolvedSort);
 
         [Obsolete("This member will be updated or removed to support additional theories. Use SmtContext to look up specific functions.")]
-        IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
+        IReadOnlyDictionary<SmtIdentifier, IApplicable> Functions { get; }
         IReadOnlySet<SmtIdentifier> PrimaryFunctionSymbols { get; }
-        bool TryGetFunction(SmtIdentifier functionId, [NotNullWhen(true)] out SmtFunction? resolvedFunction);
+        bool TryGetFunction(SmtIdentifier functionId, [NotNullWhen(true)] out IApplicable? resolvedFunction);
     }
 }

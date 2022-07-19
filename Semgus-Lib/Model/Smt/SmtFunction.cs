@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt
 {
-    public class SmtFunction
+    public class SmtFunction : IApplicable
     {
         public SmtFunction(SmtIdentifier name, ISmtTheory theory, params SmtFunctionRank[] rankTemplates)
         {
@@ -140,6 +140,35 @@ namespace Semgus.Model.Smt
                 rank = new SmtFunctionRank(returnSort, argumentSorts);
             }
             return template.Validator(rank);
+        }
+
+        /// <summary>
+        /// Returns a string describing available ranks
+        /// </summary>
+        /// <returns>Descriptive string</returns>
+        public string GetRankHelp()
+        {
+            string msg = $"\n  Available signatures: \n";
+            foreach (var rankTemplate in RankTemplates)
+            {
+                msg += $"    - ({string.Join(' ', rankTemplate.ArgumentSorts.Select(s => s.Name))}) -> {rankTemplate.ReturnSort.Name}";
+                if (rankTemplate.ValidationComment != null)
+                {
+                    msg += $"  [{rankTemplate.ValidationComment}]";
+                }
+                msg += "\n";
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// Checks if there is a possible resolution for the given arity
+        /// </summary>
+        /// <param name="arity">Arity to check</param>
+        /// <returns>True if there is a valid rank with the given arity</returns>
+        public bool IsArityPossible(int arity)
+        {
+            return RankTemplates.Any(rt => rt.Arity == arity);
         }
     }
 }

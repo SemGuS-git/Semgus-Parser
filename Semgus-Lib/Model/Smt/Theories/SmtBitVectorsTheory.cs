@@ -69,7 +69,7 @@ namespace Semgus.Model.Smt.Theories
         public SmtIdentifier Name { get; } = BitVectorsTheoryId;
 
         #region Deprecated
-        public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
+        public IReadOnlyDictionary<SmtIdentifier, IApplicable> Functions { get; }
         public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts
             => throw new NotImplementedException();
         #endregion
@@ -143,7 +143,7 @@ namespace Semgus.Model.Smt.Theories
             // Comparison: argument sizes the same, and returns Boolean
             cf("bvult", argSortsEqual, argSortsEqualCmt, r => r.ReturnSort, b, bv0, bv0);
 
-            Functions = fd;
+            Functions = fd.ToDictionary(kvp => kvp.Key, kvp => (IApplicable)kvp.Value);
             var primary = new HashSet<SmtIdentifier>(fd.Keys);
             primary.Add(new SmtIdentifier("extract"));
             PrimaryFunctionSymbols = primary;
@@ -184,7 +184,7 @@ namespace Semgus.Model.Smt.Theories
         /// <param name="functionId">The function ID to look up</param>
         /// <param name="resolvedFunction">The resolved function</param>
         /// <returns>True if successfully gotten</returns>
-        public bool TryGetFunction(SmtIdentifier functionId, [NotNullWhen(true)] out SmtFunction? resolvedFunction)
+        public bool TryGetFunction(SmtIdentifier functionId, [NotNullWhen(true)] out IApplicable? resolvedFunction)
         {
             //
             // This needs to be constructed on the fly

@@ -8,11 +8,11 @@ namespace Semgus.Model.Smt.Terms
 {
     public class SmtFunctionApplication : SmtTerm
     {
-        public SmtFunction Definition { get; private set; }
+        public IApplicable Definition { get; private set; }
         public SmtFunctionRank Rank { get; private set; }
         public IReadOnlyList<SmtTerm> Arguments { get; private set; }
 
-        public SmtFunctionApplication(SmtFunction defn, SmtFunctionRank rank, IList<SmtTerm> arguments) : base(rank.ReturnSort)
+        public SmtFunctionApplication(IApplicable defn, SmtFunctionRank rank, IList<SmtTerm> arguments) : base(rank.ReturnSort)
         {
             Definition = defn;
             Rank = rank;

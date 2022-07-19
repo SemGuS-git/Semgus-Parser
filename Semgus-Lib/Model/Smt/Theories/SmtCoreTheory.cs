@@ -9,7 +9,8 @@ namespace Semgus.Model.Smt.Theories
 {
     using static SmtCommonIdentifiers;
 
-    internal class SmtCoreTheory : ISmtTheory {
+    internal class SmtCoreTheory : ISmtTheory
+    {
         public static SmtCoreTheory Instance { get; } = new();
 
         private class BoolSort : SmtSort {
@@ -17,7 +18,7 @@ namespace Semgus.Model.Smt.Theories
             public static BoolSort Instance { get; } = new();
         }
         public SmtIdentifier Name { get; } = CoreTheoryId;
-        public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
+        public IReadOnlyDictionary<SmtIdentifier, IApplicable> Functions { get; }
         public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
         public IReadOnlySet<SmtIdentifier> PrimarySortSymbols { get; }
         public IReadOnlySet<SmtIdentifier> PrimaryFunctionSymbols { get; }
@@ -48,7 +49,7 @@ namespace Semgus.Model.Smt.Theories
         /// <param name="fid">Function identifier</param>
         /// <param name="function">The requested function</param>
         /// <returns>True if successfully got function, false otherwise</returns>
-        public bool TryGetFunction(SmtIdentifier fid, [NotNullWhen(true)] out SmtFunction? function)
+        public bool TryGetFunction(SmtIdentifier fid, [NotNullWhen(true)] out IApplicable? function)
             => Functions.TryGetValue(fid, out function);
 
         private SmtCoreTheory()
@@ -101,7 +102,7 @@ namespace Semgus.Model.Smt.Theories
             cf(new("distinct"), b, usf.Next(), usf.Sort);
             cf(new("ite"), usf.Next(), b, usf.Sort, usf.Sort);
 
-            Functions = fd;
+            Functions = fd.ToDictionary(kvp => kvp.Key, kvp => (IApplicable)kvp.Value);
             PrimaryFunctionSymbols = new HashSet<SmtIdentifier>(fd.Keys);
         }
     }

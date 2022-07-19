@@ -35,7 +35,7 @@ namespace Semgus.Parser.Reader
             var fns = context.Functions // TODO: does this work? Maybe we need a broader lookup
                 .Select(fid => { context.TryGetFunctionDeclaration(fid, out var fn); return fn!; })
                 .Where(fn => fn is not null)
-                .Where(fn => arity == -1 || fn.RankTemplates.Any(rt => rt.Arity == arity))
+                .Where(fn => arity == -1 || fn.IsArityPossible(arity))
                 .Select(fn => new { fn.Name, Distance = ComputeEditDistance(id.Symbol, fn.Name.Symbol) })
                 .Where(p => p.Distance <= MaxEditDistanceForSimilarity)
                 .OrderBy(p => p.Distance)
@@ -70,7 +70,7 @@ namespace Semgus.Parser.Reader
             var globals = context.Functions
                 .Select(fid => { context.TryGetFunctionDeclaration(fid, out var fn); return fn!; })
                 .Where(fn => fn is not null)
-                .Where(fn => fn.RankTemplates.Any(rt => rt.Arity == 0))
+                .Where(fn => fn.IsArityPossible(0))
                 .Select(f => (Id: f.Name, Distance: ComputeEditDistance(id.Symbol, f.Name.Symbol)))
                 .Where(p => p.Distance <= MaxEditDistanceForSimilarity);
 

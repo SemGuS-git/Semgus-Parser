@@ -153,7 +153,7 @@ namespace Semgus.Model.Smt
         /// <param name="id">The id to get a function declaration for</param>
         /// <param name="function">The function declaration if found</param>
         /// <returns>True if found a definition, false if name not in scope</returns>
-        public bool TryGetFunctionDeclaration(SmtIdentifier id, [NotNullWhen(true)] out SmtFunction? function)
+        public bool TryGetFunctionDeclaration(SmtIdentifier id, [NotNullWhen(true)] out IApplicable? function)
         {
             foreach (var level in _assertionStack)
             {
