@@ -1,0 +1,10 @@
+﻿;;;
+;;; Core theory
+;;;
+(defsort Bool)
+
+(declare true () Bool)
+(declare false () Bool)
+
+(declare and (Bool Bool) Bool :chainable t)
+(declare or (Bool Bool) Bool :chainable t)

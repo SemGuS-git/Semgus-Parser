@@ -31,4 +31,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../SmtDefinitionsGenerator/SmtDefinitionsGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../S-Expressions/S-Expressions.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
+    <AdditionalFiles Include="Definitions\**\*.sexpr" />
+  </ItemGroup>
+
 </Project>
