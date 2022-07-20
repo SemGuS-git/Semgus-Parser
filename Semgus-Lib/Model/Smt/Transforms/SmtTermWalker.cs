@@ -65,13 +65,13 @@ namespace Semgus.Model.Smt.Transforms
         public virtual (SmtTerm, TData) OnBitVectorLiteral(SmtBitVectorLiteral bitVectorLiteral)
             => (bitVectorLiteral, _defaultDataFactory(bitVectorLiteral));
 
-        public (SmtTerm, TData) VisitBitVectorLiteral(SmtBitVectorLiteral bitVectorLiteral)
+        public virtual (SmtTerm, TData) VisitBitVectorLiteral(SmtBitVectorLiteral bitVectorLiteral)
             => OnBitVectorLiteral(bitVectorLiteral);
 
         public virtual (SmtTerm, TData) OnDecimalLiteral(SmtDecimalLiteral decimalLiteral)
             => (decimalLiteral, _defaultDataFactory(decimalLiteral));
 
-        public (SmtTerm, TData) VisitDecimalLiteral(SmtDecimalLiteral decimalLiteral)
+        public virtual (SmtTerm, TData) VisitDecimalLiteral(SmtDecimalLiteral decimalLiteral)
             => OnDecimalLiteral(decimalLiteral);
 
         public virtual void OnExistsScope(SmtScope scope) { }
@@ -88,7 +88,7 @@ namespace Semgus.Model.Smt.Transforms
             }
         }
 
-        public (SmtTerm, TData) VisitExistsBinder(SmtExistsBinder existsBinder)
+        public virtual (SmtTerm, TData) VisitExistsBinder(SmtExistsBinder existsBinder)
         {
             OnExistsScope(existsBinder.NewScope);
             var (child, data) = existsBinder.Child.Accept(this);
@@ -109,7 +109,7 @@ namespace Semgus.Model.Smt.Transforms
             }
         }
 
-        public (SmtTerm, TData) VisitForallBinder(SmtForallBinder forallBinder)
+        public virtual (SmtTerm, TData) VisitForallBinder(SmtForallBinder forallBinder)
         {
             OnForallScope(forallBinder.NewScope);
             var (child, data) = forallBinder.Child.Accept(this);
@@ -136,7 +136,7 @@ namespace Semgus.Model.Smt.Transforms
             }
         }
 
-        public (SmtTerm, TData) VisitFunctionApplication(SmtFunctionApplication functionApplication)
+        public virtual (SmtTerm, TData) VisitFunctionApplication(SmtFunctionApplication functionApplication)
         {
             List<SmtTerm> args = new();
             List<TData> data = new();
@@ -150,7 +150,7 @@ namespace Semgus.Model.Smt.Transforms
             return OnFunctionApplication(functionApplication, args, data);
         }
 
-        public (SmtTerm, TData) VisitLambdaBinder(SmtLambdaBinder lambdaBinder)
+        public virtual (SmtTerm, TData) VisitLambdaBinder(SmtLambdaBinder lambdaBinder)
         {
             var (child, data) = lambdaBinder.Child.Accept(this);
             if (child != lambdaBinder.Child)
@@ -163,7 +163,7 @@ namespace Semgus.Model.Smt.Transforms
             }
         }
 
-        public (SmtTerm, TData) VisitLetBinder(SmtLetBinder letBinder)
+        public virtual (SmtTerm, TData) VisitLetBinder(SmtLetBinder letBinder)
         {
             // TODO: when we have let support
             var (child, data) = letBinder.Child.Accept(this);
@@ -177,7 +177,7 @@ namespace Semgus.Model.Smt.Transforms
             }
         }
 
-        public (SmtTerm, TData) VisitMatchBinder(SmtMatchBinder matchBinder)
+        public virtual (SmtTerm, TData) VisitMatchBinder(SmtMatchBinder matchBinder)
         {
             var (child, data) = matchBinder.Child.Accept(this);
             if (child != matchBinder.Child)
@@ -190,7 +190,7 @@ namespace Semgus.Model.Smt.Transforms
             }
         }
 
-        public (SmtTerm, TData) VisitMatchGrouper(SmtMatchGrouper matchGrouper)
+        public virtual (SmtTerm, TData) VisitMatchGrouper(SmtMatchGrouper matchGrouper)
         {
             List<TData> data = new();
             List<SmtMatchBinder> binders = new();
@@ -206,22 +206,22 @@ namespace Semgus.Model.Smt.Transforms
             return (newMatchGrouper, MergeData(newMatchGrouper, data));
         }
 
-        public (SmtTerm, TData) OnNumeralLiteral(SmtNumeralLiteral numeralLiteral)
+        public virtual (SmtTerm, TData) OnNumeralLiteral(SmtNumeralLiteral numeralLiteral)
             => (numeralLiteral, _defaultDataFactory(numeralLiteral));
 
-        public (SmtTerm, TData) VisitNumeralLiteral(SmtNumeralLiteral numeralLiteral)
+        public virtual (SmtTerm, TData) VisitNumeralLiteral(SmtNumeralLiteral numeralLiteral)
             => OnNumeralLiteral(numeralLiteral);
 
-        public (SmtTerm, TData) OnStringLiteral(SmtStringLiteral stringLiteral)
+        public virtual (SmtTerm, TData) OnStringLiteral(SmtStringLiteral stringLiteral)
             => (stringLiteral, _defaultDataFactory(stringLiteral));
 
-        public (SmtTerm, TData) VisitStringLiteral(SmtStringLiteral stringLiteral)
+        public virtual (SmtTerm, TData) VisitStringLiteral(SmtStringLiteral stringLiteral)
             => OnStringLiteral(stringLiteral);
 
-        public (SmtTerm, TData) OnVariable(SmtVariable variable)
+        public virtual (SmtTerm, TData) OnVariable(SmtVariable variable)
             => (variable, _defaultDataFactory(variable));
 
-        public (SmtTerm, TData) VisitVariable(SmtVariable variable)
+        public virtual (SmtTerm, TData) VisitVariable(SmtVariable variable)
             => OnVariable(variable);
     }
 }
