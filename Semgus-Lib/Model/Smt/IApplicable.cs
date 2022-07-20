@@ -12,8 +12,23 @@ namespace Semgus.Model.Smt
     /// </summary>
     public interface IApplicable
     {
+        /// <summary>
+        /// Identifier for this IApplicable
+        /// </summary>
         public SmtIdentifier Name { get; }
+
+        /// <summary>
+        /// Theory or logic that this IApplicable comes from
+        /// </summary>
         public ISmtTheory Theory { get; }
+
+        /// <summary>
+        /// Tries to get an appropriate rank for the given parameter and return sorts
+        /// </summary>
+        /// <param name="rank">The resolved rank</param>
+        /// <param name="returnSort">The return sort, if known</param>
+        /// <param name="argumentSorts">The argument sorts</param>
+        /// <returns>True if successfully resolved the rank</returns>
         public bool TryResolveRank([NotNullWhen(true)] out SmtFunctionRank? rank, SmtSort? returnSort, params SmtSort[] argumentSorts);
 
         /// <summary>
