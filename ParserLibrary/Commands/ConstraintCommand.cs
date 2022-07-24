@@ -55,13 +55,12 @@ namespace Semgus.Parser.Commands
                 }
             }
 
-            // Macroexpand the predicate
-            predicate = SmtMacroExpander.Expand(_smtProvider.Context, predicate);
-
             // Only Boolean constraints are valid
             var boolSort = _smtProvider.Context.GetSortOrDie(SmtCommonIdentifiers.BoolSortId, _sourceMap, _logger);
             if (predicate.Sort == boolSort)
             {
+                // Macroexpand the predicate
+                predicate = SmtMacroExpander.Expand(_smtProvider.Context, predicate);
                 _semgusProvider.Context.AddConstraint(predicate);
                 _problemHandler.OnConstraint(_smtProvider.Context, _semgusProvider.Context, predicate);
             }
