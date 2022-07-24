@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,26 +11,62 @@ namespace Semgus.Model.Smt.Transforms
 {
     public class SmtMacroExpander : SmtTermWalker<object?>
     {
-        public SmtMacroExpander() : base(default(object))
+        private readonly SmtContext _context;
+
+        public SmtMacroExpander(SmtContext ctx) : base(default(object))
         {
+            _context = ctx;
         }
 
-        public override (SmtTerm, object?) OnFunctionApplication(SmtFunctionApplication appl, IReadOnlyList<SmtTerm> arguments, IReadOnlyList<object?> up)
+        public SmtTerm Expand(SmtTerm term)
         {
-            var applicable = appl.Definition;
-            if (applicable is SmtMacro macro)
+            return (term.Accept(this)).Item1;
+        }
+
+        public static SmtTerm Expand(SmtContext context, SmtTerm term)
+            => new SmtMacroExpander(context).Expand(term);
+
+        public override (SmtTerm, object?) VisitFunctionApplication(SmtFunctionApplication functionApplication)
+        {
+            if (functionApplication.Definition is SmtMacro macro
+                && macro.ShouldExpand(_context, functionApplication.Rank))
             {
-                return (MacroExpand(macro, appl.Rank, appl.Arguments), up);
+                if (TryMacroExpand(functionApplication, out var expansion))
+                {
+                    return expansion.Accept(this);
+                }
+            }
+            return base.VisitFunctionApplication(functionApplication);
+        }
+
+        public bool TryMacroExpand(SmtTerm toExpand, out SmtTerm expansion)
+        {
+            bool didExpand;
+            bool didExpandAny = false;
+            do
+            {
+                didExpand = TryMacroExpand1(toExpand, out expansion);
+                didExpandAny |= didExpand;
+                toExpand = expansion;
+            }
+            while (didExpand);
+            return didExpandAny;
+        }
+
+        public bool TryMacroExpand1(SmtTerm toExpand, out SmtTerm expansion)
+        {
+            if (toExpand is SmtFunctionApplication appl
+                && appl.Definition is SmtMacro macro
+                && macro.ShouldExpand(_context, appl.Rank))
+            {
+                expansion = macro.DoExpand(_context, appl.Arguments);
+                return expansion != toExpand;
             }
             else
             {
-                return base.OnFunctionApplication(appl, arguments, up);
+                expansion = toExpand;
+                return false;
             }
-        }
-
-        private SmtTerm MacroExpand(SmtMacro macro, SmtFunctionRank rank, IReadOnlyList<SmtTerm> args)
-        {
-            return null!;
         }
     }
 }

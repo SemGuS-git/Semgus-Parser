@@ -3,6 +3,7 @@
 using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Model.Smt.Terms;
+using Semgus.Model.Smt.Transforms;
 using Semgus.Parser.Reader;
 
 using System;
@@ -187,9 +188,12 @@ namespace Semgus.Parser.Commands
             }
 
             SmtLambdaBinder lambda = new(term, scopeCtx.Scope, arguments);
+            MaybeProcessChcDefinition(decl, rank, lambda);
+
+            // Macroexpand the definition before adding it
+            lambda = (SmtLambdaBinder)SmtMacroExpander.Expand(_smtCtxProvider.Context, lambda);
             decl.AddDefinition(rank, lambda);
 
-            MaybeProcessChcDefinition(decl, rank, lambda);
             return true;
         }
 
@@ -390,6 +394,9 @@ namespace Semgus.Parser.Commands
                         constraints.ToArray()
                     );
                 }
+
+                // Only the constraint needs to be macroexpanded
+                constraint = SmtMacroExpander.Expand(_smtCtxProvider.Context, constraint);
 
                 _semgusCtxProvider.Context.AddChc(new SemgusChc(head, relList, constraint, binder, headBindings.Concat(bodyBindings), inputs, outputs));
             }

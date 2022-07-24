@@ -19,6 +19,7 @@ namespace Semgus.Model.Smt.Theories
         }
         public SmtIdentifier Name { get; } = CoreTheoryId;
         public IReadOnlyDictionary<SmtIdentifier, IApplicable> Functions { get; }
+        public IReadOnlyDictionary<SmtIdentifier, SmtMacro> Macros { get; }
         public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
         public IReadOnlySet<SmtIdentifier> PrimarySortSymbols { get; }
         public IReadOnlySet<SmtIdentifier> PrimaryFunctionSymbols { get; }
@@ -50,7 +51,14 @@ namespace Semgus.Model.Smt.Theories
         /// <param name="function">The requested function</param>
         /// <returns>True if successfully got function, false otherwise</returns>
         public bool TryGetFunction(SmtIdentifier fid, [NotNullWhen(true)] out IApplicable? function)
-            => Functions.TryGetValue(fid, out function);
+        {
+            if (Macros.TryGetValue(fid, out SmtMacro? macro))
+            {
+                function = macro;
+                return true;
+            }
+            return Functions.TryGetValue(fid, out function);
+        }
 
         private SmtCoreTheory()
         {
@@ -82,18 +90,8 @@ namespace Semgus.Model.Smt.Theories
             cf(new("not"), b, b);
 
             cf(id_and, b, b, b);
-            cf(id_and, b, b, b, b);
-            cf(id_and, b, b, b, b, b);
-            cf(id_and, b, b, b, b, b, b);
-            cf(id_and, b, b, b, b, b, b, b);
-            cf(id_and, b, b, b, b, b, b, b, b);
 
             cf(id_or, b, b, b);
-            cf(id_or, b, b, b, b);
-            cf(id_or, b, b, b, b, b);
-            cf(id_or, b, b, b, b, b, b);
-            cf(id_or, b, b, b, b, b, b, b);
-            cf(id_or, b, b, b, b, b, b, b, b);
 
             cf(new("!"), b, b);
             cf(new("xor"), b, b, b);
@@ -102,8 +100,18 @@ namespace Semgus.Model.Smt.Theories
             cf(new("distinct"), b, usf.Next(), usf.Sort);
             cf(new("ite"), usf.Next(), b, usf.Sort, usf.Sort);
 
+            Dictionary<SmtIdentifier, SmtMacro> md = new();
+            void cm(SmtIdentifier id, SmtMacro.DefaultMacroType defType)
+            {
+                md.Add(id, new SmtMacro(fd[id], defType, expandByDefault: false));
+            }
+
+            cm(id_and, SmtMacro.DefaultMacroType.LeftAssociative);
+            cm(id_or, SmtMacro.DefaultMacroType.LeftAssociative);
+
             Functions = fd.ToDictionary(kvp => kvp.Key, kvp => (IApplicable)kvp.Value);
             PrimaryFunctionSymbols = new HashSet<SmtIdentifier>(fd.Keys);
+            Macros = md;
         }
     }
 }
