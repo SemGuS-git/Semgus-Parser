@@ -59,7 +59,7 @@ namespace Semgus.Parser
          (exists ((r1 Int) (r2 Int))
              (and
               (E.Sem et1 x y r1)
-              (E.Sem et2 x y r1)
+              (E.Sem et2 x y r2)
               (= r (+ r1 r2)))))
         (($ite bt etc eta)
          (exists ((rb Bool) (rc Int) (ra Int))
@@ -67,7 +67,7 @@ namespace Semgus.Parser
               (B.Sem bt x y rb)
               (E.Sem etc x y rc)
               (E.Sem eta x y ra)
-              (= r(ite rb rc ra)))))))
+              (= r (ite rb rc ra)))))))
 
     :input (x y) :output (r))
 
@@ -78,31 +78,31 @@ namespace Semgus.Parser
           (exists ((rb Bool))
               (and
                (B.Sem bt x y rb)
-               (= r(not rb)))))
+               (= r (not rb)))))
          (($and bt1 bt2)
           (exists ((rb1 Bool) (rb2 Bool))
               (and
                (B.Sem bt1 x y rb1)
                (B.Sem bt2 x y rb2)
-               (= r(and rb1 rb2)))))
+               (= r (and rb1 rb2)))))
          (($or bt1 bt2)
           (exists ((rb1 Bool) (rb2 Bool))
               (and
                (B.Sem bt1 x y rb1)
                (B.Sem bt2 x y rb2)
-               (= r(or rb1 rb2)))))
+               (= r (or rb1 rb2)))))
          (($< et1 et2)
           (exists ((r1 Int) (r2 Int))
               (and
                (E.Sem et1 x y r1)
                (E.Sem et2 x y r2)
-               (= r(< r1 r2)))))))
+               (= r (< r1 r2)))))))
     :input (x y) :output (r))))
 
 ;;;
 ;;; Function to synthesize - a term rooted at E
 ;;;
-(synth-fun max2() E) ; Using the default universe of terms rooted at E
+(synth-fun max2 () E) ; Using the default universe of terms rooted at E
 
 ;;;
 ;;; Constraints - examples
