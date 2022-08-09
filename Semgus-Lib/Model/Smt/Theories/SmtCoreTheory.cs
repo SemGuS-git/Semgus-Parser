@@ -80,19 +80,11 @@ namespace Semgus.Model.Smt.Theories
             cf(new("false"), b);
             cf(new("not"), b, b);
 
-            cf(id_and, b, b, b);
-            cf(id_and, b, b, b, b);
-            cf(id_and, b, b, b, b, b);
-            cf(id_and, b, b, b, b, b, b);
-            cf(id_and, b, b, b, b, b, b, b);
-            cf(id_and, b, b, b, b, b, b, b, b);
-
-            cf(id_or, b, b, b);
-            cf(id_or, b, b, b, b);
-            cf(id_or, b, b, b, b, b);
-            cf(id_or, b, b, b, b, b, b);
-            cf(id_or, b, b, b, b, b, b, b);
-            cf(id_or, b, b, b, b, b, b, b, b);
+            for(int i = 1; i <= 256; i++) {
+                var arr = Enumerable.Repeat(b, i).ToArray();
+                cf(id_and,b, arr);
+                cf(id_or,b, arr);
+            }
 
             cf(new("!"), b, b);
             cf(new("xor"), b, b, b);

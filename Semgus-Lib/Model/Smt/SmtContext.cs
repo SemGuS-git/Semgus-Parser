@@ -27,8 +27,8 @@ namespace Semgus.Model.Smt
             {
                 SmtCoreTheory.Instance,
                 SmtIntsTheory.Instance,
-                SmtStringsTheory.Instance,
-                SmtBitVectorsTheory.Instance
+                //SmtStringsTheory.Instance,
+                //SmtBitVectorsTheory.Instance
             };
         }
 
