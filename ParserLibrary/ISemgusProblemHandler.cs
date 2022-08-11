@@ -28,7 +28,7 @@ namespace Semgus.Parser
         /// <param name="name"></param>
         /// <param name="args"></param>
         /// <param name="sort"></param>
-        public void OnSynthFun(SmtContext ctx, SmtIdentifier name, IList<SmtConstant> args, SmtSort sort);
+        public void OnSynthFun(SmtContext ctx, SmtIdentifier name, IList<(SmtIdentifier, SmtSortIdentifier)> args, SmtSort sort);
 
         /// <summary>
         /// Called when metadata is set via the set-info command

@@ -31,15 +31,15 @@ namespace Semgus.Parser
   ($y)
    ($0)
    ($1)
-   ($+ ($+_1 E) ($+_2 E))
-   ($ite($ite_1 B) ($ite_2 E) ($ite_3 E)))
+   ($+ E E)
+   ($ite B E E))
 
   (($t) ; B productions
    ($f)
-   ($! ($!_1 B))
-   ($and($and_1 B) ($and_2 B))
-   ($or($or_1 B) ($or_2 B))
-   ($< ($<_1 E) ($<_2 E)))))
+   ($! B)
+   ($and B B)
+   ($or B B)
+   ($< E E))))
 
 ;;;
 ;;; Semantics

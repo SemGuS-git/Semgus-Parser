@@ -32,37 +32,62 @@ namespace Semgus.Parser.Commands
         }
 
         [Command("synth-fun")]
-        public void SynthFun(SmtIdentifier name, IList<SmtConstant> args, SmtSortIdentifier retId, GrammarForm? grammarForm = default)
+        public void SynthFun(SmtIdentifier name, IList<(SmtIdentifier, SmtSortIdentifier)> args, SmtSortIdentifier retId, SemgusToken? grammarPredecl = default, SemgusToken? grammarBlock = default)
         {
             using var logscope = _logger.BeginScope($"while processing `synth-fun` for {name.Symbol}:");
 
+            // Handle the grammar block (semi-)gracefully
+            GrammarForm? grammarForm = GrammarBlockHelper.CreateGrammarForm(grammarPredecl, grammarBlock, _converter, _sourceMap, _logger);
+
             var ret = _smtContext.Context.GetSortOrDie(retId, _sourceMap, _logger);
 
-            // Currently, only Semgus-style synth-funs are supported
-            if (args.Count > 0 || ret is not SemgusTermType tt)
+            // Currently, only Semgus-style synth-funs are supported for SemGuS terms
+            if (args.Count > 0 && ret is SemgusTermType)
             {
-                _logger.LogParseError("Only Semgus-style `synth-fun`s are supported, with no arguments and a term type as the return.", default);
-                throw new InvalidOperationException("Only Semgus-style `synth-fun`s are supported, with no arguments and a term type as the return.");
+                throw _logger.LogParseErrorAndThrow("Only SemGuS-style `synth-fun`s are supported for term types, but found arguments to synth-fun.", _sourceMap[name]);
             }
-
-            var rank = new SmtFunctionRank(tt);
-            var decl = new SmtFunction(name, SmtTheory.UserDefined, rank);
-
-            // Handle the grammar declaration
-            SemgusGrammar grammar;
-            if (grammarForm is null)
+            else if (ret is not SemgusTermType)
             {
-                grammar = CreateDefaultGrammar(tt);
+                // SyGuS-style synthfun
+                var (grammar, termTypes, startTT, startRel, chcs) = GrammarBlockHelper.ConvertSygusGrammar(grammarForm!, args, _smtContext.Context, _converter, _sourceMap, _logger);
+                var rank = new SmtFunctionRank(startTT);
+                var decl = new SmtFunction(GensymUtils.Gensym("_SyTerm", name.Symbol), SmtTheory.UserDefined, rank);
+
+                _handler.OnTermTypes(termTypes);
+                foreach (var chc in chcs)
+                {
+                    _semgusContext.Context.AddChc(chc);
+                }
+                _smtContext.Context.AddFunctionDeclaration(decl);
+                _handler.OnSynthFun(_smtContext.Context, name, args, ret);
+                var sf = new SemgusSynthFun(decl, rank, grammar);
+                _semgusContext.Context.AddSynthFun(sf);
+
+                var sygRank = new SmtFunctionRank(ret, args.Select(a => _smtContext.Context.GetSortOrDie(a.Item2, _sourceMap, _logger)).ToArray());
+                var sygDecl = new SmtFunction(name, SmtTheory.UserDefined, sygRank);
+                _semgusContext.Context.AddSygusSynthFun(decl, startRel, sygDecl, sygRank);
             }
             else
             {
-                grammar = CreateGrammarFromForm(grammarForm);
-            }
+                var rank = new SmtFunctionRank((SemgusTermType)ret);
+                var decl = new SmtFunction(name, SmtTheory.UserDefined, rank);
 
-            // Add to the places
-            _smtContext.Context.AddFunctionDeclaration(decl);
-            _handler.OnSynthFun(_smtContext.Context, name, args, ret);
-            _semgusContext.Context.AddSynthFun(new(decl, rank, grammar));
+                // Handle the grammar declaration
+                SemgusGrammar grammar;
+                if (grammarForm is null)
+                {
+                    grammar = CreateDefaultGrammar((SemgusTermType)ret);
+                }
+                else
+                {
+                    grammar = CreateGrammarFromForm(grammarForm);
+                }
+
+                // Add to the places
+                _smtContext.Context.AddFunctionDeclaration(decl);
+                _handler.OnSynthFun(_smtContext.Context, name, args, ret);
+                _semgusContext.Context.AddSynthFun(new(decl, rank, grammar));
+            }
         }
 
         public SemgusGrammar CreateDefaultGrammar(SemgusTermType tt)

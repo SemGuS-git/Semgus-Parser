@@ -43,7 +43,7 @@ namespace Semgus.Parser.Reader.Converters
                     {
                         toTypeMsg += $"[{string.Join(", ", resolvedType.GetGenericArguments().Select(t => t.Name))}]";
                     }
-                    _logger.LogParseError($"Cannot convert {token.GetType().Name} [{token.ToString()}] to {toTypeMsg} while converting list.", token.Position);
+                    //_logger.LogParseError($"Cannot convert {token.GetType().Name} [{token.ToString()}] to {toTypeMsg} while converting list.", token.Position);
                     to = default;
                     return false;
                 }

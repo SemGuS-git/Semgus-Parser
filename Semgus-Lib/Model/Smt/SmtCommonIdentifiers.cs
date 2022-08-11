@@ -31,5 +31,6 @@ namespace Semgus.Model.Smt {
         public static SmtIdentifier EqFunctionId { get; } = new("=");
         public static SmtIdentifier TrueConstantId { get; } = new("true");
         public static SmtIdentifier FalseConstantId { get; } = new("false");
+        public static SmtIdentifier MinusFunctionId { get; } = new("-");
     }
 }

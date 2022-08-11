@@ -30,8 +30,10 @@ This project is under active development and does not yet support all SMT-LIB2 f
 * Bit vectors
 
 New additions:
-* Indexed identifiers, e.g. `(_ move up)` (planned for v2.1.0, not yet released)
-* Bit vectors (planned for v2.1.0, not yet released)
+* Indexed identifiers, e.g. `(_ move up)`
+* Bit vectors (partial support; only theory functions supported for now)
+* Converting SyGuS problems to CHCs on the fly (beta)
+* Declarative S-expression output format (beta). Use `--format sexpr`
 
 Unsupported SMT-LIB2 features include:
 * Parametric sorts
@@ -40,7 +42,6 @@ Unsupported SMT-LIB2 features include:
 
 The roadmap for next-up features includes:
 * Arbitrary `let` and `match` terms
-* Converting SyGuS problems to CHCs on the fly
 
 If there is an unsupported feature that you would like added, drop us a line by submitting an issue (or commenting on an existing one).
 This will help us prioritize what to put on our roadmap.

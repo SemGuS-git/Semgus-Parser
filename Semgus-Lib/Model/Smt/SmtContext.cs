@@ -227,6 +227,7 @@ namespace Semgus.Model.Smt
             {
                 throw new InvalidOperationException("Unable to pop first assertion level from assertion stack.");
             }
+            _assertionStack.Pop();
         }
 
         private class AssertionLevel

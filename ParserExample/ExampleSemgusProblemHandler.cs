@@ -55,7 +55,7 @@ namespace Semgus.Parser.Example
             Console.WriteLine("set-info: " + attr.Keyword + " : " + attr.Value);
         }
 
-        public void OnSynthFun(SmtContext ctx, SmtIdentifier name, IList<SmtConstant> args, SmtSort sort)
+        public void OnSynthFun(SmtContext ctx, SmtIdentifier name, IList<(SmtIdentifier, SmtSortIdentifier)> args, SmtSort sort)
         {
             Console.WriteLine("synth-fun: " + name);
         }
