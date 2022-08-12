@@ -22,6 +22,18 @@ namespace Semgus.Model.Smt.Terms
         {
             return visitor.VisitMatchBinder(this);
         }
+
+        public override string ToString()
+        {
+            if (Bindings.Count > 0)
+            {
+                return $"(({Constructor?.Operator} {string.Join(' ', Bindings.Select(b => b.Binding.Id))}) {Child})";
+            }
+            else
+            {
+                return $"({Constructor?.Operator} {Child})";
+            }
+        }
     }
 
     public record SmtMatchVariableBinding(SmtVariableBinding Binding, int Index)
@@ -42,6 +54,11 @@ namespace Semgus.Model.Smt.Terms
         public override TOutput Accept<TOutput>(ISmtTermVisitor<TOutput> visitor)
         {
             return visitor.VisitMatchGrouper(this);
+        }
+
+        public override string ToString()
+        {
+            return $"(match {Term} ({string.Join(' ', Binders)}))";
         }
     }
 }

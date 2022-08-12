@@ -20,9 +20,9 @@ namespace Semgus.Model.Smt
         private readonly Func<SmtContext, IEnumerable<SmtTerm>, SmtTerm> _expander;
 
         /// <summary>
-        /// Return sort of this macro
+        /// Function to compute return sort of this macro
         /// </summary>
-        private readonly SmtSort _return;
+        private readonly Func<IReadOnlyList<SmtSort>, SmtSort> _returnSortDeriver;
 
         /// <summary>
         /// Should this macro be expanded by default?
@@ -35,19 +35,19 @@ namespace Semgus.Model.Smt
         /// <param name="name">Macro name</param>
         /// <param name="theory">Theory this macro belongs to</param>
         /// <param name="lambdaList">Lambda list for this macro</param>
-        /// <param name="returnSort">Return sort of this macro</param>
+        /// <param name="returnSortDeriver">Function to compute return sort of this macro</param>
         /// <param name="expander">The expansion function</param>
         public SmtMacro(SmtIdentifier name,
                         ISmtTheory theory,
                         IEnumerable<MacroParameter> lambdaList,
-                        SmtSort returnSort,
+                        Func<IReadOnlyList<SmtSort>, SmtSort> returnSortDeriver,
                         Func<SmtContext, IEnumerable<SmtTerm>, SmtTerm> expander,
                         bool expandByDefault = true)
         {
             Name = name;
             Theory = theory;
             _lambdaList = lambdaList.ToList();
-            _return = returnSort;
+            _returnSortDeriver = returnSortDeriver;
             _expander = expander;
             _expandByDefault = expandByDefault;
         }
@@ -126,7 +126,7 @@ namespace Semgus.Model.Smt
                 // it's actually needed. No theory uses this feature currently.
             }
 
-            _return = matchingRank.ReturnSort;
+            _returnSortDeriver = r => matchingRank.ReturnSort;
 
             var llb = new LambdaListBuilder();
             llb.AddSingle(matchingRank.ArgumentSorts[0])
@@ -285,7 +285,7 @@ namespace Semgus.Model.Smt
                     argHelp.Add("???");
                 }
             }
-            return $"({string.Join(' ', argHelp)}) -> {_return.Name}";
+            return $"({string.Join(' ', argHelp)}) -> TBD"; // {_return.Name}";
         }
 
         /// <summary>
@@ -410,18 +410,20 @@ namespace Semgus.Model.Smt
                 return false;
             }
 
-            if (returnSort is not null && !CheckSortMatch(_return, returnSort, resolvedSorts))
+            var computedReturn = _returnSortDeriver(argumentSorts);
+
+            if (returnSort is not null && !CheckSortMatch(computedReturn, returnSort, resolvedSorts))
             {
                 rank = default;
                 return false;
             }
             else if (returnSort is null)
             {
-                if (!_return.IsSortParameter)
+                if (!computedReturn.IsSortParameter)
                 {
-                    returnSort = _return;
+                    returnSort = computedReturn;
                 }
-                else if (!resolvedSorts.TryGetValue(_return, out returnSort))
+                else if (!resolvedSorts.TryGetValue(computedReturn, out returnSort))
                 {
                     rank = default;
                     return false;

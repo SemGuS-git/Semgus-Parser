@@ -110,5 +110,15 @@ namespace Semgus.Parser.Verifier
                 }
             }
         }
+
+        public void OnFunctionDeclaration(SmtContext ctx, SmtFunction function, SmtFunctionRank rank)
+        {
+            _writer.WriteLine("Function declaration: " + function.Name);
+        }
+
+        public void OnFunctionDefinition(SmtContext ctx, SmtFunction function, SmtFunctionRank rank, SmtLambdaBinder lambda)
+        {
+            _writer.WriteLine("Function definition: " + function.Name + ": " + lambda);
+        }
     }
 }

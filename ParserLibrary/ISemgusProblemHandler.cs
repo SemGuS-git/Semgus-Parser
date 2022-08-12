@@ -22,6 +22,20 @@ namespace Semgus.Parser
         public void OnTermTypes(IReadOnlyList<SemgusTermType> termTypes);
 
         /// <summary>
+        /// Called when a function is declared
+        /// </summary>
+        /// <param name="ctx">SMT context</param>
+        /// <param name="functions">Defined function</param>
+        public void OnFunctionDeclaration(SmtContext ctx, SmtFunction function, SmtFunctionRank rank);
+
+        /// <summary>
+        /// Called when a function is defined
+        /// </summary>
+        /// <param name="ctx">SMT context</param>
+        /// <param name="functions">Defined function</param>
+        public void OnFunctionDefinition(SmtContext ctx, SmtFunction function, SmtFunctionRank rank, SmtLambdaBinder lambda);
+
+        /// <summary>
         /// Called when a synth-fun command is encountered. NOTE: this doesn't have SemGuS-specific information yet.
         /// </summary>
         /// <param name="ctx"></param>

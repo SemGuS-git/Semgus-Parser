@@ -142,6 +142,7 @@ namespace Semgus.Parser.Commands
             var rank = new SmtFunctionRank(returnSort, args.ToArray());
             var decl = new SmtFunction(name, SmtTheory.UserDefined, rank);
 
+            _handler.OnFunctionDeclaration(_smtCtxProvider.Context, decl, rank);
             return (decl, rank);
         }
 
@@ -193,6 +194,7 @@ namespace Semgus.Parser.Commands
             // Macroexpand the definition before adding it
             lambda = (SmtLambdaBinder)SmtMacroExpander.Expand(_smtCtxProvider.Context, lambda);
             decl.AddDefinition(rank, lambda);
+            _handler.OnFunctionDefinition(_smtCtxProvider.Context, decl, rank, lambda);
 
             return true;
         }

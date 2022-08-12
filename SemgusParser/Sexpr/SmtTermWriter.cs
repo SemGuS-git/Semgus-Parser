@@ -78,7 +78,15 @@ namespace Semgus.Parser.Sexpr
 
         public ISexprWriter VisitLambdaBinder(SmtLambdaBinder lambdaBinder)
         {
-            throw new NotImplementedException();
+            _sw.WriteList(() =>
+            {
+                _sw.WriteSymbol("lambda");
+                _sw.WriteKeyword("arguments");
+                _sw.WriteList(lambdaBinder.ArgumentNames, an => _sw.Write(an));
+                _sw.WriteKeyword("body");
+                lambdaBinder.Child.Accept(this);
+            });
+            return _sw;
         }
 
         public ISexprWriter VisitLetBinder(SmtLetBinder letBinder)
@@ -88,12 +96,37 @@ namespace Semgus.Parser.Sexpr
 
         public ISexprWriter VisitMatchBinder(SmtMatchBinder matchBinder)
         {
-            throw new NotImplementedException();
+            _sw.WriteList(() =>
+            {
+                _sw.WriteSymbol("binder");
+                _sw.WriteKeyword("operator");
+                if (matchBinder.Constructor is null)
+                {
+                    _sw.WriteNil();
+                }
+                else
+                {
+                    _sw.Write(matchBinder.Constructor.Operator);
+                }
+                _sw.WriteKeyword("arguments");
+                _sw.WriteList(matchBinder.Bindings, b => _sw.Write(b.Binding.Id));
+                _sw.WriteKeyword("child");
+                matchBinder.Child.Accept(this);
+            });
+            return _sw;
         }
 
         public ISexprWriter VisitMatchGrouper(SmtMatchGrouper matchGrouper)
         {
-            throw new NotImplementedException();
+            _sw.WriteList(() =>
+            {
+                _sw.WriteSymbol("match");
+                _sw.WriteKeyword("term");
+                matchGrouper.Term.Accept(this);
+                _sw.WriteKeyword("binders");
+                _sw.WriteList(matchGrouper.Binders, b => b.Accept(this));
+            });
+            return _sw;
         }
 
         public ISexprWriter VisitNumeralLiteral(SmtNumeralLiteral numeralLiteral)

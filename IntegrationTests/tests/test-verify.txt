@@ -4,6 +4,10 @@ set-info: :realizable true
 declare-term-types: 
   E --> $x() | $y() | $0() | $1() | $+(E, E) | $ite(B, E, E);
   B --> $t() | $f() | $!(B) | $and(B, B) | $or(B, B) | $<(E, E);
+Function declaration: E.Sem
+Function declaration: B.Sem
+Function definition: E.Sem: (lambda (et x y r) (match et (($x (= r x)) ($y (= r y)) ($0 (= r 0)) ($1 (= r 1)) (($+ et1 et2) (exists ((r1 Int) (r2 Int)) (and (E.Sem et1 x y r1) (E.Sem et2 x y r2) (= r (+ r1 r2))))) (($ite bt etc eta) (exists ((rb Bool) (rc Int) (ra Int)) (and (B.Sem bt x y rb) (E.Sem etc x y rc) (E.Sem eta x y ra) (= r (ite rb rc ra))))))))
+Function definition: B.Sem: (lambda (bt x y r) (match bt (($t (= r true)) ($f (= r false)) (($! bt) (exists ((rb Bool)) (and (B.Sem bt x y rb) (= r (not rb))))) (($and bt1 bt2) (exists ((rb1 Bool) (rb2 Bool)) (and (B.Sem bt1 x y rb1) (B.Sem bt2 x y rb2) (= r (and rb1 rb2))))) (($or bt1 bt2) (exists ((rb1 Bool) (rb2 Bool)) (and (B.Sem bt1 x y rb1) (B.Sem bt2 x y rb2) (= r (or rb1 rb2))))) (($< et1 et2) (exists ((r1 Int) (r2 Int)) (and (E.Sem et1 x y r1) (E.Sem et2 x y r2) (= r (< r1 r2))))))))
 check-synth
 CHC: (E.Sem et x y r) <= (= r x)
     [constructor: ($x)]     [inputs: x y]     [outputs: r]
@@ -13,7 +17,7 @@ CHC: (E.Sem et x y r) <= (= r 0)
     [constructor: ($0)]     [inputs: x y]     [outputs: r]
 CHC: (E.Sem et x y r) <= (= r 1)
     [constructor: ($1)]     [inputs: x y]     [outputs: r]
-CHC: (E.Sem et x y r) <= (E.Sem et1 x y r1) ^ (E.Sem et2 x y r1) ^ (= r (+ r1 r2))
+CHC: (E.Sem et x y r) <= (E.Sem et1 x y r1) ^ (E.Sem et2 x y r2) ^ (= r (+ r1 r2))
     [constructor: ($+ et1 et2)]     [inputs: x y]     [outputs: r]
 CHC: (E.Sem et x y r) <= (B.Sem bt x y rb) ^ (E.Sem etc x y rc) ^ (E.Sem eta x y ra) ^ (= r (ite rb rc ra))
     [constructor: ($ite bt etc eta)]     [inputs: x y]     [outputs: r]

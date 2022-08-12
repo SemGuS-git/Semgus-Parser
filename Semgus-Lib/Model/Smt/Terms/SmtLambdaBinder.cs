@@ -19,5 +19,10 @@ namespace Semgus.Model.Smt.Terms
         {
             return visitor.VisitLambdaBinder(this);
         }
+
+        public override string ToString()
+        {
+            return $"(lambda ({string.Join(' ', ArgumentNames)}) {Child})";
+        }
     }
 }

@@ -45,7 +45,8 @@ namespace Semgus.Sexpr.Writer
             MaybeWS();
 
             _tw.Write("#*");
-            for (int i = 0; i < value.Length; ++i)
+            // MSB first
+            for (int i = value.Length - 1; i >= 0; --i)
             {
                 _tw.Write(value[i] ? "1" : "0");
             }

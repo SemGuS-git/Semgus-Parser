@@ -1,5 +1,7 @@
 declare-term-types: 
   BV --> $bv();
+Function declaration: BV.Sem
+Function definition: BV.Sem: (lambda (term x1) (match term (($bv true))))
 check-synth
 CHC: (BV.Sem term x1) <= true
     [constructor: ($bv)]

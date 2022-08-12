@@ -114,5 +114,15 @@ namespace Semgus.Parser.Json
                 EndOfEvent();
             }
         }
+
+        public void OnFunctionDeclaration(SmtContext ctx, SmtFunction function, SmtFunctionRank rank)
+        {
+            // TODO
+        }
+
+        public void OnFunctionDefinition(SmtContext ctx, SmtFunction function, SmtFunctionRank rank, SmtLambdaBinder lambda)
+        {
+            // TODO
+        }
     }
 }

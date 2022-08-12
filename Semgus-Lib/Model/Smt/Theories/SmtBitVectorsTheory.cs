@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Semgus.Model.Smt.Terms;
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -70,6 +72,7 @@ namespace Semgus.Model.Smt.Theories
 
         #region Deprecated
         public IReadOnlyDictionary<SmtIdentifier, IApplicable> Functions { get; }
+        public IReadOnlyDictionary<SmtIdentifier, IApplicable> Macros { get; }
         public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts
             => throw new NotImplementedException();
         #endregion
@@ -143,7 +146,38 @@ namespace Semgus.Model.Smt.Theories
             // Comparison: argument sizes the same, and returns Boolean
             cf("bvult", argSortsEqual, argSortsEqualCmt, r => r.ReturnSort, b, bv0, bv0);
 
+            // Macro: xor
+            Dictionary<SmtIdentifier, SmtMacro> md = new();
+            var bvxor_id = new SmtIdentifier("bvxor");
+            var llb = new SmtMacro.LambdaListBuilder();
+            var ll = llb.AddSingle(bv0).AddSingle(bv0).Build();
+            md.Add(bvxor_id, new SmtMacro(bvxor_id, this, ll, r => r[0], expander: (ctx, args) =>
+            {
+                SmtIdentifier bvor_id = new("bvor");
+                SmtIdentifier bvand_id = new("bvand");
+                SmtIdentifier bvnot_id = new("bvnot");
+
+                var a = args.ToArray();
+
+                return SmtTermBuilder.Apply(ctx,
+                                     bvor_id,
+                                     SmtTermBuilder.Apply(ctx,
+                                                          bvand_id,
+                                                          a[0],
+                                                          SmtTermBuilder.Apply(ctx,
+                                                                               bvnot_id,
+                                                                               a[1])),
+                                     SmtTermBuilder.Apply(ctx,
+                                                          bvand_id,
+                                                          SmtTermBuilder.Apply(ctx,
+                                                                               bvnot_id,
+                                                                               a[0]),
+                                                          a[1]));
+
+            }));
+
             Functions = fd.ToDictionary(kvp => kvp.Key, kvp => (IApplicable)kvp.Value);
+            Macros = md.ToDictionary(kvp => kvp.Key, kvp => (IApplicable)kvp.Value);
             var primary = new HashSet<SmtIdentifier>(fd.Keys);
             primary.Add(new SmtIdentifier("extract"));
             PrimaryFunctionSymbols = primary;
@@ -228,7 +262,14 @@ namespace Semgus.Model.Smt.Theories
             }
             else
             {
-                return Functions.TryGetValue(functionId, out resolvedFunction);
+                if (Macros.TryGetValue(functionId, out resolvedFunction))
+                {
+                    return true;
+                }
+                else
+                {
+                    return Functions.TryGetValue(functionId, out resolvedFunction);
+                }
             }
         }
     }

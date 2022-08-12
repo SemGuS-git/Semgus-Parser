@@ -100,5 +100,15 @@ namespace Semgus.Parser.Example
                 }
             }
         }
+
+        public void OnFunctionDeclaration(SmtContext ctx, SmtFunction function, SmtFunctionRank rank)
+        {
+            Console.WriteLine("Function declaration: " + function.Name);
+        }
+
+        public void OnFunctionDefinition(SmtContext ctx, SmtFunction function, SmtFunctionRank rank, SmtLambdaBinder lambda)
+        {
+            Console.WriteLine("Function definition: " + function.Name);
+        }
     }
 }
