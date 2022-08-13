@@ -124,7 +124,8 @@ namespace Semgus.Parser.Json
 
         public void OnFunctionDefinition(SmtContext ctx, SmtFunction function, SmtFunctionRank rank, SmtLambdaBinder lambda)
         {
-            // TODO
+            _serializer.Serialize (_writer, new FunctionDefinitionEvent(function, rank, lambda));
+            EndOfEvent();
         }
     }
 }
