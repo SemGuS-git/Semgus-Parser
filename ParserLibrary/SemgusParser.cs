@@ -44,12 +44,18 @@ namespace Semgus.Parser
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
+        /// The current SMT user-defined source
+        /// </summary>
+        public SmtUserDefinedSource CurrentSmtSource { get; }
+
+        /// <summary>
         /// Creates a new SemGuS parser from the given file
         /// </summary>
         /// <param name="filename">Name of file to parse</param>
         public SemgusParser(string filename) : this(new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read), filename)
         {
             _filename = filename;
+            CurrentSmtSource = SmtUserDefinedSource.ForFile(filename);
         }
 
         /// <summary>
@@ -62,6 +68,7 @@ namespace Semgus.Parser
             _streamOrReader = stream;
             _reader = new SemgusReader(stream);
             _reader.SetSourceName(sourceName);
+            CurrentSmtSource = SmtUserDefinedSource.ForStream(sourceName);
             _commandDispatch = new Dictionary<string, MethodInfo>();
             _serviceProvider = ProcessCommandInfo();
         }
@@ -76,6 +83,7 @@ namespace Semgus.Parser
             _streamOrReader = reader;
             _reader = new SemgusReader(reader);
             _reader.SetSourceName(sourceName);
+            CurrentSmtSource = SmtUserDefinedSource.ForStream(sourceName);
             _commandDispatch = new Dictionary<string, MethodInfo>();
             _serviceProvider = ProcessCommandInfo();
         }
@@ -113,6 +121,7 @@ namespace Semgus.Parser
             services.AddScoped<ISmtContextProvider, SmtContextProvider>();
             services.AddScoped<ISmtScopeProvider, SmtScopeProvider>();
             services.AddScoped<ISemgusContextProvider, SemgusContextProvider>();
+            services.AddSingleton<ISourceContextProvider>(this);
             services.AddLogging(config =>
             {
                 config.AddProvider(new ReaderLoggerProvider(this, Console.Error));

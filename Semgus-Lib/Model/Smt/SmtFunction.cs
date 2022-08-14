@@ -1,43 +1,79 @@
 ﻿using Semgus.Model.Smt.Terms;
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt
 {
+    /// <summary>
+    /// A function object
+    /// </summary>
     public class SmtFunction : IApplicable
     {
-        public SmtFunction(SmtIdentifier name, ISmtTheory theory, params SmtFunctionRank[] rankTemplates)
+        /// <summary>
+        /// Constructs a new function object
+        /// </summary>
+        /// <param name="name">The function name</param>
+        /// <param name="source">The function source (e.g., theory or extension)</param>
+        /// <param name="rankTemplates">Templates for valid ranks</param>
+        public SmtFunction(SmtIdentifier name, ISmtSource source, params SmtFunctionRank[] rankTemplates)
         {
             Name = name;
-            Theory = theory;
+            Source = source;
             _rankTemplates = new List<SmtFunctionRank>(rankTemplates);
             _definitions = new Dictionary<SmtFunctionRank, SmtLambdaBinder>();
         }
 
+        /// <summary>
+        /// Mapping of ranks to definitions
+        /// </summary>
         private readonly IDictionary<SmtFunctionRank, SmtLambdaBinder> _definitions;
 
+        /// <summary>
+        /// Adds a definition for the given rank
+        /// </summary>
+        /// <param name="rank">Rank to add definition for</param>
+        /// <param name="definition">Function definition</param>
         public void AddDefinition(SmtFunctionRank rank, SmtLambdaBinder definition)
         {
             _definitions[rank] = definition;
         }
 
+        /// <summary>
+        /// Name of this function
+        /// </summary>
         public SmtIdentifier Name { get; private set; }
-        public ISmtTheory Theory { get; private set; }
 
+        /// <summary>
+        /// Source of this function, e.g. theory, extension, or user-defined
+        /// </summary>
+        public ISmtSource Source { get; private set; }
+
+        /// <summary>
+        /// List of valid rank templates
+        /// </summary>
         private readonly List<SmtFunctionRank> _rankTemplates;
 
+        /// <summary>
+        /// Adds a valid rank template to this function
+        /// </summary>
+        /// <param name="rank">Rank template to add</param>
         public void AddRankTemplate(SmtFunctionRank rank)
         {
             _rankTemplates.Add(rank);
         }
 
+        /// <summary>
+        /// Gets a collection of all valid rank templates for this function
+        /// </summary>
         public IReadOnlyCollection<SmtFunctionRank> RankTemplates => _rankTemplates;
 
+        /// <summary>
+        /// Attempts to resolve a concrete rank for the given function signature
+        /// </summary>
+        /// <param name="rank">The resolved rank</param>
+        /// <param name="returnSort">Return sort of function call, if known</param>
+        /// <param name="argumentSorts">Function call argument sorts</param>
+        /// <returns>True if successfully resolved a concrete rank</returns>
         public bool TryResolveRank([NotNullWhen(true)] out SmtFunctionRank? rank, SmtSort? returnSort, params SmtSort[] argumentSorts)
         {
             var sameArity = _rankTemplates
@@ -54,6 +90,14 @@ namespace Semgus.Model.Smt
             return false;
         }
 
+        /// <summary>
+        /// Attempts to resolve a concrete rank for the given function signature, from a single rank template
+        /// </summary>
+        /// <param name="rank">The resolved rank</param>
+        /// <param name="template">The rank template to try</param>
+        /// <param name="returnSort">Return sort of function call, if known</param>
+        /// <param name="argumentSorts">Function call argument sorts</param>
+        /// <returns>True if successfully resolved a concrete rank</returns>
         private bool TryResolveRank([NotNullWhen(true)] out SmtFunctionRank? rank, SmtFunctionRank template, SmtSort? returnSort, params SmtSort[] argumentSorts)
         {
             Dictionary<SmtSort, SmtSort> resolvedParameters = new();

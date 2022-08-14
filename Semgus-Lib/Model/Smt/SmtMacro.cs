@@ -33,19 +33,19 @@ namespace Semgus.Model.Smt
         /// Constructs a new SMT macro with the given parameters
         /// </summary>
         /// <param name="name">Macro name</param>
-        /// <param name="theory">Theory this macro belongs to</param>
+        /// <param name="source">Theory or logic this macro belongs to</param>
         /// <param name="lambdaList">Lambda list for this macro</param>
         /// <param name="returnSortDeriver">Function to compute return sort of this macro</param>
         /// <param name="expander">The expansion function</param>
         public SmtMacro(SmtIdentifier name,
-                        ISmtTheory theory,
+                        ISmtSource source,
                         IEnumerable<MacroParameter> lambdaList,
                         Func<IReadOnlyList<SmtSort>, SmtSort> returnSortDeriver,
                         Func<SmtContext, IEnumerable<SmtTerm>, SmtTerm> expander,
                         bool expandByDefault = true)
         {
             Name = name;
-            Theory = theory;
+            Source = source;
             _lambdaList = lambdaList.ToList();
             _returnSortDeriver = returnSortDeriver;
             _expander = expander;
@@ -75,7 +75,7 @@ namespace Semgus.Model.Smt
         public SmtMacro(SmtFunction baseFn, DefaultMacroType defaultType, bool expandByDefault = true)
         {
             Name = baseFn.Name;
-            Theory = baseFn.Theory;
+            Source = baseFn.Source;
             _expandByDefault = expandByDefault;
             SmtFunctionRank? matchingRank = default;
             foreach (var template in baseFn.RankTemplates)
@@ -249,7 +249,7 @@ namespace Semgus.Model.Smt
         /// <summary>
         /// The theory this macro belongs to
         /// </summary>
-        public ISmtTheory Theory { get; }
+        public ISmtSource Source { get; }
 
         /// <summary>
         /// Checks if this macro invocation should be expanded or no

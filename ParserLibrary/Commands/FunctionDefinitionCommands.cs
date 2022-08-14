@@ -25,6 +25,7 @@ namespace Semgus.Parser.Commands
         private readonly ISmtScopeProvider _scopeProvider;
         private readonly ISmtConverter _converter;
         private readonly ISourceMap _sourceMap;
+        private readonly ISourceContextProvider _sourceContextProvider;
         private readonly ILogger<FunctionDefinitionCommands> _logger;
 
         public FunctionDefinitionCommands(ISemgusProblemHandler handler,
@@ -33,6 +34,7 @@ namespace Semgus.Parser.Commands
                                     ISmtScopeProvider scopeProvider,
                                     ISmtConverter converter,
                                     ISourceMap sourceMap,
+                                    ISourceContextProvider sourceContextProvider,
                                     ILogger<FunctionDefinitionCommands> logger)
         {
             _handler = handler;
@@ -41,6 +43,7 @@ namespace Semgus.Parser.Commands
             _scopeProvider = scopeProvider;
             _converter = converter;
             _sourceMap = sourceMap;
+            _sourceContextProvider = sourceContextProvider;
             _logger = logger;
         }
 
@@ -140,7 +143,7 @@ namespace Semgus.Parser.Commands
             var returnSort = _smtCtxProvider.Context.GetSortOrDie(returnSortId, _sourceMap, _logger);
             var args = argIds.Select(argId => _smtCtxProvider.Context.GetSortOrDie(argId, _sourceMap, _logger));
             var rank = new SmtFunctionRank(returnSort, args.ToArray());
-            var decl = new SmtFunction(name, SmtTheory.UserDefined, rank);
+            var decl = new SmtFunction(name, _sourceContextProvider.CurrentSmtSource, rank);
 
             _handler.OnFunctionDeclaration(_smtCtxProvider.Context, decl, rank);
             return (decl, rank);

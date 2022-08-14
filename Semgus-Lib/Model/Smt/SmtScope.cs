@@ -77,10 +77,10 @@ namespace Semgus.Model.Smt
                                           [NotNullWhen(false)] out string? error)
         {
             if (context.TryGetFunctionDeclaration(id, out var alreadyBound)
-                && alreadyBound.Theory != SmtTheory.UserDefined)
+                && alreadyBound.Source is not SmtUserDefinedSource)
             {
                 binding = default;
-                error = $"cannot shadow theory symbol `{id}` from theory {alreadyBound.Theory.Name}";
+                error = $"cannot shadow theory symbol `{id}` from theory {alreadyBound.Source.Name}";
                 return false;
             }
 

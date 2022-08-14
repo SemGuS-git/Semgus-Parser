@@ -20,7 +20,7 @@ namespace Semgus.Model.Smt
         /// <summary>
         /// Theory or logic that this IApplicable comes from
         /// </summary>
-        public ISmtTheory Theory { get; }
+        public ISmtSource Source { get; }
 
         /// <summary>
         /// Tries to get an appropriate rank for the given parameter and return sorts
