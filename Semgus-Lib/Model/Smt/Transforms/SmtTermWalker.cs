@@ -66,13 +66,13 @@ namespace Semgus.Model.Smt.Transforms
             => (bitVectorLiteral, _defaultDataFactory(bitVectorLiteral));
 
         public virtual (SmtTerm, TData) VisitBitVectorLiteral(SmtBitVectorLiteral bitVectorLiteral)
-            => OnBitVectorLiteral(bitVectorLiteral);
+            => OnBitVectorLiteral(bitVectorLiteral).CopyAnnotationsFrom(bitVectorLiteral);
 
         public virtual (SmtTerm, TData) OnDecimalLiteral(SmtDecimalLiteral decimalLiteral)
             => (decimalLiteral, _defaultDataFactory(decimalLiteral));
 
         public virtual (SmtTerm, TData) VisitDecimalLiteral(SmtDecimalLiteral decimalLiteral)
-            => OnDecimalLiteral(decimalLiteral);
+            => OnDecimalLiteral(decimalLiteral).CopyAnnotationsFrom(decimalLiteral);
 
         public virtual void OnExistsScope(SmtScope scope) { }
 
@@ -92,7 +92,7 @@ namespace Semgus.Model.Smt.Transforms
         {
             OnExistsScope(existsBinder.NewScope);
             var (child, data) = existsBinder.Child.Accept(this);
-            return OnExistsBinder(existsBinder, child, data);
+            return OnExistsBinder(existsBinder, child, data).CopyAnnotationsFrom(existsBinder);
         }
 
         public virtual void OnForallScope(SmtScope scope) { }
@@ -113,7 +113,7 @@ namespace Semgus.Model.Smt.Transforms
         {
             OnForallScope(forallBinder.NewScope);
             var (child, data) = forallBinder.Child.Accept(this);
-            return OnForallBinder(forallBinder, child, data);
+            return OnForallBinder(forallBinder, child, data).CopyAnnotationsFrom(forallBinder);
         }
 
         public virtual (SmtTerm, TData) OnFunctionApplication(SmtFunctionApplication appl, IReadOnlyList<SmtTerm> arguments, IReadOnlyList<TData> up)
@@ -147,7 +147,7 @@ namespace Semgus.Model.Smt.Transforms
                 data.Add(datum);
             }
 
-            return OnFunctionApplication(functionApplication, args, data);
+            return OnFunctionApplication(functionApplication, args, data).CopyAnnotationsFrom(functionApplication);
         }
 
         public virtual (SmtTerm, TData) VisitLambdaBinder(SmtLambdaBinder lambdaBinder)
@@ -155,7 +155,8 @@ namespace Semgus.Model.Smt.Transforms
             var (child, data) = lambdaBinder.Child.Accept(this);
             if (child != lambdaBinder.Child)
             {
-                return (new SmtLambdaBinder(child, lambdaBinder.NewScope, lambdaBinder.ArgumentNames), data);
+                return (new SmtLambdaBinder(child, lambdaBinder.NewScope, lambdaBinder.ArgumentNames), data)
+                    .CopyAnnotationsFrom(lambdaBinder);
             }
             else
             {
@@ -169,7 +170,8 @@ namespace Semgus.Model.Smt.Transforms
             var (child, data) = letBinder.Child.Accept(this);
             if (child != letBinder.Child)
             {
-                return (new SmtLetBinder(child, letBinder.NewScope), data);
+                return (new SmtLetBinder(child, letBinder.NewScope), data)
+                    .CopyAnnotationsFrom(letBinder);
             }
             else
             {
@@ -182,7 +184,8 @@ namespace Semgus.Model.Smt.Transforms
             var (child, data) = matchBinder.Child.Accept(this);
             if (child != matchBinder.Child)
             {
-                return (new SmtMatchBinder(child, matchBinder.NewScope, matchBinder.ParentType, matchBinder.Constructor, matchBinder.Bindings), data);
+                return (new SmtMatchBinder(child, matchBinder.NewScope, matchBinder.ParentType, matchBinder.Constructor, matchBinder.Bindings), data)
+                    .CopyAnnotationsFrom(matchBinder);
             }
             else
             {
@@ -202,7 +205,7 @@ namespace Semgus.Model.Smt.Transforms
                 data.Add(nDatum);
                 binders.Add((SmtMatchBinder)nChild);
             } // TODO: Don't make a new term if nothing changed
-            var newMatchGrouper = new SmtMatchGrouper(term, matchGrouper.Sort, binders);
+            var newMatchGrouper = new SmtMatchGrouper(term, matchGrouper.Sort, binders).CopyAnnotationsFrom(matchGrouper);
             return (newMatchGrouper, MergeData(newMatchGrouper, data));
         }
 
@@ -210,18 +213,40 @@ namespace Semgus.Model.Smt.Transforms
             => (numeralLiteral, _defaultDataFactory(numeralLiteral));
 
         public virtual (SmtTerm, TData) VisitNumeralLiteral(SmtNumeralLiteral numeralLiteral)
-            => OnNumeralLiteral(numeralLiteral);
+            => OnNumeralLiteral(numeralLiteral).CopyAnnotationsFrom(numeralLiteral);
 
         public virtual (SmtTerm, TData) OnStringLiteral(SmtStringLiteral stringLiteral)
             => (stringLiteral, _defaultDataFactory(stringLiteral));
 
         public virtual (SmtTerm, TData) VisitStringLiteral(SmtStringLiteral stringLiteral)
-            => OnStringLiteral(stringLiteral);
+            => OnStringLiteral(stringLiteral).CopyAnnotationsFrom(stringLiteral);
 
         public virtual (SmtTerm, TData) OnVariable(SmtVariable variable)
             => (variable, _defaultDataFactory(variable));
 
         public virtual (SmtTerm, TData) VisitVariable(SmtVariable variable)
-            => OnVariable(variable);
+            => OnVariable(variable).CopyAnnotationsFrom(variable);
+    }
+
+    /// <summary>
+    /// Helper methods for the SMT term walker
+    /// </summary>
+    internal static class SmtTermWalkerHelpers
+    {
+        /// <summary>
+        /// Copies annotations to a term/data pair
+        /// </summary>
+        /// <typeparam name="TData">Pair data type</typeparam>
+        /// <param name="thing">SMT term/data pair</param>
+        /// <param name="src">Term to copy annotations from</param>
+        /// <returns>The term/data pair</returns>
+        public static (SmtTerm, TData) CopyAnnotationsFrom<TData>(this (SmtTerm Term, TData) thing, SmtTerm src)
+        {
+            if (thing.Term != src)
+            {
+                thing.Term.CopyAnnotationsFrom(src);
+            }
+            return thing;
+        }
     }
 }

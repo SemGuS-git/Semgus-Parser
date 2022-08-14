@@ -77,12 +77,15 @@ namespace Semgus.Parser.Json.Converters
             }
 
             /// <summary>
-            /// Base term model. Specifies the term type property.
+            /// Base term model. Specifies the term type and annotation properties.
             /// </summary>
             private abstract record TermModel
             {
                 [JsonProperty("$termType")]
-                string TermType { get; }
+                public string TermType { get; }
+
+                [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+                public IEnumerable<SmtAttribute>? Annotations { get; init; }
 
                 public TermModel(string type)
                 {
@@ -107,7 +110,10 @@ namespace Semgus.Parser.Json.Converters
                     ReturnSort: functionApplication.Rank.ReturnSort.Name,
                     ArgumentSorts: functionApplication.Rank.ArgumentSorts.Select(x => x.Name),
                     Arguments: functionApplication.Arguments
-                ));
+                )
+                {
+                    Annotations = functionApplication.Annotations
+                });
                 return this;
             }
 
@@ -126,7 +132,11 @@ namespace Semgus.Parser.Json.Converters
             private record VariableModel(SmtIdentifier Name, SmtSortIdentifier Sort) : TermModel("variable");
             public object VisitVariable(SmtVariable variable)
             {
-                _serializer.Serialize(_writer, new VariableModel(Name: variable.Name, Sort: variable.Sort.Name));
+                _serializer.Serialize(_writer,
+                    new VariableModel(Name: variable.Name, Sort: variable.Sort.Name)
+                    {
+                        Annotations = variable.Annotations
+                    });
                 return this;
             }
 
@@ -135,7 +145,10 @@ namespace Semgus.Parser.Json.Converters
             {
                 _serializer.Serialize(_writer,
                     new ExistsBinderModel(existsBinder.NewScope.LocalBindings.Select(b => new VariableModel(b.Id, b.Sort.Name)),
-                                          existsBinder.Child));
+                                          existsBinder.Child)
+                    {
+                        Annotations = existsBinder.Annotations
+                    });
                 return this;
             }
 
@@ -144,7 +157,10 @@ namespace Semgus.Parser.Json.Converters
             {
                 _serializer.Serialize(_writer,
                     new ForallBinderModel(forallBinder.NewScope.LocalBindings.Select(b => new VariableModel(b.Id, b.Sort.Name)),
-                                          forallBinder.Child));
+                                          forallBinder.Child)
+                    {
+                        Annotations = forallBinder.Annotations
+                    });
                 return this;
             }
 
@@ -152,7 +168,10 @@ namespace Semgus.Parser.Json.Converters
             public object VisitMatchGrouper(SmtMatchGrouper matchGrouper)
             {
                 _serializer.Serialize(_writer,
-                    new MatchGrouperModel(matchGrouper.Term, matchGrouper.Binders));
+                    new MatchGrouperModel(matchGrouper.Term, matchGrouper.Binders)
+                    {
+                        Annotations = matchGrouper.Annotations
+                    });
                 return this;
             }
 
@@ -160,7 +179,10 @@ namespace Semgus.Parser.Json.Converters
             public object VisitMatchBinder(SmtMatchBinder matchBinder)
             {
                 _serializer.Serialize(_writer,
-                    new MatchBinderModel(matchBinder.Constructor?.Operator, matchBinder.Bindings.Select(b => b.Binding.Id), matchBinder.Child));
+                    new MatchBinderModel(matchBinder.Constructor?.Operator, matchBinder.Bindings.Select(b => b.Binding.Id), matchBinder.Child)
+                    {
+                        Annotations = matchBinder.Annotations
+                    });
                 return this;
             }
 
@@ -168,7 +190,10 @@ namespace Semgus.Parser.Json.Converters
             public object VisitLambdaBinder(SmtLambdaBinder lambdaBinder)
             {
                 _serializer.Serialize(_writer,
-                    new LambdaBinderModel(lambdaBinder.ArgumentNames, lambdaBinder.Child));
+                    new LambdaBinderModel(lambdaBinder.ArgumentNames, lambdaBinder.Child)
+                    {
+                        Annotations = lambdaBinder.Annotations
+                    });
                 return this;
             }
 
