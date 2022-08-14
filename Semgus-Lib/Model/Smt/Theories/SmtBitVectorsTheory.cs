@@ -41,7 +41,7 @@ namespace Semgus.Model.Smt.Theories
             /// </summary>
             /// <param name="size">Size of bit vectors in this sort</param>
             private BitVectorsSort(long size) : base(new(new SmtIdentifier(BitVectorSortPrimaryId.Symbol,
-                                                                      new SmtIdentifier.Index(size))))
+                                                                      size)))
             {
                 Size = size;
             }
@@ -111,7 +111,7 @@ namespace Semgus.Model.Smt.Theories
 
             PrimarySortSymbols = new HashSet<SmtIdentifier>() { BitVectorSortPrimaryId };
 
-            var bv0 = new SmtSort.WildcardSort(new(new SmtIdentifier("BitVec", new SmtIdentifier.Index("*"))));
+            var bv0 = new SmtSort.WildcardSort(new(new SmtIdentifier("BitVec", "*")));
 
             // Concatenation: output size is equal to sum of input sizes
             cf("concat",
@@ -233,11 +233,11 @@ namespace Semgus.Model.Smt.Theories
                     functionId.Indices[0].NumeralValue!.Value < functionId.Indices[1].NumeralValue!.Value)
                 {
                     resolvedFunction = new SmtFunction(
-                        new SmtIdentifier("extract", new SmtIdentifier.Index("i"), new SmtIdentifier.Index("j")),
+                        new SmtIdentifier("extract", "i", "j"),
                         this,
                         new SmtFunctionRank(
-                            new SmtSort.GenericSort(new(new SmtIdentifier("BitVec", new SmtIdentifier.Index("n")))),
-                            new SmtSort.GenericSort(new(new SmtIdentifier("BitVec", new SmtIdentifier.Index("m")))))
+                            new SmtSort.GenericSort(new(new SmtIdentifier("BitVec", "n"))),
+                            new SmtSort.GenericSort(new(new SmtIdentifier("BitVec", "m"))))
                         {
                             ValidationComment = "i,j,m,n are numerals, m > i >= j > 0, n = i - j + 1"
                         });
@@ -252,7 +252,7 @@ namespace Semgus.Model.Smt.Theories
                     this,
                     new SmtFunctionRank(
                         BitVectorsSort.GetSort(i - j + 1),
-                        new SmtSort.WildcardSort(new(new SmtIdentifier("BitVec", new SmtIdentifier.Index("*"))))
+                        new SmtSort.WildcardSort(new(new SmtIdentifier("BitVec", "*")))
                         )
                     {
                         Validator = r => ((BitVectorsSort)r.ArgumentSorts[0]).Size > i,

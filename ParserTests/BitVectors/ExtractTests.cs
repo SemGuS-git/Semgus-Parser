@@ -23,8 +23,8 @@ namespace Semgus.Parser.Tests.BitVectors
         /// The name of the function returned when an invalid (_ extract i j) form is given
         /// </summary>
         private static readonly SmtIdentifier InvalidName = new("extract",
-                                                                new SmtIdentifier.Index("i"),
-                                                                new SmtIdentifier.Index("j"));
+                                                                "i",
+                                                                "j");
 
         [Fact]
         public void TrueForWrongArguments()
@@ -50,7 +50,7 @@ namespace Semgus.Parser.Tests.BitVectors
         public void TrueForWrongIndices(dynamic i, dynamic j)
         {
             SmtContext ctx = new();
-            SmtIdentifier fnId = new("extract", new SmtIdentifier.Index(i), new SmtIdentifier.Index(j));
+            SmtIdentifier fnId = new("extract", i, j);
             AssertTrue(ctx.TryGetFunctionDeclaration(fnId, out IApplicable? appl));
             var function = Assert.IsType<SmtFunction>(appl);
             Assert.Equal(InvalidName, function.Name);
@@ -65,7 +65,7 @@ namespace Semgus.Parser.Tests.BitVectors
         public void TrueForRightIndices(long i, long j)
         {
             SmtContext ctx = new();
-            SmtIdentifier fnId = new("extract", new SmtIdentifier.Index(i), new SmtIdentifier.Index(j));
+            SmtIdentifier fnId = new("extract", i, j);
             AssertTrue(ctx.TryGetFunctionDeclaration(fnId, out IApplicable? appl));
             var function = Assert.IsType<SmtFunction>(appl);
             Assert.Single(function.RankTemplates);
@@ -83,7 +83,7 @@ namespace Semgus.Parser.Tests.BitVectors
         {
             long n = i - j + 1;
             SmtContext ctx = new();
-            SmtIdentifier fnId = new("extract", new SmtIdentifier.Index(i), new SmtIdentifier.Index(j));
+            SmtIdentifier fnId = new("extract", i, j);
             AssertTrue(ctx.TryGetFunctionDeclaration(fnId, out IApplicable? function));
 
             var argSort = SmtBitVectorsTheory.BitVectorsSort.GetSort(m);
@@ -112,7 +112,7 @@ namespace Semgus.Parser.Tests.BitVectors
         {
             long n = np ?? i - j + 1;
             SmtContext ctx = new();
-            SmtIdentifier fnId = new("extract", new SmtIdentifier.Index(i), new SmtIdentifier.Index(j));
+            SmtIdentifier fnId = new("extract", i, j);
             AssertTrue(ctx.TryGetFunctionDeclaration(fnId, out IApplicable? function));
 
             var argSort = SmtBitVectorsTheory.BitVectorsSort.GetSort(m);

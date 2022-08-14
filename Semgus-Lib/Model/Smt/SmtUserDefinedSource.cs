@@ -46,7 +46,7 @@
         /// <returns>The user-defined source for the given filename</returns>
         public static SmtUserDefinedSource ForFile(string name)
         {
-            SmtIdentifier id = new(name, new SmtIdentifier.Index("file"), new SmtIdentifier.Index(name));
+            SmtIdentifier id = new(name, "file", name);
             return ForIdentifier(id);
         }
 
@@ -57,7 +57,7 @@
         /// <returns>The user-defined source for the given stream name</returns>
         public static SmtUserDefinedSource ForStream(string name)
         {
-            SmtIdentifier id = new(name, new SmtIdentifier.Index("stream"), new SmtIdentifier.Index(name));
+            SmtIdentifier id = new(name, "stream", name);
             return ForIdentifier(id);
         }
     }
