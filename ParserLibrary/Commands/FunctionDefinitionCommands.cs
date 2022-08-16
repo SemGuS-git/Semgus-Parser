@@ -3,6 +3,7 @@
 using Semgus.Model;
 using Semgus.Model.Smt;
 using Semgus.Model.Smt.Terms;
+using Semgus.Model.Smt.Transforms;
 using Semgus.Parser.Reader;
 
 using System;
@@ -24,6 +25,8 @@ namespace Semgus.Parser.Commands
         private readonly ISmtScopeProvider _scopeProvider;
         private readonly ISmtConverter _converter;
         private readonly ISourceMap _sourceMap;
+        private readonly ISourceContextProvider _sourceContextProvider;
+        private readonly IExtensionHandler _extensionHandler;
         private readonly ILogger<FunctionDefinitionCommands> _logger;
 
         public FunctionDefinitionCommands(ISemgusProblemHandler handler,
@@ -32,6 +35,8 @@ namespace Semgus.Parser.Commands
                                     ISmtScopeProvider scopeProvider,
                                     ISmtConverter converter,
                                     ISourceMap sourceMap,
+                                    ISourceContextProvider sourceContextProvider,
+                                    IExtensionHandler extensionHandler,
                                     ILogger<FunctionDefinitionCommands> logger)
         {
             _handler = handler;
@@ -40,6 +45,8 @@ namespace Semgus.Parser.Commands
             _scopeProvider = scopeProvider;
             _converter = converter;
             _sourceMap = sourceMap;
+            _sourceContextProvider = sourceContextProvider;
+            _extensionHandler = extensionHandler;
             _logger = logger;
         }
 
@@ -139,8 +146,9 @@ namespace Semgus.Parser.Commands
             var returnSort = _smtCtxProvider.Context.GetSortOrDie(returnSortId, _sourceMap, _logger);
             var args = argIds.Select(argId => _smtCtxProvider.Context.GetSortOrDie(argId, _sourceMap, _logger));
             var rank = new SmtFunctionRank(returnSort, args.ToArray());
-            var decl = new SmtFunction(name, SmtTheory.UserDefined, rank);
+            var decl = new SmtFunction(name, _sourceContextProvider.CurrentSmtSource, rank);
 
+            _handler.OnFunctionDeclaration(_smtCtxProvider.Context, decl, rank);
             return (decl, rank);
         }
 
@@ -187,9 +195,14 @@ namespace Semgus.Parser.Commands
             }
 
             SmtLambdaBinder lambda = new(term, scopeCtx.Scope, arguments);
-            decl.AddDefinition(rank, lambda);
-
             MaybeProcessChcDefinition(decl, rank, lambda);
+
+            // Macroexpand the definition before adding it
+            lambda = (SmtLambdaBinder)SmtMacroExpander.Expand(_smtCtxProvider.Context, lambda);
+            decl.AddDefinition(rank, lambda);
+            _extensionHandler.ProcessExtensions(_handler, _smtCtxProvider.Context, lambda);
+            _handler.OnFunctionDefinition(_smtCtxProvider.Context, decl, rank, lambda);
+
             return true;
         }
 
@@ -390,6 +403,9 @@ namespace Semgus.Parser.Commands
                         constraints.ToArray()
                     );
                 }
+
+                // Only the constraint needs to be macroexpanded
+                constraint = SmtMacroExpander.Expand(_smtCtxProvider.Context, constraint);
 
                 _semgusCtxProvider.Context.AddChc(new SemgusChc(head, relList, constraint, binder, headBindings.Concat(bodyBindings), inputs, outputs));
             }

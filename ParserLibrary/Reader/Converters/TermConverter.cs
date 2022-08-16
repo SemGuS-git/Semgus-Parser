@@ -340,7 +340,7 @@ namespace Semgus.Parser.Reader.Converters
                                         }
                                         else
                                         {
-                                            _contextProvider.Context.TryGetFunctionDeclaration(SmtCommonIdentifiers.OrFunctionId, out SmtFunction? orf);
+                                            _contextProvider.Context.TryGetFunctionDeclaration(SmtCommonIdentifiers.OrFunctionId, out IApplicable? orf);
                                             var boolsort = GetSortOrDie(SmtCommonIdentifiers.BoolSortId);
 
                                             // Make sure all terms are of type bool
@@ -402,7 +402,7 @@ namespace Semgus.Parser.Reader.Converters
                             }
                         });
 
-                        if (_contextProvider.Context.TryGetFunctionDeclaration(af.Id.Id, out SmtFunction? defn))
+                        if (_contextProvider.Context.TryGetFunctionDeclaration(af.Id.Id, out IApplicable? defn))
                         {
                             var args = af.Arguments.Select(a =>
                             {
@@ -433,16 +433,7 @@ namespace Semgus.Parser.Reader.Converters
                                 string msg = "Unable to resolve rank for: " + af.Id.Id;
                                 to = new ErrorTerm(msg);
                                 msg += $"\n  Looking for signature ({string.Join(' ', argSorts.Select(s => s.Name))}) -> {af.Id.Sort?.Name.ToString() ?? "TBD"}";
-                                msg += $"\n  Available signatures: \n";
-                                foreach (var rankTemplate in defn.RankTemplates)
-                                {
-                                    msg += $"    - ({string.Join(' ', rankTemplate.ArgumentSorts.Select(s => s.Name))}) -> {rankTemplate.ReturnSort.Name}";
-                                    if (rankTemplate.ValidationComment != null)
-                                    {
-                                        msg += $"  [{rankTemplate.ValidationComment}]";
-                                    }
-                                    msg += "\n";
-                                }
+                                msg += defn.GetRankHelp();
                                 _logger.LogParseError(msg, _sourceMap[af.Id.Id]);
                             }
                         }

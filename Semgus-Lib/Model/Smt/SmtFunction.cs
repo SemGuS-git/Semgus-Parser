@@ -1,43 +1,105 @@
 ﻿using Semgus.Model.Smt.Terms;
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Semgus.Model.Smt
 {
-    public class SmtFunction
+    /// <summary>
+    /// A function object
+    /// </summary>
+    public class SmtFunction : IApplicable
     {
-        public SmtFunction(SmtIdentifier name, ISmtTheory theory, params SmtFunctionRank[] rankTemplates)
+        /// <summary>
+        /// Constructs a new function object
+        /// </summary>
+        /// <param name="name">The function name</param>
+        /// <param name="source">The function source (e.g., theory or extension)</param>
+        /// <param name="rankTemplates">Templates for valid ranks</param>
+        public SmtFunction(SmtIdentifier name, ISmtSource source, params SmtFunctionRank[] rankTemplates)
         {
             Name = name;
-            Theory = theory;
+            Source = source;
             _rankTemplates = new List<SmtFunctionRank>(rankTemplates);
             _definitions = new Dictionary<SmtFunctionRank, SmtLambdaBinder>();
         }
 
+        /// <summary>
+        /// Hook called when trying to get a definition and none found.
+        /// Takes an SmtContext, this function and the desired rank as arguments and returns
+        /// a definition, or null if not found. Note that the computed definition
+        /// is not automatically cached - hooks must call AddDefinition if the
+        /// definition should be kept.
+        /// </summary>
+        public Func<SmtContext, SmtFunction, SmtFunctionRank, SmtLambdaBinder?> DefinitionMissingHook { get; set; } = (_, _, _) => null;
+
+        /// <summary>
+        /// Mapping of ranks to definitions
+        /// </summary>
         private readonly IDictionary<SmtFunctionRank, SmtLambdaBinder> _definitions;
 
+        /// <summary>
+        /// Adds a definition for the given rank
+        /// </summary>
+        /// <param name="rank">Rank to add definition for</param>
+        /// <param name="definition">Function definition</param>
         public void AddDefinition(SmtFunctionRank rank, SmtLambdaBinder definition)
         {
             _definitions[rank] = definition;
         }
 
-        public SmtIdentifier Name { get; private set; }
-        public ISmtTheory Theory { get; private set; }
+        /// <summary>
+        /// Gets a function definition for the given rank
+        /// </summary>
+        /// <param name="rank">Rank to get definition for</param>
+        /// <param name="definition">The definition</param>
+        /// <returns>True if successfully got definition</returns>
+        public bool TryGetDefinition(SmtContext ctx, SmtFunctionRank rank, [NotNullWhen(true)] out SmtLambdaBinder? definition)
+        {
+            if (_definitions.TryGetValue(rank, out definition))
+            {
+                return true;
+            }
 
+            definition = DefinitionMissingHook(ctx, this, rank);
+            return definition is not null;
+        }
+
+        /// <summary>
+        /// Name of this function
+        /// </summary>
+        public SmtIdentifier Name { get; private set; }
+
+        /// <summary>
+        /// Source of this function, e.g. theory, extension, or user-defined
+        /// </summary>
+        public ISmtSource Source { get; private set; }
+
+        /// <summary>
+        /// List of valid rank templates
+        /// </summary>
         private readonly List<SmtFunctionRank> _rankTemplates;
 
+        /// <summary>
+        /// Adds a valid rank template to this function
+        /// </summary>
+        /// <param name="rank">Rank template to add</param>
         public void AddRankTemplate(SmtFunctionRank rank)
         {
             _rankTemplates.Add(rank);
         }
 
+        /// <summary>
+        /// Gets a collection of all valid rank templates for this function
+        /// </summary>
         public IReadOnlyCollection<SmtFunctionRank> RankTemplates => _rankTemplates;
 
+        /// <summary>
+        /// Attempts to resolve a concrete rank for the given function signature
+        /// </summary>
+        /// <param name="rank">The resolved rank</param>
+        /// <param name="returnSort">Return sort of function call, if known</param>
+        /// <param name="argumentSorts">Function call argument sorts</param>
+        /// <returns>True if successfully resolved a concrete rank</returns>
         public bool TryResolveRank([NotNullWhen(true)] out SmtFunctionRank? rank, SmtSort? returnSort, params SmtSort[] argumentSorts)
         {
             var sameArity = _rankTemplates
@@ -54,6 +116,14 @@ namespace Semgus.Model.Smt
             return false;
         }
 
+        /// <summary>
+        /// Attempts to resolve a concrete rank for the given function signature, from a single rank template
+        /// </summary>
+        /// <param name="rank">The resolved rank</param>
+        /// <param name="template">The rank template to try</param>
+        /// <param name="returnSort">Return sort of function call, if known</param>
+        /// <param name="argumentSorts">Function call argument sorts</param>
+        /// <returns>True if successfully resolved a concrete rank</returns>
         private bool TryResolveRank([NotNullWhen(true)] out SmtFunctionRank? rank, SmtFunctionRank template, SmtSort? returnSort, params SmtSort[] argumentSorts)
         {
             Dictionary<SmtSort, SmtSort> resolvedParameters = new();
@@ -140,6 +210,35 @@ namespace Semgus.Model.Smt
                 rank = new SmtFunctionRank(returnSort, argumentSorts);
             }
             return template.Validator(rank);
+        }
+
+        /// <summary>
+        /// Returns a string describing available ranks
+        /// </summary>
+        /// <returns>Descriptive string</returns>
+        public string GetRankHelp()
+        {
+            string msg = $"\n  Available signatures: \n";
+            foreach (var rankTemplate in RankTemplates)
+            {
+                msg += $"    - ({string.Join(' ', rankTemplate.ArgumentSorts.Select(s => s.Name))}) -> {rankTemplate.ReturnSort.Name}";
+                if (rankTemplate.ValidationComment != null)
+                {
+                    msg += $"  [{rankTemplate.ValidationComment}]";
+                }
+                msg += "\n";
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// Checks if there is a possible resolution for the given arity
+        /// </summary>
+        /// <param name="arity">Arity to check</param>
+        /// <returns>True if there is a valid rank with the given arity</returns>
+        public bool IsArityPossible(int arity)
+        {
+            return RankTemplates.Any(rt => rt.Arity == arity);
         }
     }
 }

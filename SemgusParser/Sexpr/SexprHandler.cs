@@ -114,5 +114,29 @@ namespace Semgus.Parser.Sexpr
                 }
             }
         }
+
+        public void OnFunctionDeclaration(SmtContext ctx, SmtFunction function, SmtFunctionRank rank)
+        {
+            _sw.WriteList(() =>
+            {
+                _sw.WriteSymbol("declare-function");
+                _sw.Write(function.Name);
+                _sw.WriteKeyword("rank");
+                _sw.Write(rank);
+            });
+        }
+
+        public void OnFunctionDefinition(SmtContext ctx, SmtFunction function, SmtFunctionRank rank, SmtLambdaBinder lambda)
+        {
+            _sw.WriteList(() =>
+            {
+                _sw.WriteSymbol("define-function");
+                _sw.Write(function.Name);
+                _sw.WriteKeyword("rank");
+                _sw.Write(rank);
+                _sw.WriteKeyword("definition");
+                _sw.Write(lambda);
+            });
+        }
     }
 }

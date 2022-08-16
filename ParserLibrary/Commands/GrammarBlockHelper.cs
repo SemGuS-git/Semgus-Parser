@@ -63,7 +63,7 @@ namespace Semgus.Parser.Commands
                                             SemgusChc.SemanticRelation Relation,
                                             SmtFunction Function,
                                             SmtFunctionRank Rank);
-        public static (SemgusGrammar, IReadOnlyList<SemgusTermType>, SemgusTermType, SmtFunction, IReadOnlyCollection<SemgusChc>) ConvertSygusGrammar<T>(SynthFunCommand.GrammarForm grammar, IList<(SmtIdentifier, SmtSortIdentifier)> args, SmtContext ctx, ISmtConverter converter, ISourceMap sourceMap, ILogger<T> logger)
+        public static (SemgusGrammar, IReadOnlyList<SemgusTermType>, SemgusTermType, SmtFunction, IReadOnlyCollection<SemgusChc>) ConvertSygusGrammar<T>(SynthFunCommand.GrammarForm grammar, IList<(SmtIdentifier, SmtSortIdentifier)> args, SmtContext ctx, ISmtConverter converter, ISourceMap sourceMap, ISourceContextProvider sourceContextProvider, ILogger<T> logger)
         {
             IDictionary<SmtIdentifier, TermTypeData> data = new Dictionary<SmtIdentifier, TermTypeData>();
             IDictionary<SmtIdentifier, SemanticRelationData> semRelInfo = new Dictionary<SmtIdentifier, SemanticRelationData>();
@@ -110,7 +110,7 @@ namespace Semgus.Parser.Commands
                 argVars[^1] = new(outputVarId, new SmtVariableBinding(outputVarId, datum.Sort, SmtVariableBindingType.Universal, headScope));
 
                 SmtFunctionRank semRank = new(ctx.GetSortOrDie(SmtCommonIdentifiers.BoolSortId, sourceMap, logger), argSorts);
-                SmtFunction semFunc = new(GensymUtils.Gensym("_SySem", name.Symbol), SmtTheory.UserDefined, semRank);
+                SmtFunction semFunc = new(GensymUtils.Gensym("_SySem", name.Symbol), sourceContextProvider.CurrentSmtSource, semRank);
 
                 SemgusChc.SemanticRelation semRel = new(semFunc, semRank, argVars);
                 semRelInfo.Add(name, new(name, headScope, termVarId, outputVarId, inputVars, new List<SmtVariable>() { argVars[^1] }, semRel, semFunc, semRank));

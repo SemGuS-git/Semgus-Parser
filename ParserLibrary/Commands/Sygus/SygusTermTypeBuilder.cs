@@ -42,14 +42,14 @@ namespace Semgus.Parser.Commands.Sygus
             intTT.AddConstructor(new(new("mod"), intTT, intTT));
             intTT.AddConstructor(new(new("abs"), intTT));
             intTT.AddConstructor(new(new("ite"), boolTT, intTT, intTT));
-            intTT.AddConstructor(new(new("constant", new SmtIdentifier.Index("Int")), intSort));
+            intTT.AddConstructor(new(new("constant", "Int"), intSort));
 
             boolTT.AddConstructor(new(new("="), intTT, intTT));
             boolTT.AddConstructor(new(new("<"), intTT, intTT));
             boolTT.AddConstructor(new(new(">"), intTT, intTT));
             boolTT.AddConstructor(new(new("<="), intTT, intTT));
             boolTT.AddConstructor(new(new(">="), intTT, intTT));
-            intTT.AddConstructor(new(new("constant", new SmtIdentifier.Index("Bool")), intSort));
+            intTT.AddConstructor(new(new("constant", "Bool"), intSort));
 
             foreach (var (id, sort) in arguments)
             {

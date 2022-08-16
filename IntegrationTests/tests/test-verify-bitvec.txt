@@ -1,5 +1,9 @@
 declare-term-types: 
   BV --> $bv();
+Function declaration: BV.Sem
+Function definition: BV.Sem: (lambda (term x1) (match term (($bv true))))
+Function declaration: bvxor
+Function definition: bvxor: (lambda (a1 a2) (bvor (bvand a1 (bvnot a2)) (bvand (bvnot a1) a2)))
 check-synth
 CHC: (BV.Sem term x1) <= true
     [constructor: ($bv)]
@@ -19,6 +23,8 @@ Constraint: (BV.Sem fn (bvurem #b01010101 #b11011101))
 Constraint: (BV.Sem fn (bvshl #b01010101 #b11011101))
 Constraint: (BV.Sem fn (bvlshr #b01010101 #b11011101))
 Constraint: (BV.Sem fn (ite (bvult #b1011001111010101 #b0101110100111011) #b11111111 #b00000000))
+Constraint: (BV.Sem fn (bvxor #b01010101 #b11011101))
+Constraint: (BV.Sem fn (bvxor (bvxor #b01010101 #b00110011) #b11011101))
 Function to Synthesize: fn
 Grammar: @BV__agtt [BV]
 @BV__agtt --> $bv

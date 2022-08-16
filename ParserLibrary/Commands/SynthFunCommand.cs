@@ -19,15 +19,17 @@ namespace Semgus.Parser.Commands
         private readonly ISemgusContextProvider _semgusContext;
         private readonly ISmtConverter _converter;
         private readonly ISourceMap _sourceMap;
+        private readonly ISourceContextProvider _sourceContextProvider;
         private readonly ILogger<SynthFunCommand> _logger;
 
-        public SynthFunCommand(ISemgusProblemHandler handler, ISmtContextProvider smtContext, ISemgusContextProvider semgusContext, ISmtConverter converter, ISourceMap sourceMap, ILogger<SynthFunCommand> logger)
+        public SynthFunCommand(ISemgusProblemHandler handler, ISmtContextProvider smtContext, ISemgusContextProvider semgusContext, ISmtConverter converter, ISourceMap sourceMap, ISourceContextProvider sourceContextProvider, ILogger<SynthFunCommand> logger)
         {
             _handler = handler;
             _smtContext = smtContext;
             _semgusContext = semgusContext;
             _converter = converter;
             _sourceMap = sourceMap;
+            _sourceContextProvider = sourceContextProvider;
             _logger = logger;
         }
 
@@ -49,9 +51,9 @@ namespace Semgus.Parser.Commands
             else if (ret is not SemgusTermType)
             {
                 // SyGuS-style synthfun
-                var (grammar, termTypes, startTT, startRel, chcs) = GrammarBlockHelper.ConvertSygusGrammar(grammarForm!, args, _smtContext.Context, _converter, _sourceMap, _logger);
+                var (grammar, termTypes, startTT, startRel, chcs) = GrammarBlockHelper.ConvertSygusGrammar(grammarForm!, args, _smtContext.Context, _converter, _sourceMap, _sourceContextProvider, _logger);
                 var rank = new SmtFunctionRank(startTT);
-                var decl = new SmtFunction(GensymUtils.Gensym("_SyTerm", name.Symbol), SmtTheory.UserDefined, rank);
+                var decl = new SmtFunction(GensymUtils.Gensym("_SyTerm", name.Symbol), _sourceContextProvider.CurrentSmtSource, rank);
 
                 _handler.OnTermTypes(termTypes);
                 foreach (var chc in chcs)
@@ -64,13 +66,13 @@ namespace Semgus.Parser.Commands
                 _semgusContext.Context.AddSynthFun(sf);
 
                 var sygRank = new SmtFunctionRank(ret, args.Select(a => _smtContext.Context.GetSortOrDie(a.Item2, _sourceMap, _logger)).ToArray());
-                var sygDecl = new SmtFunction(name, SmtTheory.UserDefined, sygRank);
+                var sygDecl = new SmtFunction(name, _sourceContextProvider.CurrentSmtSource, sygRank);
                 _semgusContext.Context.AddSygusSynthFun(decl, startRel, sygDecl, sygRank);
             }
             else
             {
                 var rank = new SmtFunctionRank((SemgusTermType)ret);
-                var decl = new SmtFunction(name, SmtTheory.UserDefined, rank);
+                var decl = new SmtFunction(name, _sourceContextProvider.CurrentSmtSource, rank);
 
                 // Handle the grammar declaration
                 SemgusGrammar grammar;

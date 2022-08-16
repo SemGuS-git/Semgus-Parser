@@ -37,7 +37,7 @@ namespace Semgus.Model
             OutputVariables = outputs?.ToList();
         }
 
-        public record SemanticRelation(SmtFunction Relation, SmtFunctionRank Rank, IReadOnlyList<SmtVariable> Arguments)
+        public record SemanticRelation(IApplicable Relation, SmtFunctionRank Rank, IReadOnlyList<SmtVariable> Arguments)
         {
             public override string ToString()
             {

@@ -1,4 +1,5 @@
-﻿using Semgus.Sexpr.Reader;
+﻿using Semgus.Model.Smt;
+using Semgus.Sexpr.Reader;
 
 using System;
 using System.Collections.Generic;
@@ -19,5 +20,10 @@ namespace Semgus.Parser.Reader
         /// <param name="position">Position to look up</param>
         /// <returns>Source line</returns>
         bool TryGetSourceLine(SexprPosition? position, out string? line);
+
+        /// <summary>
+        /// The current SMT user-defined source
+        /// </summary>
+        SmtUserDefinedSource CurrentSmtSource { get; }
     }
 }

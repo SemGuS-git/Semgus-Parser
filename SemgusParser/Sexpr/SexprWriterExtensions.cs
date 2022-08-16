@@ -157,5 +157,17 @@ namespace Semgus.Parser.Sexpr
                 });
             });
         }
+
+        public static void Write(this ISexprWriter writer, SmtFunctionRank rank)
+        {
+            writer.WriteList(() =>
+            {
+                writer.WriteSymbol("rank");
+                writer.WriteKeyword("argument-sorts");
+                writer.WriteList(rank.ArgumentSorts, r => writer.Write(r.Name));
+                writer.WriteKeyword("return-sort");
+                writer.Write(rank.ReturnSort.Name);
+            });
+        }
     }
 }

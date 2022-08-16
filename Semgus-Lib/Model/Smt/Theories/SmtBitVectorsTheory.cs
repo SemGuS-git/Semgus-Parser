@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Semgus.Model.Smt.Terms;
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -39,7 +41,7 @@ namespace Semgus.Model.Smt.Theories
             /// </summary>
             /// <param name="size">Size of bit vectors in this sort</param>
             private BitVectorsSort(long size) : base(new(new SmtIdentifier(BitVectorSortPrimaryId.Symbol,
-                                                                      new SmtIdentifier.Index(size))))
+                                                                      size)))
             {
                 Size = size;
             }
@@ -69,9 +71,7 @@ namespace Semgus.Model.Smt.Theories
         public SmtIdentifier Name { get; } = BitVectorsTheoryId;
 
         #region Deprecated
-        public IReadOnlyDictionary<SmtIdentifier, SmtFunction> Functions { get; }
-        public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts
-            => throw new NotImplementedException();
+        public IReadOnlyDictionary<SmtIdentifier, IApplicable> Functions { get; }
         #endregion
 
         /// <summary>
@@ -92,26 +92,11 @@ namespace Semgus.Model.Smt.Theories
         {
             SmtSort b = core.Sorts[BoolSortId.Name];
 
-            Dictionary<SmtIdentifier, SmtFunction> fd = new();
-            void cf(string name, Func<SmtFunctionRank, bool> val, string? valCmt, Func<SmtFunctionRank, SmtSort> retCalc, SmtSort ret, params SmtSort[] args)
-            {
-                SmtIdentifier id = new(name);
-                if (fd.TryGetValue(id, out SmtFunction? fun))
-                {
-                    fun.AddRankTemplate(new SmtFunctionRank(ret, args) { Validator = val, ReturnSortDeriver = retCalc, ValidationComment = valCmt });
-                }
-                else
-                {
-                    fd.Add(id, new SmtFunction(id, this, new SmtFunctionRank(ret, args) { Validator = val, ReturnSortDeriver = retCalc, ValidationComment = valCmt }));
-                }
-            }
-
-            PrimarySortSymbols = new HashSet<SmtIdentifier>() { BitVectorSortPrimaryId };
-
-            var bv0 = new SmtSort.WildcardSort(new(new SmtIdentifier("BitVec", new SmtIdentifier.Index("*"))));
+            SmtSourceBuilder sb = new(this);
+            var bv0 = new SmtSort.WildcardSort(new(new SmtIdentifier("BitVec", "*")));
 
             // Concatenation: output size is equal to sum of input sizes
-            cf("concat",
+            sb.AddFn("concat",
                 r => ((BitVectorsSort)r.ReturnSort).Size
                   == (((BitVectorsSort)r.ArgumentSorts[0]).Size
                     + ((BitVectorsSort)r.ArgumentSorts[1]).Size),
@@ -120,33 +105,31 @@ namespace Semgus.Model.Smt.Theories
                     + ((BitVectorsSort)r.ArgumentSorts[1]).Size),
                 bv0, bv0, bv0);
 
-            Func<SmtFunctionRank, bool> noVal = r => true;
-            Func<SmtFunctionRank, SmtSort> firstArgSort = r => r.ArgumentSorts[0];
-
             // Unary operations returnting a bit vector of the same size
-            cf("bvnot", noVal, null, firstArgSort, bv0, bv0);
-            cf("bvneg", noVal, null, firstArgSort, bv0, bv0);
+            sb.AddFn("bvnot", SmtSourceBuilder.NoRankValidation, null, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0);
+            sb.AddFn("bvneg", SmtSourceBuilder.NoRankValidation, null, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0);
 
-            Func<SmtFunctionRank, bool> argSortsEqual = r => r.ArgumentSorts[0] == r.ArgumentSorts[1];
             string argSortsEqualCmt = "Size of inputs must be the same";
 
             // Binary operations returning a bit vector of the same size
-            cf("bvand", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvor", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvadd", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvmul", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvudiv", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvurem", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvshl", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvlshr", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
+            sb.AddFn("bvand", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvor", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvadd", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvmul", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvudiv", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvurem", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvshl", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvlshr", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
 
             // Comparison: argument sizes the same, and returns Boolean
-            cf("bvult", argSortsEqual, argSortsEqualCmt, r => r.ReturnSort, b, bv0, bv0);
+            sb.AddFn("bvult", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseReturnSort, b, bv0, bv0);
 
-            Functions = fd;
-            var primary = new HashSet<SmtIdentifier>(fd.Keys);
-            primary.Add(new SmtIdentifier("extract"));
-            PrimaryFunctionSymbols = primary;
+            // Extract: must be constructed on-the-fly
+            sb.AddOnTheFlyFn("extract");
+
+            Functions = sb.Functions;
+            PrimaryFunctionSymbols = sb.PrimaryFunctionSymbols;
+            PrimarySortSymbols = new HashSet<SmtIdentifier>() { BitVectorSortPrimaryId };
         }
 
         /// <summary>
@@ -184,7 +167,7 @@ namespace Semgus.Model.Smt.Theories
         /// <param name="functionId">The function ID to look up</param>
         /// <param name="resolvedFunction">The resolved function</param>
         /// <returns>True if successfully gotten</returns>
-        public bool TryGetFunction(SmtIdentifier functionId, [NotNullWhen(true)] out SmtFunction? resolvedFunction)
+        public bool TryGetFunction(SmtIdentifier functionId, [NotNullWhen(true)] out IApplicable? resolvedFunction)
         {
             //
             // This needs to be constructed on the fly
@@ -199,11 +182,11 @@ namespace Semgus.Model.Smt.Theories
                     functionId.Indices[0].NumeralValue!.Value < functionId.Indices[1].NumeralValue!.Value)
                 {
                     resolvedFunction = new SmtFunction(
-                        new SmtIdentifier("extract", new SmtIdentifier.Index("i"), new SmtIdentifier.Index("j")),
+                        new SmtIdentifier("extract", "i", "j"),
                         this,
                         new SmtFunctionRank(
-                            new SmtSort.GenericSort(new(new SmtIdentifier("BitVec", new SmtIdentifier.Index("n")))),
-                            new SmtSort.GenericSort(new(new SmtIdentifier("BitVec", new SmtIdentifier.Index("m")))))
+                            new SmtSort.GenericSort(new(new SmtIdentifier("BitVec", "n"))),
+                            new SmtSort.GenericSort(new(new SmtIdentifier("BitVec", "m"))))
                         {
                             ValidationComment = "i,j,m,n are numerals, m > i >= j > 0, n = i - j + 1"
                         });
@@ -218,7 +201,7 @@ namespace Semgus.Model.Smt.Theories
                     this,
                     new SmtFunctionRank(
                         BitVectorsSort.GetSort(i - j + 1),
-                        new SmtSort.WildcardSort(new(new SmtIdentifier("BitVec", new SmtIdentifier.Index("*"))))
+                        new SmtSort.WildcardSort(new(new SmtIdentifier("BitVec", "*")))
                         )
                     {
                         Validator = r => ((BitVectorsSort)r.ArgumentSorts[0]).Size > i,

@@ -73,6 +73,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISemgusContextProvider>(),
                 converter,
                 A.Fake<ISourceMap>(),
+                A.Fake<ISourceContextProvider>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             SemgusGrammar grammar = sfc.CreateGrammarFromForm(gf);
@@ -120,6 +121,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISemgusContextProvider>(),
                 converter,
                 A.Fake<ISourceMap>(),
+                A.Fake<ISourceContextProvider>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             SemgusGrammar grammar = sfc.CreateGrammarFromForm(gf);
@@ -170,6 +172,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISemgusContextProvider>(),
                 converter,
                 A.Fake<ISourceMap>(),
+                A.Fake<ISourceContextProvider>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             Assert.Throws<FatalParseException>(() => sfc.CreateGrammarFromForm(gf));
@@ -208,6 +211,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISemgusContextProvider>(),
                 converter,
                 A.Fake<ISourceMap>(),
+                A.Fake<ISourceContextProvider>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             SemgusGrammar grammar = sfc.CreateGrammarFromForm(gf);
@@ -257,6 +261,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISemgusContextProvider>(),
                 converter,
                 A.Fake<ISourceMap>(),
+                A.Fake<ISourceContextProvider>(),
                 A.Fake<ILogger<SynthFunCommand>>());
 
             Assert.Throws<FatalParseException>(() => sfc.CreateGrammarFromForm(gf));

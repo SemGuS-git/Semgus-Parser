@@ -30,6 +30,7 @@ namespace Semgus.Parser.Json
             _serializer.Converters.Add(new SmtTermConverter());
             _serializer.Converters.Add(new SmtAttributeValueConverter());
             _serializer.Converters.Add(new SmtSortIdentifierConverter());
+            _serializer.Converters.Add(new SmtFunctionRankConverter());
             _writer = writer;
             _processingMode = mode;
             if (_processingMode == Program.ProcessingMode.Batch)
@@ -113,6 +114,18 @@ namespace Semgus.Parser.Json
                 _serializer.Serialize(_writer, new TermTypeDefinitionEvent(tt));
                 EndOfEvent();
             }
+        }
+
+        public void OnFunctionDeclaration(SmtContext ctx, SmtFunction function, SmtFunctionRank rank)
+        {
+            _serializer.Serialize(_writer, new FunctionDeclarationEvent(function, rank));
+            EndOfEvent();
+        }
+
+        public void OnFunctionDefinition(SmtContext ctx, SmtFunction function, SmtFunctionRank rank, SmtLambdaBinder lambda)
+        {
+            _serializer.Serialize (_writer, new FunctionDefinitionEvent(function, rank, lambda));
+            EndOfEvent();
         }
     }
 }

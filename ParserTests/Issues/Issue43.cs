@@ -44,6 +44,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISemgusContextProvider>(),
                 A.Fake<ISmtScopeProvider>(),
                 A.Fake<ISourceMap>(),
+                A.Fake<IExtensionHandler>(),
                 A.Fake<ILogger<ConstraintCommand>>());
 
             Assert.Throws<FatalParseException>(() => cc.Constraint(testToken));
@@ -62,6 +63,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISemgusContextProvider>(),
                 A.Fake<ISmtScopeProvider>(),
                 A.Fake<ISourceMap>(),
+                A.Fake<IExtensionHandler>(),
                 A.Fake<ILogger<ConstraintCommand>>());
 
             Assert.Throws<FatalParseException>(() => cc.Constraint(testToken));
@@ -84,6 +86,7 @@ namespace Semgus.Parser.Tests.Issues
                 A.Fake<ISemgusContextProvider>(),
                 A.Fake<ISmtScopeProvider>(),
                 A.Fake<ISourceMap>(),
+                A.Fake<IExtensionHandler>(),
                 A.Fake<ILogger<ConstraintCommand>>());
 
             // Should not throw

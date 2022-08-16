@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging;
 
 using Semgus.Model;
 using Semgus.Model.Smt;
+using Semgus.Model.Smt.Terms;
+using Semgus.Model.Smt.Transforms;
 using Semgus.Parser.Commands;
 using Semgus.Parser.Commands.Sygus;
 using Semgus.Parser.Reader;
@@ -16,7 +18,7 @@ using Semgus.Sexpr.Reader;
 
 namespace Semgus.Parser
 {
-    public class SemgusParser : IDisposable, ISourceContextProvider
+    public class SemgusParser : IDisposable, ISourceContextProvider, IExtensionHandler
     {
         /// <summary>
         /// The underlying S-expression reader
@@ -44,12 +46,18 @@ namespace Semgus.Parser
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
+        /// The current SMT user-defined source
+        /// </summary>
+        public SmtUserDefinedSource CurrentSmtSource { get; }
+
+        /// <summary>
         /// Creates a new SemGuS parser from the given file
         /// </summary>
         /// <param name="filename">Name of file to parse</param>
         public SemgusParser(string filename) : this(new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read), filename)
         {
             _filename = filename;
+            CurrentSmtSource = SmtUserDefinedSource.ForFile(filename);
         }
 
         /// <summary>
@@ -62,6 +70,7 @@ namespace Semgus.Parser
             _streamOrReader = stream;
             _reader = new SemgusReader(stream);
             _reader.SetSourceName(sourceName);
+            CurrentSmtSource = SmtUserDefinedSource.ForStream(sourceName);
             _commandDispatch = new Dictionary<string, MethodInfo>();
             _serviceProvider = ProcessCommandInfo();
         }
@@ -76,6 +85,7 @@ namespace Semgus.Parser
             _streamOrReader = reader;
             _reader = new SemgusReader(reader);
             _reader.SetSourceName(sourceName);
+            CurrentSmtSource = SmtUserDefinedSource.ForStream(sourceName);
             _commandDispatch = new Dictionary<string, MethodInfo>();
             _serviceProvider = ProcessCommandInfo();
         }
@@ -113,6 +123,8 @@ namespace Semgus.Parser
             services.AddScoped<ISmtContextProvider, SmtContextProvider>();
             services.AddScoped<ISmtScopeProvider, SmtScopeProvider>();
             services.AddScoped<ISemgusContextProvider, SemgusContextProvider>();
+            services.AddSingleton<ISourceContextProvider>(this);
+            services.AddSingleton<IExtensionHandler>(this);
             services.AddLogging(config =>
             {
                 config.AddProvider(new ReaderLoggerProvider(this, Console.Error));
@@ -260,6 +272,38 @@ namespace Semgus.Parser
 
             line = default;
             return false;
+        }
+
+        /// <summary>
+        /// Holds extensions that we have seen so far while parsing
+        /// </summary>
+        private ISet<SmtExtensionFinder.Extension> _reportedExtensions = new HashSet<SmtExtensionFinder.Extension>();
+        
+        /// <summary>
+        /// Processes extensions and emits definitions for new extensions
+        /// </summary>
+        /// <param name="handler">The problem handler</param>
+        /// <param name="ctx">The SMT context</param>
+        /// <param name="term">The term to process</param>
+        /// <exception cref="InvalidOperationException">Thrown if an extension is missing a definition</exception>
+        public void ProcessExtensions(ISemgusProblemHandler handler, SmtContext ctx, SmtTerm term)
+        {
+            var extensions = SmtExtensionFinder.Find(term);
+            extensions.ExceptWith(_reportedExtensions);
+
+            foreach (var ext in extensions)
+            {
+                if (ext.Function.TryGetDefinition(ctx, ext.Rank, out var defn))
+                {
+                    handler.OnFunctionDeclaration(ctx, ext.Function, ext.Rank);
+                    handler.OnFunctionDefinition(ctx, ext.Function, ext.Rank, defn);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Missing extension definition: {ext.Function.Name} [{ext.Rank}]");
+                }
+            }
+            _reportedExtensions.UnionWith(extensions);
         }
     }
 }

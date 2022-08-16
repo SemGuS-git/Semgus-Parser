@@ -29,11 +29,11 @@ namespace Semgus.Parser
             long ix = Interlocked.Increment(ref _gensym_counter);
             if (index is null)
             {
-                return new SmtIdentifier(prefix, new SmtIdentifier.Index(ix));
+                return new SmtIdentifier(prefix, ix);
             }
             else
             {
-                return new SmtIdentifier(prefix, new SmtIdentifier.Index(index), new SmtIdentifier.Index(ix));
+                return new SmtIdentifier(prefix, index, ix);
             }
         }
     }

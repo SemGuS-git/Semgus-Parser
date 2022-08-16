@@ -10,6 +10,7 @@ using Semgus.Model.Smt.Theories;
 using Semgus.Model.Smt;
 using Semgus.Model;
 using System.Linq;
+using Semgus.Model.Smt.Transforms;
 
 namespace Semgus.Parser.Commands
 {
@@ -25,9 +26,10 @@ namespace Semgus.Parser.Commands
         private readonly ISemgusContextProvider _semgusProvider;
         private readonly ISmtScopeProvider _scopeProvider;
         private readonly ISourceMap _sourceMap;
+        private readonly IExtensionHandler _extensionHandler;
         private readonly ILogger<ConstraintCommand> _logger;
 
-        public ConstraintCommand(ISmtConverter converter, ISemgusProblemHandler handler, ISmtContextProvider smtProvider, ISemgusContextProvider semgusProvider, ISmtScopeProvider scopeProvider, ISourceMap sourceMap, ILogger<ConstraintCommand> logger)
+        public ConstraintCommand(ISmtConverter converter, ISemgusProblemHandler handler, ISmtContextProvider smtProvider, ISemgusContextProvider semgusProvider, ISmtScopeProvider scopeProvider, ISourceMap sourceMap, IExtensionHandler extensionHandler, ILogger<ConstraintCommand> logger)
         {
             _converter = converter;
             _problemHandler = handler;
@@ -35,6 +37,7 @@ namespace Semgus.Parser.Commands
             _semgusProvider = semgusProvider;
             _scopeProvider = scopeProvider;
             _sourceMap = sourceMap;
+            _extensionHandler = extensionHandler;
             _logger = logger;
         }
 
@@ -58,6 +61,11 @@ namespace Semgus.Parser.Commands
             var boolSort = _smtProvider.Context.GetSortOrDie(SmtCommonIdentifiers.BoolSortId, _sourceMap, _logger);
             if (predicate.Sort == boolSort)
             {
+                // Macroexpand the predicate
+                predicate = SmtMacroExpander.Expand(_smtProvider.Context, predicate);
+                // Check for extensions
+                _extensionHandler.ProcessExtensions(_problemHandler, _smtProvider.Context, predicate);
+
                 _semgusProvider.Context.AddConstraint(predicate);
                 _problemHandler.OnConstraint(_smtProvider.Context, _semgusProvider.Context, predicate);
             }
@@ -216,8 +224,18 @@ namespace Semgus.Parser.Commands
         }
 
         private record TransformData(SmtFunctionApplication Application, SmtScope Bindings);
-        private class FnTransformer : ISmtTermVisitor<(SmtTerm, IList<TransformData>)>
+        private class FnTransformer : SmtTermWalker<IList<TransformData>>
         {
+            protected override IList<TransformData> MergeData(SmtTerm root, IEnumerable<IList<TransformData>> data)
+            {
+                List<TransformData> mergedData = new();
+                foreach (var datum in data)
+                {
+                    mergedData.AddRange(datum);
+                }
+                return mergedData;
+            }
+
             private readonly SmtContext _ctx;
             private readonly SmtFunction _rel;
             private readonly SmtFunction _term;
@@ -225,6 +243,7 @@ namespace Semgus.Parser.Commands
             private readonly SmtFunctionRank _rank;
 
             public FnTransformer(SmtContext ctx, SmtFunction rel, SmtFunction term, SmtFunction func, SmtFunctionRank rank)
+                : base(() => new List<TransformData>())
             {
                 _ctx = ctx;
                 _rel = rel;
@@ -252,97 +271,42 @@ namespace Semgus.Parser.Commands
                 return child;
             }
 
-            public (SmtTerm, IList<TransformData>) VisitBitVectorLiteral(SmtBitVectorLiteral bitVectorLiteral) => (bitVectorLiteral, new List<TransformData>());
-
-            public (SmtTerm, IList<TransformData>) VisitDecimalLiteral(SmtDecimalLiteral decimalLiteral) => (decimalLiteral, new List<TransformData>());
-
-            public (SmtTerm, IList<TransformData>) VisitExistsBinder(SmtExistsBinder existsBinder)
+            public override (SmtTerm, IList<TransformData>) OnExistsBinder(SmtExistsBinder existsBinder, SmtTerm child, IList<TransformData> data)
             {
-                var (child, data) = existsBinder.Child.Accept(this);
-                child = AddBindings(data, child);
-                return (new SmtExistsBinder(child, existsBinder.NewScope), new List<TransformData>());
+                return base.OnExistsBinder(existsBinder, AddBindings(data, child), new List<TransformData>());
             }
 
-            public (SmtTerm, IList<TransformData>) VisitForallBinder(SmtForallBinder forallBinder)
+            public override (SmtTerm, IList<TransformData>) OnForallBinder(SmtForallBinder forallBinder, SmtTerm child, IList<TransformData> data)
             {
-                var (child, data) = forallBinder.Child.Accept(this);
-                child = AddBindings(data, child);
-                return (new SmtForallBinder(child, forallBinder.NewScope), new List<TransformData>());
+                return base.OnForallBinder(forallBinder, AddBindings(data, child), new List<TransformData>());
             }
 
-            public (SmtTerm, IList<TransformData>) VisitFunctionApplication(SmtFunctionApplication functionApplication)
+            public override (SmtTerm, IList<TransformData>) OnFunctionApplication(SmtFunctionApplication appl, IReadOnlyList<SmtTerm> arguments, IReadOnlyList<IList<TransformData>> up)
             {
-                List<SmtTerm> args = new();
-                List<TransformData> vars = new();
-                foreach (var a in functionApplication.Arguments)
-                {
-                    var (arg, data) = a.Accept(this);
-                    args.Add(arg);
-                    vars.AddRange(data);
-                }
-
-                if (functionApplication.Definition == _func)
+                if (appl.Definition == _func)
                 {
                     SmtScope scope = new(default);
                     SmtIdentifier output = GensymUtils.Gensym("_SyOut", "o");
                     scope.TryAddVariableBinding(output, _rank.ReturnSort, SmtVariableBindingType.Existential, _ctx, out var outputBinding, out var error);
 
-                    List<SmtTerm> arguments = new();
-                    arguments.Add(SmtTermBuilder.Apply(_ctx, _term.Name));
-                    arguments.AddRange(args);
-                    arguments.Add(new SmtVariable(output, outputBinding!));
+                    List<SmtTerm> newArguments = new();
+                    newArguments.Add(SmtTermBuilder.Apply(_ctx, _term.Name));
+                    newArguments.AddRange(arguments);
+                    newArguments.Add(new SmtVariable(output, outputBinding!));
 
-                    var appl = SmtTermBuilder.Apply(_ctx,
+                    var newAppl = SmtTermBuilder.Apply(_ctx,
                                                    _rel.Name,
-                                                   arguments.ToArray());
+                                                   newArguments.ToArray());
 
-                    vars.Add(new((SmtFunctionApplication)appl, scope));
-                    return (new SmtVariable(output, outputBinding!), vars);
+                    var data = MergeData(newAppl, up);
+                    data.Add(new((SmtFunctionApplication)newAppl, scope));
+                    return (new SmtVariable(output, outputBinding!), data);
                 }
                 else
                 {
-                    return (new SmtFunctionApplication(functionApplication.Definition, functionApplication.Rank, args), vars);
+                    return base.OnFunctionApplication(appl, arguments, up);
                 }
             }
-
-            public (SmtTerm, IList<TransformData>) VisitLambdaBinder(SmtLambdaBinder lambdaBinder)
-            {
-                var (child, vars) = lambdaBinder.Child.Accept(this);
-                return (new SmtLambdaBinder(child, lambdaBinder.NewScope, lambdaBinder.ArgumentNames), vars);
-            }
-
-            public (SmtTerm, IList<TransformData>) VisitLetBinder(SmtLetBinder letBinder)
-            {
-                var (child, vars) = letBinder.Child.Accept(this);
-                return (new SmtLetBinder(child, letBinder.NewScope), vars);
-            }
-
-            public (SmtTerm, IList<TransformData>) VisitMatchBinder(SmtMatchBinder matchBinder)
-            {
-                var (child, vars) = matchBinder.Child.Accept(this);
-                return (new SmtMatchBinder(child, matchBinder.NewScope, matchBinder.ParentType, matchBinder.Constructor, matchBinder.Bindings), vars);
-            }
-
-            public (SmtTerm, IList<TransformData>) VisitMatchGrouper(SmtMatchGrouper matchGrouper)
-            {
-                List<TransformData> vars = new();
-                List<SmtMatchBinder> binders = new();
-                var (term, tVars) = matchGrouper.Term.Accept(this);
-                vars.AddRange(tVars);
-                foreach (var binder in matchGrouper.Binders)
-                {
-                    var (nChild, nVars) = binder.Accept(this);
-                    vars.AddRange(nVars);
-                    binders.Add((SmtMatchBinder)nChild);
-                }
-                return (new SmtMatchGrouper(term, matchGrouper.Sort, binders), vars);
-            }
-
-            public (SmtTerm, IList<TransformData>) VisitNumeralLiteral(SmtNumeralLiteral numeralLiteral) => (numeralLiteral, new List<TransformData>());
-
-            public (SmtTerm, IList<TransformData>) VisitStringLiteral(SmtStringLiteral stringLiteral) => (stringLiteral, new List<TransformData>());
-
-            public (SmtTerm, IList<TransformData>) VisitVariable(SmtVariable variable) => (variable, new List<TransformData>());
         }
     }
 }
