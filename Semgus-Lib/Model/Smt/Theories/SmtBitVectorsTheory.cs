@@ -72,9 +72,6 @@ namespace Semgus.Model.Smt.Theories
 
         #region Deprecated
         public IReadOnlyDictionary<SmtIdentifier, IApplicable> Functions { get; }
-        public IReadOnlyDictionary<SmtIdentifier, IApplicable> Macros { get; }
-        public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts
-            => throw new NotImplementedException();
         #endregion
 
         /// <summary>
@@ -95,26 +92,11 @@ namespace Semgus.Model.Smt.Theories
         {
             SmtSort b = core.Sorts[BoolSortId.Name];
 
-            Dictionary<SmtIdentifier, SmtFunction> fd = new();
-            void cf(string name, Func<SmtFunctionRank, bool> val, string? valCmt, Func<SmtFunctionRank, SmtSort> retCalc, SmtSort ret, params SmtSort[] args)
-            {
-                SmtIdentifier id = new(name);
-                if (fd.TryGetValue(id, out SmtFunction? fun))
-                {
-                    fun.AddRankTemplate(new SmtFunctionRank(ret, args) { Validator = val, ReturnSortDeriver = retCalc, ValidationComment = valCmt });
-                }
-                else
-                {
-                    fd.Add(id, new SmtFunction(id, this, new SmtFunctionRank(ret, args) { Validator = val, ReturnSortDeriver = retCalc, ValidationComment = valCmt }));
-                }
-            }
-
-            PrimarySortSymbols = new HashSet<SmtIdentifier>() { BitVectorSortPrimaryId };
-
+            SmtSourceBuilder sb = new(this);
             var bv0 = new SmtSort.WildcardSort(new(new SmtIdentifier("BitVec", "*")));
 
             // Concatenation: output size is equal to sum of input sizes
-            cf("concat",
+            sb.AddFn("concat",
                 r => ((BitVectorsSort)r.ReturnSort).Size
                   == (((BitVectorsSort)r.ArgumentSorts[0]).Size
                     + ((BitVectorsSort)r.ArgumentSorts[1]).Size),
@@ -123,64 +105,31 @@ namespace Semgus.Model.Smt.Theories
                     + ((BitVectorsSort)r.ArgumentSorts[1]).Size),
                 bv0, bv0, bv0);
 
-            Func<SmtFunctionRank, bool> noVal = r => true;
-            Func<SmtFunctionRank, SmtSort> firstArgSort = r => r.ArgumentSorts[0];
-
             // Unary operations returnting a bit vector of the same size
-            cf("bvnot", noVal, null, firstArgSort, bv0, bv0);
-            cf("bvneg", noVal, null, firstArgSort, bv0, bv0);
+            sb.AddFn("bvnot", SmtSourceBuilder.NoRankValidation, null, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0);
+            sb.AddFn("bvneg", SmtSourceBuilder.NoRankValidation, null, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0);
 
-            Func<SmtFunctionRank, bool> argSortsEqual = r => r.ArgumentSorts[0] == r.ArgumentSorts[1];
             string argSortsEqualCmt = "Size of inputs must be the same";
 
             // Binary operations returning a bit vector of the same size
-            cf("bvand", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvor", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvadd", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvmul", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvudiv", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvurem", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvshl", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
-            cf("bvlshr", argSortsEqual, argSortsEqualCmt, firstArgSort, bv0, bv0, bv0);
+            sb.AddFn("bvand", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvor", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvadd", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvmul", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvudiv", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvurem", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvshl", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
+            sb.AddFn("bvlshr", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseFirstArgumentSort, bv0, bv0, bv0);
 
             // Comparison: argument sizes the same, and returns Boolean
-            cf("bvult", argSortsEqual, argSortsEqualCmt, r => r.ReturnSort, b, bv0, bv0);
+            sb.AddFn("bvult", SmtSourceBuilder.CheckArgumentSortsEqual, argSortsEqualCmt, SmtSourceBuilder.UseReturnSort, b, bv0, bv0);
 
-            // Macro: xor
-            Dictionary<SmtIdentifier, SmtMacro> md = new();
-            var bvxor_id = new SmtIdentifier("bvxor");
-            var llb = new SmtMacro.LambdaListBuilder();
-            var ll = llb.AddSingle(bv0).AddSingle(bv0).Build();
-            md.Add(bvxor_id, new SmtMacro(bvxor_id, this, ll, r => r[0], expander: (ctx, args) =>
-            {
-                SmtIdentifier bvor_id = new("bvor");
-                SmtIdentifier bvand_id = new("bvand");
-                SmtIdentifier bvnot_id = new("bvnot");
+            // Extract: must be constructed on-the-fly
+            sb.AddOnTheFlyFn("extract");
 
-                var a = args.ToArray();
-
-                return SmtTermBuilder.Apply(ctx,
-                                     bvor_id,
-                                     SmtTermBuilder.Apply(ctx,
-                                                          bvand_id,
-                                                          a[0],
-                                                          SmtTermBuilder.Apply(ctx,
-                                                                               bvnot_id,
-                                                                               a[1])),
-                                     SmtTermBuilder.Apply(ctx,
-                                                          bvand_id,
-                                                          SmtTermBuilder.Apply(ctx,
-                                                                               bvnot_id,
-                                                                               a[0]),
-                                                          a[1]));
-
-            }));
-
-            Functions = fd.ToDictionary(kvp => kvp.Key, kvp => (IApplicable)kvp.Value);
-            Macros = md.ToDictionary(kvp => kvp.Key, kvp => (IApplicable)kvp.Value);
-            var primary = new HashSet<SmtIdentifier>(fd.Keys);
-            primary.Add(new SmtIdentifier("extract"));
-            PrimaryFunctionSymbols = primary;
+            Functions = sb.Functions;
+            PrimaryFunctionSymbols = sb.PrimaryFunctionSymbols;
+            PrimarySortSymbols = new HashSet<SmtIdentifier>() { BitVectorSortPrimaryId };
         }
 
         /// <summary>
@@ -262,14 +211,7 @@ namespace Semgus.Model.Smt.Theories
             }
             else
             {
-                if (Macros.TryGetValue(functionId, out resolvedFunction))
-                {
-                    return true;
-                }
-                else
-                {
-                    return Functions.TryGetValue(functionId, out resolvedFunction);
-                }
+                return Functions.TryGetValue(functionId, out resolvedFunction);
             }
         }
     }

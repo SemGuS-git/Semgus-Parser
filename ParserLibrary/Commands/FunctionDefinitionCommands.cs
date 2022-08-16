@@ -26,6 +26,7 @@ namespace Semgus.Parser.Commands
         private readonly ISmtConverter _converter;
         private readonly ISourceMap _sourceMap;
         private readonly ISourceContextProvider _sourceContextProvider;
+        private readonly IExtensionHandler _extensionHandler;
         private readonly ILogger<FunctionDefinitionCommands> _logger;
 
         public FunctionDefinitionCommands(ISemgusProblemHandler handler,
@@ -35,6 +36,7 @@ namespace Semgus.Parser.Commands
                                     ISmtConverter converter,
                                     ISourceMap sourceMap,
                                     ISourceContextProvider sourceContextProvider,
+                                    IExtensionHandler extensionHandler,
                                     ILogger<FunctionDefinitionCommands> logger)
         {
             _handler = handler;
@@ -44,6 +46,7 @@ namespace Semgus.Parser.Commands
             _converter = converter;
             _sourceMap = sourceMap;
             _sourceContextProvider = sourceContextProvider;
+            _extensionHandler = extensionHandler;
             _logger = logger;
         }
 
@@ -197,6 +200,7 @@ namespace Semgus.Parser.Commands
             // Macroexpand the definition before adding it
             lambda = (SmtLambdaBinder)SmtMacroExpander.Expand(_smtCtxProvider.Context, lambda);
             decl.AddDefinition(rank, lambda);
+            _extensionHandler.ProcessExtensions(_handler, _smtCtxProvider.Context, lambda);
             _handler.OnFunctionDefinition(_smtCtxProvider.Context, decl, rank, lambda);
 
             return true;

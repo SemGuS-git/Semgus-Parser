@@ -26,9 +26,10 @@ namespace Semgus.Parser.Commands
         private readonly ISemgusContextProvider _semgusProvider;
         private readonly ISmtScopeProvider _scopeProvider;
         private readonly ISourceMap _sourceMap;
+        private readonly IExtensionHandler _extensionHandler;
         private readonly ILogger<ConstraintCommand> _logger;
 
-        public ConstraintCommand(ISmtConverter converter, ISemgusProblemHandler handler, ISmtContextProvider smtProvider, ISemgusContextProvider semgusProvider, ISmtScopeProvider scopeProvider, ISourceMap sourceMap, ILogger<ConstraintCommand> logger)
+        public ConstraintCommand(ISmtConverter converter, ISemgusProblemHandler handler, ISmtContextProvider smtProvider, ISemgusContextProvider semgusProvider, ISmtScopeProvider scopeProvider, ISourceMap sourceMap, IExtensionHandler extensionHandler, ILogger<ConstraintCommand> logger)
         {
             _converter = converter;
             _problemHandler = handler;
@@ -36,6 +37,7 @@ namespace Semgus.Parser.Commands
             _semgusProvider = semgusProvider;
             _scopeProvider = scopeProvider;
             _sourceMap = sourceMap;
+            _extensionHandler = extensionHandler;
             _logger = logger;
         }
 
@@ -61,6 +63,9 @@ namespace Semgus.Parser.Commands
             {
                 // Macroexpand the predicate
                 predicate = SmtMacroExpander.Expand(_smtProvider.Context, predicate);
+                // Check for extensions
+                _extensionHandler.ProcessExtensions(_problemHandler, _smtProvider.Context, predicate);
+
                 _semgusProvider.Context.AddConstraint(predicate);
                 _problemHandler.OnConstraint(_smtProvider.Context, _semgusProvider.Context, predicate);
             }

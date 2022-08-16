@@ -39,4 +39,8 @@
 ;; Comparison
 (constraint (BV.Sem fn (ite (bvult #xABCD #xDCBA) #xFF #x00)))
 
+;; Extensions
+(constraint (BV.Sem fn (bvxor #xAA #xBB)))
+(constraint (BV.Sem fn (bvxor (bvxor #xAA #xCC) #xBB)))
+
 (check-synth)

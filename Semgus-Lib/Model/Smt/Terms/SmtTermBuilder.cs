@@ -98,5 +98,16 @@ namespace Semgus.Model.Smt.Terms
         {
             return new SmtExistsBinder(child, toBind);
         }
+
+        public SmtLambdaBinder Lambda(SmtScope toBind, SmtTerm child)
+            => Lambda(_ctx, toBind, child);
+
+        public static SmtLambdaBinder Lambda(SmtContext ctx, SmtScope toBind, SmtTerm child)
+            => Lambda(ctx, _defaultErrorHandler, toBind, child);
+
+        public static SmtLambdaBinder Lambda(SmtContext ctx, Action<object, string> onError, SmtScope lambdaScope, SmtTerm child)
+        {
+            return new SmtLambdaBinder(child, lambdaScope, lambdaScope.LocalBindings.Select(b => b.Id));
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -65,53 +66,37 @@ namespace Semgus.Model.Smt.Theories
             SmtSort b = BoolSort.Instance;
             SmtSort.UniqueSortFactory usf = new();
 
-            Dictionary<SmtIdentifier, SmtFunction> fd = new();
-            void cf(SmtIdentifier id, SmtSort ret, params SmtSort[] args)
-            {
-                if (fd.TryGetValue(id, out SmtFunction? fun))
-                {
-                    fun.AddRankTemplate(new SmtFunctionRank(ret, args));
-                }
-                else
-                {
-                    fd.Add(id, new SmtFunction(id, this, new SmtFunctionRank(ret, args)));
-                }
-            }
-
-            Sorts = new Dictionary<SmtIdentifier, SmtSort>() { { b.Name.Name, b } };
-            PrimarySortSymbols = new HashSet<SmtIdentifier>() { b.Name.Name };
+            SmtSourceBuilder sb = new(this);
+            sb.AddSort(b);
 
             var id_and = AndFunctionId;
             var id_or = OrFunctionId;
             var id_eq = EqFunctionId;
 
-            cf(new("true"), b);
-            cf(new("false"), b);
-            cf(new("not"), b, b);
+            sb.AddFn("true", b);
+            sb.AddFn("false", b);
+            sb.AddFn("not", b, b);
 
-            cf(id_and, b, b, b);
+            sb.AddFn(id_and, b, b, b);
 
-            cf(id_or, b, b, b);
+            sb.AddFn(id_or, b, b, b);
 
-            cf(new("!"), b, b);
-            cf(new("xor"), b, b, b);
-            cf(new("=>"), b, b, b);
-            cf(id_eq, b, usf.Sort, usf.Sort);
-            cf(new("distinct"), b, usf.Next(), usf.Sort);
-            cf(new("ite"), usf.Next(), b, usf.Sort, usf.Sort);
+            sb.AddFn("!", b, b);
+            sb.AddFn("xor", b, b, b);
+            sb.AddFn("=>", b, b, b);
+            sb.AddFn(id_eq, b, usf.Sort, usf.Sort);
+            sb.AddFn("distinct", b, usf.Next(), usf.Sort);
+            sb.AddFn("ite", usf.Next(), b, usf.Sort, usf.Sort);
 
-            Dictionary<SmtIdentifier, SmtMacro> md = new();
-            void cm(SmtIdentifier id, SmtMacro.DefaultMacroType defType)
-            {
-                md.Add(id, new SmtMacro(fd[id], defType, expandByDefault: false));
-            }
 
-            cm(id_and, SmtMacro.DefaultMacroType.LeftAssociative);
-            cm(id_or, SmtMacro.DefaultMacroType.LeftAssociative);
+            sb.AddMacro(id_and, SmtMacro.DefaultMacroType.LeftAssociative);
+            sb.AddMacro(id_or, SmtMacro.DefaultMacroType.LeftAssociative);
 
-            Functions = fd.ToDictionary(kvp => kvp.Key, kvp => (IApplicable)kvp.Value);
-            PrimaryFunctionSymbols = new HashSet<SmtIdentifier>(fd.Keys);
-            Macros = md;
+            Functions = sb.Functions;
+            PrimaryFunctionSymbols = sb.PrimaryFunctionSymbols;
+            Macros = sb.Macros;
+            Sorts = sb.Sorts;
+            PrimarySortSymbols = sb.PrimarySortSymbols;
         }
     }
 }

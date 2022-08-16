@@ -8,6 +8,6 @@ namespace Semgus.Model.Smt
 {
     public class SmtConstant : SmtFunction
     {
-        public SmtConstant(SmtIdentifier name, ISmtTheory theory, SmtSort sort) : base(name, theory, new SmtFunctionRank(sort)) { }
+        public SmtConstant(SmtIdentifier name, ISmtSource source, SmtSort sort) : base(name, source, new SmtFunctionRank(sort)) { }
     }
 }

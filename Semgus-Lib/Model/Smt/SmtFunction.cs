@@ -24,6 +24,15 @@ namespace Semgus.Model.Smt
         }
 
         /// <summary>
+        /// Hook called when trying to get a definition and none found.
+        /// Takes an SmtContext, this function and the desired rank as arguments and returns
+        /// a definition, or null if not found. Note that the computed definition
+        /// is not automatically cached - hooks must call AddDefinition if the
+        /// definition should be kept.
+        /// </summary>
+        public Func<SmtContext, SmtFunction, SmtFunctionRank, SmtLambdaBinder?> DefinitionMissingHook { get; set; } = (_, _, _) => null;
+
+        /// <summary>
         /// Mapping of ranks to definitions
         /// </summary>
         private readonly IDictionary<SmtFunctionRank, SmtLambdaBinder> _definitions;
@@ -36,6 +45,23 @@ namespace Semgus.Model.Smt
         public void AddDefinition(SmtFunctionRank rank, SmtLambdaBinder definition)
         {
             _definitions[rank] = definition;
+        }
+
+        /// <summary>
+        /// Gets a function definition for the given rank
+        /// </summary>
+        /// <param name="rank">Rank to get definition for</param>
+        /// <param name="definition">The definition</param>
+        /// <returns>True if successfully got definition</returns>
+        public bool TryGetDefinition(SmtContext ctx, SmtFunctionRank rank, [NotNullWhen(true)] out SmtLambdaBinder? definition)
+        {
+            if (_definitions.TryGetValue(rank, out definition))
+            {
+                return true;
+            }
+
+            definition = DefinitionMissingHook(ctx, this, rank);
+            return definition is not null;
         }
 
         /// <summary>

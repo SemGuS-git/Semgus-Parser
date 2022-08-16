@@ -1,4 +1,4 @@
-﻿namespace Semgus.Model.Smt
+﻿namespace Semgus.Model.Smt.Theories
 {
     /// <summary>
     /// A particular theory

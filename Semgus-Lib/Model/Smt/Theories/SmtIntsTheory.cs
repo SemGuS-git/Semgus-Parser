@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -59,37 +60,25 @@ namespace Semgus.Model.Smt.Theories
             SmtSort i = IntSort.Instance;
             SmtSort b = core.Sorts[BoolSortId.Name];
 
-            Dictionary<SmtIdentifier, SmtFunction> fd = new();
-            void cf(string name, SmtSort ret, params SmtSort[] args)
-            {
-                SmtIdentifier id = new(name);
-                if (fd.TryGetValue(id, out SmtFunction? fun))
-                {
-                    fun.AddRankTemplate(new SmtFunctionRank(ret, args));
-                }
-                else
-                {
-                    fd.Add(id, new SmtFunction(id, this, new SmtFunctionRank(ret, args)));
-                }
-            }
+            SmtSourceBuilder sb = new(this);
+            sb.AddSort(i);
 
-            Sorts = new Dictionary<SmtIdentifier, SmtSort>() { { i.Name.Name, i } };
-            PrimarySortSymbols = new HashSet<SmtIdentifier>() { i.Name.Name };
+            sb.AddFn("-", i, i); // Negation
+            sb.AddFn("-", i, i, i); // Subtraction
+            sb.AddFn("+", i, i, i);
+            sb.AddFn("*", i, i, i);
+            sb.AddFn("div", i, i, i);
+            sb.AddFn("mod", i, i, i);
+            sb.AddFn("abs", i, i);
+            sb.AddFn("<=", b, i, i);
+            sb.AddFn("<", b, i, i);
+            sb.AddFn(">=", b, i, i);
+            sb.AddFn(">", b, i, i);
 
-            cf("-", i, i); // Negation
-            cf("-", i, i, i); // Subtraction
-            cf("+", i, i, i);
-            cf("*", i, i, i);
-            cf("div", i, i, i);
-            cf("mod", i, i, i);
-            cf("abs", i, i);
-            cf("<=", b, i, i);
-            cf("<", b, i, i);
-            cf(">=", b, i, i);
-            cf(">", b, i, i);
-
-            Functions = fd.ToDictionary(kvp => kvp.Key, kvp => (IApplicable)kvp.Value);
-            PrimaryFunctionSymbols = new HashSet<SmtIdentifier>(fd.Keys);
+            Functions = sb.Functions;
+            PrimaryFunctionSymbols = sb.PrimaryFunctionSymbols;
+            Sorts = sb.Sorts;
+            PrimarySortSymbols = sb.PrimarySortSymbols;
         }
     }
 }

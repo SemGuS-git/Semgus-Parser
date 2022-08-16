@@ -4,20 +4,55 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using Semgus.Model.Smt.Extensions;
 using Semgus.Model.Smt.Theories;
 
 namespace Semgus.Model.Smt
 {
+    /// <summary>
+    /// Provides context about in-scope SMT objects
+    /// </summary>
     public class SmtContext
     {
+        /// <summary>
+        /// The stack of active assertion levels
+        /// </summary>
         private readonly Stack<AssertionLevel> _assertionStack;
 
+        /// <summary>
+        /// Underlying set of available theories
+        /// </summary>
         private readonly HashSet<ISmtTheory> _theories;
+
+        /// <summary>
+        /// Enumeration of built-in theories
+        /// </summary>
         public IEnumerable<ISmtTheory> Theories => _theories;
 
+        /// <summary>
+        /// Underlying set of available extensions
+        /// </summary>
+        private readonly HashSet<ISmtExtension> _extensions;
+
+        /// <summary>
+        /// Enumeration of built-in extensions
+        /// </summary>
+        public IEnumerable<ISmtExtension> Extensions => _extensions;
+
+        /// <summary>
+        /// Enumeration of all built-in sources
+        /// </summary>
+        public IEnumerable<ISmtBuiltInSource> BuiltInSources => _theories.Concat<ISmtBuiltInSource>(_extensions);
+
+        /// <summary>
+        /// The current assertion level
+        /// </summary>
         private AssertionLevel CurrentLevel => _assertionStack.Peek();
 
-
+        /// <summary>
+        /// Creates a fresh SmtContext with default built-in sources
+        /// </summary>
         public SmtContext()
         {
             _assertionStack = new Stack<AssertionLevel>();
@@ -29,6 +64,11 @@ namespace Semgus.Model.Smt
                 SmtIntsTheory.Instance,
                 SmtStringsTheory.Instance,
                 SmtBitVectorsTheory.Instance
+            };
+
+            _extensions = new HashSet<ISmtExtension>()
+            {
+                SmtBitVectorsExtension.Instance
             };
         }
 
@@ -47,9 +87,9 @@ namespace Semgus.Model.Smt
                     }
                 }
 
-                foreach (var theory in _theories)
+                foreach (var source in BuiltInSources)
                 {
-                    foreach (var fnId in theory.PrimaryFunctionSymbols)
+                    foreach (var fnId in source.PrimaryFunctionSymbols)
                     {
                         yield return fnId;
                     }
@@ -72,9 +112,9 @@ namespace Semgus.Model.Smt
                     }
                 }
 
-                foreach (var theory in _theories)
+                foreach (var source in BuiltInSources)
                 {
-                    foreach (var sortId in theory.PrimarySortSymbols)
+                    foreach (var sortId in source.PrimarySortSymbols)
                     {
                         yield return sortId;
                     }
@@ -93,9 +133,9 @@ namespace Semgus.Model.Smt
                 }
             }
 
-            foreach (var theory in _theories)
+            foreach (var source in BuiltInSources)
             {
-                if (theory.PrimaryFunctionSymbols.Contains(id) || theory.PrimarySortSymbols.Contains(id))
+                if (source.PrimaryFunctionSymbols.Contains(id) || source.PrimarySortSymbols.Contains(id))
                 {
                     return true;
                 }
@@ -115,9 +155,9 @@ namespace Semgus.Model.Smt
                 }
             }
 
-            foreach (var theory in _theories)
+            foreach (var source in BuiltInSources)
             {
-                if (theory.PrimarySortSymbols.Contains(id.Name))
+                if (source.PrimarySortSymbols.Contains(id.Name))
                 {
                     return true;
                 }
@@ -164,28 +204,15 @@ namespace Semgus.Model.Smt
                 }
             }
 
-            foreach (var theory in _theories)
+            foreach (var sources in BuiltInSources)
             {
-                if (theory.TryGetFunction(id, out function))
+                if (sources.TryGetFunction(id, out function))
                 {
                     return true;
                 }
             }
             function = default;
             return false;
-        }
-
-        [Obsolete("Use TryGetSortDeclaration instead.")]
-        public SmtSort GetSortDeclaration(SmtIdentifier id)
-        {
-            if (TryGetSortDeclaration(new(id), out var sort))
-            {
-                return sort;
-            }
-            else
-            {
-                throw new InvalidOperationException("Sort not declared: " + id);
-            }
         }
 
         public bool TryGetSortDeclaration(SmtSortIdentifier id, [NotNullWhen(true)] out SmtSort? sort)
@@ -199,9 +226,9 @@ namespace Semgus.Model.Smt
                 }
             }
 
-            foreach (var theory in _theories)
+            foreach (var source in BuiltInSources)
             {
-                if (theory.TryGetSort(id, out sort))
+                if (source.TryGetSort(id, out sort))
                 {
                     return true;
                 }
