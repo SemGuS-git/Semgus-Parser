@@ -136,7 +136,19 @@ namespace Semgus.Parser.Json
         /// <param name="datatype">Defined datatypes</param>
         public void OnDatatypes(SmtContext ctx, IEnumerable<SmtDatatype> datatypes)
         {
-            throw new NotImplementedException("Datatype handling not yet implemented");
+            // First, the declarations, so the consumer knows what datatypes exist
+            foreach (var dt in datatypes)
+            {
+                _serializer.Serialize(_writer, new DatatypeDeclarationEvent(dt));
+                EndOfEvent();
+            }
+
+            // Then the definitions, which can reference the previous declarations
+            foreach (var dt in datatypes)
+            {
+                _serializer.Serialize(_writer, new DatatypeDefinitionEvent(dt));
+                EndOfEvent();
+            }
         }
     }
 }
