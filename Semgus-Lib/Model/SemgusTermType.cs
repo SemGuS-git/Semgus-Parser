@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Semgus.Model.Smt;
+using Semgus.Model.Smt.Sorts;
 
 namespace Semgus.Model
 {
@@ -17,6 +18,11 @@ namespace Semgus.Model
             Constructors.Add(constructor);
         }
 
-        public record Constructor(SmtIdentifier Operator, params SmtSort[] Children);
+        public record Constructor(SmtIdentifier Operator, params SmtSort[] Children) : ISmtConstructor
+        {
+            public SmtIdentifier Name => Operator;
+
+            IReadOnlyList<SmtSort> ISmtConstructor.Children => Children.ToList();
+        }
     }
 }

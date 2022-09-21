@@ -1,5 +1,6 @@
 ﻿using Semgus.Model;
 using Semgus.Model.Smt;
+using Semgus.Model.Smt.Sorts;
 using Semgus.Model.Smt.Terms;
 
 using System;
@@ -80,7 +81,7 @@ namespace Semgus.Parser.Verifier
             foreach (var chc in semgusCtx.Chcs)
             {
                 _writer.WriteLine("CHC: " + chc.Head + " <= " + (chc.BodyRelations.Any() ? String.Join(" ^ ", chc.BodyRelations) + " ^ " : "") + chc.Constraint);
-                _writer.Write($"    [constructor: ({string.Join(' ', chc.Binder.Bindings.Select(b => b.Binding.Id).Prepend(chc.Binder.Constructor!.Operator))})]");
+                _writer.Write($"    [constructor: ({string.Join(' ', chc.Binder.Bindings.Select(b => b.Binding.Id).Prepend(chc.Binder.Constructor!.Name))})]");
                 if (chc.InputVariables != null)
                 {
                     _writer.Write($"     [inputs: {string.Join(' ', chc.InputVariables)}]");
@@ -119,6 +120,14 @@ namespace Semgus.Parser.Verifier
         public void OnFunctionDefinition(SmtContext ctx, SmtFunction function, SmtFunctionRank rank, SmtLambdaBinder lambda)
         {
             _writer.WriteLine("Function definition: " + function.Name + ": " + lambda);
+        }
+
+        public void OnDatatypes(SmtContext ctx, IEnumerable<SmtDatatype> datatypes)
+        {
+            foreach (var dt in datatypes)
+            {
+                _writer.WriteLine($"Datatype declaration: {dt.Name} [arity {dt.Arity}] {{{string.Join(' ', dt.Constructors.Select(c => $"({c.Name} {string.Join(' ', c.Children.Select(c => c.Name))})"))}}}");
+            }
         }
     }
 }

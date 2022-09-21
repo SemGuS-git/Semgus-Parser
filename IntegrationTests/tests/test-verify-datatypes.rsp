@@ -1,0 +1,4 @@
+--format
+verify
+--
+data/perfect-prop-3a.sem

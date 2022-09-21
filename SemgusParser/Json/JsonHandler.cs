@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Semgus.Parser.Json.Converters;
 using System.IO;
+using Semgus.Model.Smt.Sorts;
 
 namespace Semgus.Parser.Json
 {
@@ -126,6 +127,16 @@ namespace Semgus.Parser.Json
         {
             _serializer.Serialize (_writer, new FunctionDefinitionEvent(function, rank, lambda));
             EndOfEvent();
+        }
+
+        /// <summary>
+        /// Called when datatypes are defined
+        /// </summary>
+        /// <param name="ctx">SMT context</param>
+        /// <param name="datatype">Defined datatypes</param>
+        public void OnDatatypes(SmtContext ctx, IEnumerable<SmtDatatype> datatypes)
+        {
+            throw new NotImplementedException("Datatype handling not yet implemented");
         }
     }
 }

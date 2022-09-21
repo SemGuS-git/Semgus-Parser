@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Semgus.Model;
 using Semgus.Model.Smt;
+using Semgus.Model.Smt.Sorts;
 using Semgus.Model.Smt.Terms;
 
 namespace Semgus.Parser
@@ -25,15 +26,25 @@ namespace Semgus.Parser
         /// Called when a function is declared
         /// </summary>
         /// <param name="ctx">SMT context</param>
-        /// <param name="functions">Defined function</param>
+        /// <param name="function">Declared function</param>
+        /// <param name="rank">Rank of declared function</param>
         public void OnFunctionDeclaration(SmtContext ctx, SmtFunction function, SmtFunctionRank rank);
 
         /// <summary>
         /// Called when a function is defined
         /// </summary>
         /// <param name="ctx">SMT context</param>
-        /// <param name="functions">Defined function</param>
+        /// <param name="function">Defined function</param>
+        /// <param name="rank">Rank of defined function</param>
+        /// <param name="lambda">Body of defined function, as a lambda binder</param>
         public void OnFunctionDefinition(SmtContext ctx, SmtFunction function, SmtFunctionRank rank, SmtLambdaBinder lambda);
+
+        /// <summary>
+        /// Called when datatypes are defined
+        /// </summary>
+        /// <param name="ctx">SMT context</param>
+        /// <param name="datatype">Defined datatypes</param>
+        public void OnDatatypes(SmtContext ctx, IEnumerable<SmtDatatype> datatypes);
 
         /// <summary>
         /// Called when a synth-fun command is encountered. NOTE: this doesn't have SemGuS-specific information yet.

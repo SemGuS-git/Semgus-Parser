@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Semgus.Parser.Reader.Converters
 {
+    /// <summary>
+    /// Converts tokens to sort identifiers
+    /// </summary>
     internal class SortConverter : AbstractConverter
     {
         private readonly ISmtConverter _converter;

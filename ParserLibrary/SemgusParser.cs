@@ -111,6 +111,7 @@ namespace Semgus.Parser
             procClass(typeof(ConstraintCommand));
             procClass(typeof(CheckSynthCommand));
             procClass(typeof(DeclareSortCommand));
+            procClass(typeof(DeclareDatatypesCommand));
 
             // SyGuS extensions
             procClass(typeof(SetLogicCommand));

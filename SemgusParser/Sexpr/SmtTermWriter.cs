@@ -106,7 +106,7 @@ namespace Semgus.Parser.Sexpr
                 }
                 else
                 {
-                    _sw.Write(matchBinder.Constructor.Operator);
+                    _sw.Write(matchBinder.Constructor.Name);
                 }
                 _sw.WriteKeyword("arguments");
                 _sw.WriteList(matchBinder.Bindings, b => _sw.Write(b.Binding.Id));

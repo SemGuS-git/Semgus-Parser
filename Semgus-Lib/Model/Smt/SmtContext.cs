@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Semgus.Model.Smt.Extensions;
+using Semgus.Model.Smt.Sorts;
 using Semgus.Model.Smt.Theories;
 
 namespace Semgus.Model.Smt
@@ -166,7 +167,7 @@ namespace Semgus.Model.Smt
             return false;
         }
 
-        public void AddFunctionDeclaration(SmtFunction func)
+        public void AddFunctionDeclaration(IApplicable func)
         {
             if (IsFunctionNameInUse(func.Name))
             {
@@ -215,14 +216,14 @@ namespace Semgus.Model.Smt
             return false;
         }
 
-        public bool TryGetSortDeclaration(SmtSortIdentifier id, [NotNullWhen(true)] out SmtSort? sort)
+        public bool TryGetSortDeclaration(SmtSortIdentifier id, [NotNullWhen(true)] out SmtSort? sort, [NotNullWhen(false)] out string? error)
         {
             foreach (var level in _assertionStack)
             {
                 if (level.Sorts.ContainsKey(id.Name))
                 {
                     sort = level.Sorts[id.Name];
-                    return true;
+                    return TryResolveSortParameters(id, sort, out sort, out error);
                 }
             }
 
@@ -230,17 +231,48 @@ namespace Semgus.Model.Smt
             {
                 if (source.TryGetSort(id, out sort))
                 {
-                    return true;
+                    return TryResolveSortParameters(id, sort, out sort, out error);
                 }
             }
 
             sort = default;
+            error = "Unable to find a sort named " + id.Name;
             return false;
         }
 
-        public SmtSort ResolveParameterizedSort(SmtSort parameterized, IList<SmtSort> arguments)
+        private bool TryResolveSortParameters(SmtSortIdentifier id, SmtSort candidate, [NotNullWhen(true)] out SmtSort? resolved, [NotNullWhen(false)] out string? error)
         {
-            return parameterized; // TODO
+            if (id.Arity != candidate.Arity)
+            {
+                resolved = default;
+                error = $"Arity of sort {id.Name} ({candidate.Arity}) does not match given arity ({id.Arity})";
+                return false;
+            }
+
+            if (candidate.Arity == 0)
+            {
+                resolved = candidate;
+                error = default;
+                return true;
+            }
+
+            List<SmtSort> resolvedSubsorts = new();
+            foreach (var child in id.Parameters)
+            {
+                if (TryGetSortDeclaration(child, out var childSort, out error))
+                {
+                    resolvedSubsorts.Add(childSort);
+                }
+                else
+                {
+                    resolved = default;
+                    return false;
+                }
+            }
+
+            resolved = default;
+            error = "Not finished being implemented";
+            return false;
         }
 
         public void Push()
@@ -260,12 +292,12 @@ namespace Semgus.Model.Smt
         private class AssertionLevel
         {
             public Dictionary<SmtIdentifier, SmtSort> Sorts { get; private set; }
-            public Dictionary<SmtIdentifier, SmtFunction> Functions { get; private set; }
+            public Dictionary<SmtIdentifier, IApplicable> Functions { get; private set; }
 
             public AssertionLevel()
             {
                 Sorts = new Dictionary<SmtIdentifier, SmtSort>();
-                Functions = new Dictionary<SmtIdentifier, SmtFunction>();
+                Functions = new Dictionary<SmtIdentifier, IApplicable>();
             }
 
             public bool IsFunctionNameInUse(SmtIdentifier id)

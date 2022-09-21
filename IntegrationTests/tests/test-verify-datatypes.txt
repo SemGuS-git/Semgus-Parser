@@ -1,0 +1,50 @@
+Function declaration: name1
+Function definition: name1: (lambda () "Maria")
+Function declaration: name2
+Function definition: name2: (lambda () "Kaoruko")
+Function declaration: name3
+Function definition: name3: (lambda () "Sena")
+Function declaration: name4
+Function definition: name4: (lambda () "Etna")
+Function declaration: name5
+Function definition: name5: (lambda () "Bill")
+Function declaration: name6
+Function definition: name6: (lambda () "Ted")
+Function declaration: name7
+Function definition: name7: (lambda () "Frank")
+Function declaration: name8
+Function definition: name8: (lambda () "Boris")
+declare-term-types: 
+  PairTT --> $pair(PairTT, PairTT) | $leaf(NameTT);
+  NameTT --> $name1() | $name2() | $name3() | $name4() | $name5() | $name6() | $name7() | $name8();
+Datatype declaration: Pair [arity 0] {(pair Pair Pair) (leaf String)}
+Function declaration: Pair.Sem
+Function declaration: Name.Sem
+Function definition: Pair.Sem: (lambda (term output) (match term ((($pair p1 p2) (exists ((o1 Pair) (o2 Pair)) (and (Pair.Sem p1 o1) (Pair.Sem p2 o2) (= output (pair o1 o2))))) (($leaf n1) (exists ((o1 String)) (and (Name.Sem n1 o1) (= output (leaf o1))))))))
+Function definition: Name.Sem: (lambda (term output) (match term (($name1 (= output name1)) ($name2 (= output name2)) ($name3 (= output name3)) ($name4 (= output name4)) ($name5 (= output name5)) ($name6 (= output name6)) ($name7 (= output name7)) ($name8 (= output name8)))))
+Function declaration: leaf-pair
+Function definition: leaf-pair: (lambda (s1 s2) (pair (leaf s1) (leaf s2)))
+check-synth
+CHC: (Pair.Sem term output) <= (Pair.Sem p1 o1) ^ (Pair.Sem p2 o2) ^ (= output (pair o1 o2))
+    [constructor: ($pair p1 p2)]     [outputs: output]CHC: (Pair.Sem term output) <= (Name.Sem n1 o1) ^ (= output (leaf o1))
+    [constructor: ($leaf n1)]     [outputs: output]CHC: (Name.Sem term output) <= (= output name1)
+    [constructor: ($name1)]     [outputs: output]CHC: (Name.Sem term output) <= (= output name2)
+    [constructor: ($name2)]     [outputs: output]CHC: (Name.Sem term output) <= (= output name3)
+    [constructor: ($name3)]     [outputs: output]CHC: (Name.Sem term output) <= (= output name4)
+    [constructor: ($name4)]     [outputs: output]CHC: (Name.Sem term output) <= (= output name5)
+    [constructor: ($name5)]     [outputs: output]CHC: (Name.Sem term output) <= (= output name6)
+    [constructor: ($name6)]     [outputs: output]CHC: (Name.Sem term output) <= (= output name7)
+    [constructor: ($name7)]     [outputs: output]CHC: (Name.Sem term output) <= (= output name8)
+    [constructor: ($name8)]     [outputs: output]Constraint: (Pair.Sem make-tree (pair (pair (leaf-pair name1 name8) (leaf name7)) (leaf-pair name3 name4)))
+Function to Synthesize: make-tree
+Grammar: @PairTT__agtt [PairTT] @NameTT__agtt [NameTT]
+@PairTT__agtt --> ($pair @PairTT__agtt @PairTT__agtt)
+@PairTT__agtt --> ($leaf @NameTT__agtt)
+@NameTT__agtt --> $name1
+@NameTT__agtt --> $name2
+@NameTT__agtt --> $name3
+@NameTT__agtt --> $name4
+@NameTT__agtt --> $name5
+@NameTT__agtt --> $name6
+@NameTT__agtt --> $name7
+@NameTT__agtt --> $name8

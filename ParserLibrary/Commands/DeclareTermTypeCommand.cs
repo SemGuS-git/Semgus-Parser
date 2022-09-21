@@ -67,12 +67,12 @@ namespace Semgus.Parser.Commands
                     List<SmtSort> children = new();
                     foreach (var child in constructor.Children)
                     {
-                        if (_context.Context.TryGetSortDeclaration(child, out SmtSort? sort)) {
+                        if (_context.Context.TryGetSortDeclaration(child, out SmtSort? sort, out string? error)) {
                             children.Add(sort);
                         }
                         else
                         {
-                            throw _logger.LogParseErrorAndThrow("Sort not declared: " + child, _sourceMap[child]);
+                            throw _logger.LogParseErrorAndThrow("Sort not declared: " + child + " Reason: " + error, _sourceMap[child]);
                         }
                     }
                     termTypes[ix].AddConstructor(new(constructor.Constructor, children.ToArray()));

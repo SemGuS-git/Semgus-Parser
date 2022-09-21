@@ -179,7 +179,7 @@ namespace Semgus.Parser.Json.Converters
             public object VisitMatchBinder(SmtMatchBinder matchBinder)
             {
                 _serializer.Serialize(_writer,
-                    new MatchBinderModel(matchBinder.Constructor?.Operator, matchBinder.Bindings.Select(b => b.Binding.Id), matchBinder.Child)
+                    new MatchBinderModel(matchBinder.Constructor?.Name, matchBinder.Bindings.Select(b => b.Binding.Id), matchBinder.Child)
                     {
                         Annotations = matchBinder.Annotations
                     });

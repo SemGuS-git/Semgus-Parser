@@ -29,7 +29,7 @@ namespace Semgus.Parser.Json
             _chc = chc;
             if (_chc.Binder.Constructor != null)
             {
-                Constructor = new(_chc.Binder.Constructor.Operator,
+                Constructor = new(_chc.Binder.Constructor.Name,
                                   _chc.Binder.Bindings.OrderBy(b => b.Index).Select(b => b.Binding.Id),
                                   _chc.Binder.Constructor.Children.Select(s => s.Name),
                                   _chc.Binder.ParentType.Name);

@@ -1,5 +1,6 @@
 ﻿using Semgus.Model;
 using Semgus.Model.Smt;
+using Semgus.Model.Smt.Sorts;
 using Semgus.Model.Smt.Terms;
 using Semgus.Sexpr.Writer;
 
@@ -101,7 +102,8 @@ namespace Semgus.Parser.Sexpr
 
             foreach (var tt in termTypes)
             {
-                foreach (var cons in tt.Constructors) {
+                foreach (var cons in tt.Constructors)
+                {
                     _sw.WriteList(() =>
                     {
                         _sw.WriteSymbol("add-constructor");
@@ -137,6 +139,42 @@ namespace Semgus.Parser.Sexpr
                 _sw.WriteKeyword("definition");
                 _sw.Write(lambda);
             });
+        }
+
+        /// <summary>
+        /// Called when datatypes are defined
+        /// </summary>
+        /// <param name="ctx">SMT context</param>
+        /// <param name="datatype">Defined datatypes</param>
+        public void OnDatatypes(SmtContext ctx, IEnumerable<SmtDatatype> datatypes)
+        {
+            foreach (var dt in datatypes)
+            {
+                _sw.WriteList(() =>
+                {
+                    _sw.WriteSymbol("declare-datatype");
+                    _sw.Write(dt.Name);
+                    _sw.WriteKeyword("arity");
+                    _sw.WriteNumeral(dt.Arity);
+                });
+            }
+
+            foreach (var dt in datatypes)
+            {
+                foreach (var cons in dt.Constructors)
+                {
+                    _sw.WriteList(() =>
+                    {
+                        _sw.WriteSymbol("add-datatype-constructor");
+                        _sw.WriteKeyword("datatype");
+                        _sw.Write(dt.Name);
+                        _sw.WriteKeyword("name");
+                        _sw.Write(cons.Name);
+                        _sw.WriteKeyword("children");
+                        _sw.WriteList(cons.Children, c => _sw.Write(c.Name));
+                    });
+                }
+            }
         }
     }
 }

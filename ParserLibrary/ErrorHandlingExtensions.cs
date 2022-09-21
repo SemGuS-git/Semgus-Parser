@@ -31,9 +31,9 @@ namespace Semgus.Parser
                 return null;
             }
 
-            if (!ctx.TryGetSortDeclaration(id, out SmtSort? sort))
+            if (!ctx.TryGetSortDeclaration(id, out SmtSort? sort, out string? error))
             {
-                throw logger.LogParseErrorAndThrow($"Undeclared sort: {id}", sourceMap[id]);
+                throw logger.LogParseErrorAndThrow($"Undeclared sort: {id}" + " Error: " + error, sourceMap[id]);
             }
             else
             {

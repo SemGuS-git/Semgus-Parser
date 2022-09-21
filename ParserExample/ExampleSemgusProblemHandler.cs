@@ -1,5 +1,6 @@
 ﻿using Semgus.Model;
 using Semgus.Model.Smt;
+using Semgus.Model.Smt.Sorts;
 using Semgus.Model.Smt.Terms;
 
 using System;
@@ -109,6 +110,14 @@ namespace Semgus.Parser.Example
         public void OnFunctionDefinition(SmtContext ctx, SmtFunction function, SmtFunctionRank rank, SmtLambdaBinder lambda)
         {
             Console.WriteLine("Function definition: " + function.Name);
+        }
+
+        public void OnDatatypes(SmtContext ctx, IEnumerable<SmtDatatype> datatypes)
+        {
+            foreach (var dt in datatypes)
+            {
+                Console.WriteLine($"Datatype declaration: {dt.Name} [arity {dt.Arity}] {{{string.Join(' ', dt.Constructors.Select(c=> $"({c.Name}...)"))}}}");
+            }
         }
     }
 }

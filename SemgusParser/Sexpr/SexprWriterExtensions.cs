@@ -83,7 +83,7 @@ namespace Semgus.Parser.Sexpr
             writer.WriteList(() =>
             {
                 writer.WriteSymbol("constructor");
-                writer.Write(binder.Constructor.Operator);
+                writer.Write(binder.Constructor.Name);
                 writer.WriteKeyword("arguments");
                 writer.WriteList(binder.Bindings.OrderBy(b => b.Index), b => writer.Write(b.Binding.Id));
                 writer.WriteKeyword("argument-sorts");
