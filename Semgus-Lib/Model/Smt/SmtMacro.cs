@@ -17,7 +17,7 @@ namespace Semgus.Model.Smt
         /// <summary>
         /// Expansion function for this macro
         /// </summary>
-        private readonly Func<SmtContext, IEnumerable<SmtTerm>, SmtTerm> _expander;
+        private readonly Func<SmtContext, SmtFunctionApplication, IEnumerable<SmtTerm>, SmtTerm> _expander;
 
         /// <summary>
         /// Function to compute return sort of this macro
@@ -41,7 +41,7 @@ namespace Semgus.Model.Smt
                         ISmtSource source,
                         IEnumerable<MacroParameter> lambdaList,
                         Func<IReadOnlyList<SmtSort>, SmtSort> returnSortDeriver,
-                        Func<SmtContext, IEnumerable<SmtTerm>, SmtTerm> expander,
+                        Func<SmtContext, SmtFunctionApplication, IEnumerable<SmtTerm>, SmtTerm> expander,
                         bool expandByDefault = true)
         {
             Name = name;
@@ -138,17 +138,17 @@ namespace Semgus.Model.Smt
             switch (defaultType)
             {
                 case DefaultMacroType.LeftAssociative:
-                    _expander = (ctx, args)
+                    _expander = (ctx, _, args)
                         => LeftAssociativeExpander(baseFn, matchingRank, ctx, args.ToList());
                     break;
 
                 case DefaultMacroType.RightAssociative:
-                    _expander = (ctx, args)
+                    _expander = (ctx, _, args)
                         => RightAssociativeExpander(baseFn, matchingRank, ctx, args.ToList());
                     break;
 
                 case DefaultMacroType.Chainable:
-                    _expander = (ctx, args)
+                    _expander = (ctx, _, args)
                         => ChainableExpander(baseFn, matchingRank, ctx, args.ToList());
                     break;
 
@@ -234,11 +234,12 @@ namespace Semgus.Model.Smt
         /// Expands this macro
         /// </summary>
         /// <param name="ctx">SMT context</param>
+        /// <param name="appl">Application that is being expanded</param>
         /// <param name="args">Macro arguments</param>
         /// <returns>The expanded macro</returns>
-        public SmtTerm DoExpand(SmtContext ctx, IEnumerable<SmtTerm> args)
+        public SmtTerm DoExpand(SmtContext ctx, SmtFunctionApplication appl, IEnumerable<SmtTerm> args)
         {
-            return _expander(ctx, args);
+            return _expander(ctx, appl, args);
         }
 
         /// <summary>

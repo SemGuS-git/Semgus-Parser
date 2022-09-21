@@ -59,7 +59,7 @@ namespace Semgus.Model.Smt.Transforms
                 && appl.Definition is SmtMacro macro
                 && macro.ShouldExpand(_context, appl.Rank))
             {
-                expansion = macro.DoExpand(_context, appl.Arguments);
+                expansion = macro.DoExpand(_context, appl, appl.Arguments);
                 return expansion != toExpand;
             }
             else

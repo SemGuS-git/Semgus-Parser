@@ -37,7 +37,7 @@ namespace Semgus.Parser.Commands
         /// <summary>
         /// The logger
         /// </summary>
-        private readonly ILogger<DefineSortCommand> _logger;
+        private readonly ILogger<DeclareDatatypesCommand> _logger;
 
         /// <summary>
         /// Creates a DeclareSortCommand with the given dependencies
@@ -45,7 +45,7 @@ namespace Semgus.Parser.Commands
         /// <param name="hander">The problem handler</param>
         /// <param name="sourceMap">The source map</param>
         /// <param name="logger">The logger</param>
-        public DeclareDatatypesCommand(ISemgusProblemHandler hander, ISmtContextProvider smtCtxProvider, ISmtConverter converter, ISourceContextProvider srcCtxProvider, ISourceMap sourceMap, ILogger<DefineSortCommand> logger)
+        public DeclareDatatypesCommand(ISemgusProblemHandler hander, ISmtContextProvider smtCtxProvider, ISmtConverter converter, ISourceContextProvider srcCtxProvider, ISourceMap sourceMap, ILogger<DeclareDatatypesCommand> logger)
         {
             _handler = hander;
             _smtCtxProvider = smtCtxProvider;
@@ -58,7 +58,7 @@ namespace Semgus.Parser.Commands
         [Command("declare-datatype")]
         public void DeclareDatatype()
         {
-
+            throw _logger.LogParseErrorAndThrow("declare-datatype not yet supported. Use declare-datatypes (plural) instead.", default);
         }
 
         /// <summary>
@@ -116,6 +116,23 @@ namespace Semgus.Parser.Commands
                     SmtDatatypeConstructor cons = new(constructor.Name, datatypes[i], childSorts, _srcCtxProvider.CurrentSmtSource);
                     datatypes[i].AddConstructor(cons);
                     ctx.AddFunctionDeclaration(cons);
+
+                    foreach (var (selector, sort) in constructor.Children)
+                    {
+                        var current_datatype = datatypes[i];
+
+                        SmtMacro.LambdaListBuilder llb = new();
+                        llb.AddSingle(current_datatype);
+                        var macro = new SmtMacro(selector,
+                                     _srcCtxProvider.CurrentSmtSource,
+                                     llb.Build(),
+                                     _ => ctx.GetSortOrDie(sort, _sourceMap, _logger),
+                                     (_, appl, _) =>
+                                     {
+                                         throw _logger.LogParseErrorAndThrow($"Use of datatype selectors is banned in SemGuS ({selector} for datatype {current_datatype.Name}). Use `match` instead.", _sourceMap[appl]);
+                                     });
+                        ctx.AddFunctionDeclaration(macro);
+                    }
                 }
                 datatypes[i].Freeze();
             }
