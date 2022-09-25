@@ -11,8 +11,14 @@ namespace Semgus.Model.Smt.Sorts
     /// </summary>
     public interface ISmtConstructor
     {
+        /// <summary>
+        /// Constructor name
+        /// </summary>
         public SmtIdentifier Name { get; }
 
+        /// <summary>
+        /// Constructor child sorts
+        /// </summary>
         public IReadOnlyList<SmtSort> Children { get; }
     }
 }

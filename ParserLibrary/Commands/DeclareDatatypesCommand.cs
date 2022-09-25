@@ -20,8 +20,14 @@ namespace Semgus.Parser.Commands
         /// </summary>
         private readonly ISemgusProblemHandler _handler;
 
+        /// <summary>
+        /// The SMT context provider
+        /// </summary>
         private readonly ISmtContextProvider _smtCtxProvider;
 
+        /// <summary>
+        /// The source context provider
+        /// </summary>
         private readonly ISourceContextProvider _srcCtxProvider;
 
         /// <summary>
@@ -139,8 +145,18 @@ namespace Semgus.Parser.Commands
 
             _handler.OnDatatypes(ctx, datatypes);
         }
-
+        /// <summary>
+        /// A name/arity pair for datatype declaration
+        /// </summary>
+        /// <param name="Name">Datatype name</param>
+        /// <param name="Arity">Datatype arity</param>
         private record DatatypeDeclaration(SmtIdentifier Name, int Arity);
+
+        /// <summary>
+        /// A constructor definition for a datatype
+        /// </summary>
+        /// <param name="Name">Constructor name</param>
+        /// <param name="Children">Constructor children (name/sort pairs)</param>
         private record DatatypeConstructorDefinition(SmtIdentifier Name, [Rest] IList<(SmtIdentifier Selector, SmtSortIdentifier Sort)> Children);
     }
 }

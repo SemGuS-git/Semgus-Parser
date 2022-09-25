@@ -19,6 +19,9 @@ namespace Semgus.Parser.Commands
         /// </summary>
         private readonly ISemgusProblemHandler _handler;
 
+        /// <summary>
+        /// Provider for the SMT context
+        /// </summary>
         private readonly ISmtContextProvider _smtCtxProvider;
 
         /// <summary>
@@ -52,10 +55,11 @@ namespace Semgus.Parser.Commands
         }
 
         /// <summary>
-        /// Declares an uninterpreted sort. Or it would, if it was supported.
+        /// Declares a sort alias. Or it would, if it was supported.
         /// </summary>
-        /// <param name="sortId">Symbol to name new sort</param>
-        /// <param name="number">Arity of new sort</param>
+        /// <param name="sortSymbol">Symbol to name new sort</param>
+        /// <param name="sortParams">Sort parameters for new sort</param>
+        /// <param name="targetSort">Sort to alias</param>
         [Command("define-sort")]
         public void DefineSort(SymbolToken sortSymbol, IList<SymbolToken> sortParams, SmtSortIdentifier targetSort)
         {
