@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
+using System.Linq;
 
 using Semgus.Parser.Json;
 using Semgus.Parser.Sexpr;
@@ -116,13 +117,27 @@ namespace Semgus.Parser
             using var writerDisposable = GetOutputWriter(output, out var writer);
             using var handlerDisposable = GetHandler(writer, mode, format, hf, out var handler);
             int errCount = 0;
-            foreach (var input in inputs)
+
+            var inputList = inputs.ToList();
+            if (!ValidateInputFiles(inputList))
+            {
+                return 3;
+            }
+
+            foreach (var input in inputList)
             {
                 using SemgusParser parser = GetParser(input, test, out var friendlyName);
-                if (!parser.TryParse(handler, out errCount))
+                try
                 {
-                    Console.Error.WriteLine("error: fatal error reported while parsing " + friendlyName);
-                    return 2;
+                    if (!parser.TryParse(handler, out errCount))
+                    {
+                        Console.Error.WriteLine("error: fatal error reported while parsing " + friendlyName);
+                        return 2;
+                    }
+                }
+                catch (IOException ioe)
+                {
+                    Console.Error.WriteLine($"error: I/O error reading {friendlyName}: {ioe.Message}");
                 }
             }
 
@@ -216,6 +231,30 @@ namespace Semgus.Parser
                     throw new ArgumentException("Not a valid format: " + format);
             }
             return handler as IDisposable;
+        }
+
+        /// <summary>
+        /// Checks if all the input files appear to be valid
+        /// </summary>
+        /// <param name="inputs">Enumeration of input files</param>
+        /// <returns>True if all files are valid</returns>
+        private static bool ValidateInputFiles(IEnumerable<string> inputs)
+        {
+            bool allExists = true;
+            foreach (var input in inputs)
+            {
+                if (input == "-")
+                {
+                    continue; // Standard input flag
+                }
+
+                if (!File.Exists(input))
+                {
+                    Console.Error.WriteLine("error: input file does not exist: " + input);
+                    allExists = false;
+                }
+            }
+            return allExists;
         }
     }
 }
