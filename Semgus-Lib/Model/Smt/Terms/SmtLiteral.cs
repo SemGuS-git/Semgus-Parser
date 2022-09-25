@@ -28,9 +28,9 @@ namespace Semgus.Model.Smt.Terms
         /// <exception cref="InvalidOperationException">Thrown when the literal sort cannot be found</exception>
         protected static SmtSort GetSortOrDie(SmtContext ctx, SmtSortIdentifier name)
         {
-            if (!ctx.TryGetSortDeclaration(name, out var sort))
+            if (!ctx.TryGetSortDeclaration(name, out var sort, out var error))
             {
-                throw new InvalidOperationException("Failed to get sort for literal: " + name);
+                throw new InvalidOperationException("Failed to get sort for literal: " + name + " with error: " + error);
             }
             return sort;
         }

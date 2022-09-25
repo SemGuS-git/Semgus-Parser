@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Semgus.Parser.Json.Converters;
 using System.IO;
+using Semgus.Model.Smt.Sorts;
 
 namespace Semgus.Parser.Json
 {
@@ -144,6 +145,28 @@ namespace Semgus.Parser.Json
             {
                 Console.Error.WriteLine("warning: function events are disabled. Some problems may be incomplete.");
                 _printedFunctionEventsWarning = true;
+            }
+        }
+
+        /// <summary>
+        /// Called when datatypes are defined
+        /// </summary>
+        /// <param name="ctx">SMT context</param>
+        /// <param name="datatype">Defined datatypes</param>
+        public void OnDatatypes(SmtContext ctx, IEnumerable<SmtDatatype> datatypes)
+        {
+            // First, the declarations, so the consumer knows what datatypes exist
+            foreach (var dt in datatypes)
+            {
+                _serializer.Serialize(_writer, new DatatypeDeclarationEvent(dt));
+                EndOfEvent();
+            }
+
+            // Then the definitions, which can reference the previous declarations
+            foreach (var dt in datatypes)
+            {
+                _serializer.Serialize(_writer, new DatatypeDefinitionEvent(dt));
+                EndOfEvent();
             }
         }
     }

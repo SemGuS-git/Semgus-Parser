@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Semgus.Model.Smt.Sorts;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,9 +11,9 @@ namespace Semgus.Model.Smt.Terms
     public class SmtMatchBinder : SmtBinder
     {
         public IReadOnlyList<SmtMatchVariableBinding> Bindings { get; }
-        public SemgusTermType.Constructor? Constructor { get; }
-        public SemgusTermType ParentType { get; }
-        public SmtMatchBinder(SmtTerm child, SmtScope newScope, SemgusTermType parentType, SemgusTermType.Constructor? constructor, IEnumerable<SmtMatchVariableBinding> bindings) : base(child, newScope)
+        public ISmtConstructor? Constructor { get; }
+        public SmtSort ParentType { get; }
+        public SmtMatchBinder(SmtTerm child, SmtScope newScope, SmtSort parentType, ISmtConstructor? constructor, IEnumerable<SmtMatchVariableBinding> bindings) : base(child, newScope)
         {
             Bindings = bindings.ToList();
             Constructor = constructor;
@@ -27,11 +29,11 @@ namespace Semgus.Model.Smt.Terms
         {
             if (Bindings.Count > 0)
             {
-                return $"(({Constructor?.Operator} {string.Join(' ', Bindings.Select(b => b.Binding.Id))}) {Child})";
+                return $"(({Constructor?.Name} {string.Join(' ', Bindings.Select(b => b.Binding.Id))}) {Child})";
             }
             else
             {
-                return $"({Constructor?.Operator} {Child})";
+                return $"({Constructor?.Name} {Child})";
             }
         }
     }

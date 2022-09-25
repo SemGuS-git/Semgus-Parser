@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 using Semgus.Model;
 using Semgus.Model.Smt;
+using Semgus.Model.Smt.Sorts;
 using Semgus.Model.Smt.Terms;
 
 namespace Semgus.Parser.Reader.Converters
@@ -211,7 +212,16 @@ namespace Semgus.Parser.Reader.Converters
                                 if (_converter.TryConvert(form, out MatchForm? mf))
                                 {
                                     SmtSort argSort = mf.TermToMatch.Sort;
-                                    if (argSort is not SemgusTermType tt)
+                                    IEnumerable<ISmtConstructor> constructors;
+                                    if (argSort is SemgusTermType tt)
+                                    {
+                                        constructors = tt.Constructors;
+                                    }
+                                    else if (argSort is SmtDatatype dt)
+                                    {
+                                        constructors = dt.Constructors;
+                                    }
+                                    else
                                     {
                                         to = new ErrorTerm("Unsupported match expression. Only valid on terms of type term type.");
 
@@ -228,19 +238,19 @@ namespace Semgus.Parser.Reader.Converters
                                     {
                                         using var scopeCtx = _scopeProvider.CreateNewScope();
                                         IList<SmtMatchVariableBinding> bindings = new List<SmtMatchVariableBinding>();
-                                        SemgusTermType.Constructor? constructor;
+                                        ISmtConstructor? constructor;
                                         if (_converter.TryConvert(pattern, out SmtIdentifier? symbol))
                                         {
-                                            var nullaryCons = tt.Constructors.Where(c => c.Operator == symbol).ToList();
+                                            var nullaryCons = constructors.Where(c => c.Name == symbol).ToList();
                                             if (nullaryCons.Any())
                                             {
                                                 // Use this pattern. Nothing to bind.
                                                 constructor = nullaryCons.First();
 
                                                 // Verify that it is actually a nullary constructor
-                                                if (constructor.Children.Length != 0)
+                                                if (constructor.Children.Count != 0)
                                                 {
-                                                    string msg = $"Constructor '{constructor.Operator}' in match expression expects {constructor.Children.Length} children, but written as nullary (with 0 children)";
+                                                    string msg = $"Constructor '{constructor.Name}' in match expression expects {constructor.Children.Count} children, but written as nullary (with 0 children)";
                                                     _logger.LogParseError(msg, pattern.Position);
                                                     to = new ErrorTerm(msg);
                                                     return true;
@@ -274,21 +284,21 @@ namespace Semgus.Parser.Reader.Converters
                                                 return true;
                                             }
                                             var consId = consList.First();
-                                            var conses = tt.Constructors.Where(c => c.Operator == consId).ToList();
+                                            var conses = constructors.Where(c => c.Name == consId).ToList();
                                             if (!conses.Any())
                                             {
-                                                to = new ErrorTerm($"No matching constructor found for type {tt.Name}: {consId}");
-                                                _logger.LogParseError($"No matching constructor found for type {tt.Name}: {consId}", pattern.Position);
+                                                to = new ErrorTerm($"No matching constructor found for type {argSort.Name}: {consId}");
+                                                _logger.LogParseError($"No matching constructor found for type {argSort.Name}: {consId}", pattern.Position);
                                                 return true;
                                             }
                                             constructor = conses.First(); // There should only be one, since constructors cannot be overloaded
-                                            if (constructor.Children.Length != consList.Count - 1)
+                                            if (constructor.Children.Count != consList.Count - 1)
                                             {
                                                 to = new ErrorTerm("Number of pattern arguments does not match structure definition");
                                                 _logger.LogParseError("Number of pattern arguments does not match structure definition", pattern.Position);
                                                 return true;
                                             }
-                                            for (int argIx = 0; argIx < constructor.Children.Length; ++argIx)
+                                            for (int argIx = 0; argIx < constructor.Children.Count; ++argIx)
                                             {
                                                 if (!scopeCtx.Scope.TryAddVariableBinding(consList[argIx + 1],
                                                                                           constructor.Children[argIx],
@@ -329,14 +339,14 @@ namespace Semgus.Parser.Reader.Converters
                                         // Make sure all terms are of type bool
                                         if (convTerms.Any(t => t.Sort == ErrorSort.Instance))
                                         {
-                                            string msg = $"Pattern {constructor!.Operator.Symbol} in match expression has error terms.";
+                                            string msg = $"Pattern {constructor!.Name.Symbol} in match expression has error terms.";
                                             to = new ErrorTerm(msg);
                                             return true;
                                         }
 
                                         if (convTerms.Count == 1)
                                         {
-                                            binders.Add(new SmtMatchBinder(convTerms[0], scopeCtx.Scope, tt, constructor, bindings));
+                                            binders.Add(new SmtMatchBinder(convTerms[0], scopeCtx.Scope, argSort, constructor, bindings));
                                         }
                                         else
                                         {
@@ -346,7 +356,7 @@ namespace Semgus.Parser.Reader.Converters
                                             // Make sure all terms are of type bool
                                             if (convTerms.Any(t => t.Sort != boolsort))
                                             {
-                                                string msg = $"Not all terms in pattern {constructor!.Operator.Symbol} are of sort Bool.";
+                                                string msg = $"Not all terms in pattern {constructor!.Name.Symbol} are of sort Bool.";
                                                 to = new ErrorTerm(msg);
                                                 _logger.LogParseError(msg, pattern.Position);
                                                 return true;
@@ -356,7 +366,7 @@ namespace Semgus.Parser.Reader.Converters
                                             {
                                                 throw new InvalidOperationException("Too many terms to match pattern.");
                                             }
-                                            binders.Add(new SmtMatchBinder(new SmtFunctionApplication(orf, rank, convTerms), scopeCtx.Scope, tt, constructor, bindings));
+                                            binders.Add(new SmtMatchBinder(new SmtFunctionApplication(orf, rank, convTerms), scopeCtx.Scope, argSort, constructor, bindings));
                                         }
                                     }
 

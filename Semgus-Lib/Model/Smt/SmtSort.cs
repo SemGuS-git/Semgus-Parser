@@ -37,6 +37,11 @@ namespace Semgus.Model.Smt
         public bool IsSortParameter { get; protected set; } = false;
 
         /// <summary>
+        /// Number of sort parameters needed for this sort
+        /// </summary>
+        public int Arity { get; protected set; } = 0;
+
+        /// <summary>
         /// An arbitrary generic sort
         /// </summary>
         internal class GenericSort : SmtSort

@@ -321,7 +321,7 @@ namespace Semgus.Parser.Commands
             // Each pattern is one or more CHC
             void procCHC(SmtMatchBinder binder, SmtTerm term)
             {
-                using var logMatchScope = _logger.BeginScope($"in match {(binder.Constructor?.Operator.ToString() ?? "default")}:");
+                using var logMatchScope = _logger.BeginScope($"in match {(binder.Constructor?.Name.ToString() ?? "default")}:");
 
                 SmtScope bodyScope = new(headScope);
                 List<SmtVariableBinding> bodyBindings = new();
