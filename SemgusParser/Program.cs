@@ -82,11 +82,17 @@ namespace Semgus.Parser
                 inputArguments
             };
 
+            HandlerFlags.HandlerFlagsFactory hfFac = new(rootCommand);
+
             rootCommand.SetHandler(
                 handle: (ProcessingMode mode, OutputFormat format,
                          bool test, string output, string[] inputs,
                          InvocationContext ctx)
-                            => ctx.ExitCode = Execute(mode, format, test, output, inputs), 
+                            =>
+                {
+                    HandlerFlags hf = hfFac.GetFlags(ctx);
+                    ctx.ExitCode = Execute(mode, format, test, output, hf, inputs);
+                },
                 modeOption,
                 formatOption,
                 testOption,
@@ -105,10 +111,10 @@ namespace Semgus.Parser
         /// <param name="output">The output file, or "-" for standard output</param>
         /// <param name="inputs">Enumerable of input file names</param>
         /// <returns>Exit code from parsing</returns>
-        private static int Execute(ProcessingMode mode, OutputFormat format, bool test, string output, IEnumerable<string> inputs)
+        private static int Execute(ProcessingMode mode, OutputFormat format, bool test, string output, HandlerFlags hf, IEnumerable<string> inputs)
         {
             using var writerDisposable = GetOutputWriter(output, out var writer);
-            using var handlerDisposable = GetHandler(writer, mode, format, out var handler);
+            using var handlerDisposable = GetHandler(writer, mode, format, hf, out var handler);
             int errCount = 0;
             foreach (var input in inputs)
             {
@@ -189,7 +195,7 @@ namespace Semgus.Parser
         /// <param name="format">The selected output format</param>
         /// <param name="handler">The created handler</param>
         /// <returns>A (possibly-null) IDisposable associated with the problem handler</returns>
-        private static IDisposable? GetHandler(TextWriter writer, ProcessingMode mode, OutputFormat format, out ISemgusProblemHandler handler)
+        private static IDisposable? GetHandler(TextWriter writer, ProcessingMode mode, OutputFormat format, HandlerFlags hf, out ISemgusProblemHandler handler)
         {
             switch (format)
             {
@@ -198,7 +204,7 @@ namespace Semgus.Parser
                     break;
 
                 case OutputFormat.Json:
-                    handler = new JsonHandler(writer, mode);
+                    handler = new JsonHandler(writer, mode, hf);
                     break;
 
                 case OutputFormat.Sexpr:

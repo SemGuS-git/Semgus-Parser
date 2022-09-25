@@ -20,9 +20,11 @@ namespace Semgus.Parser.Json
         private readonly JsonSerializer _serializer;
         private readonly TextWriter _writer;
         private readonly Program.ProcessingMode _processingMode;
+        private readonly HandlerFlags _flags;
 
-        public JsonHandler(TextWriter writer, Program.ProcessingMode mode)
+        public JsonHandler(TextWriter writer, Program.ProcessingMode mode, HandlerFlags flags)
         {
+            _flags = flags;
             _serializer = new JsonSerializer();
             _serializer.ContractResolver = new CamelCasePropertyNamesContractResolver();
             _serializer.Converters.Add(new SmtIdentifierConverter());
@@ -116,16 +118,33 @@ namespace Semgus.Parser.Json
             }
         }
 
+        private bool _printedFunctionEventsWarning = false;
         public void OnFunctionDeclaration(SmtContext ctx, SmtFunction function, SmtFunctionRank rank)
         {
-            _serializer.Serialize(_writer, new FunctionDeclarationEvent(function, rank));
-            EndOfEvent();
+            if (_flags.FunctionEvents)
+            {
+                _serializer.Serialize(_writer, new FunctionDeclarationEvent(function, rank));
+                EndOfEvent();
+            }
+            else if (!_printedFunctionEventsWarning)
+            {
+                Console.Error.WriteLine("warning: function events are disabled. Some problems may be incomplete.");
+                _printedFunctionEventsWarning = true;
+            }
         }
 
         public void OnFunctionDefinition(SmtContext ctx, SmtFunction function, SmtFunctionRank rank, SmtLambdaBinder lambda)
         {
-            _serializer.Serialize (_writer, new FunctionDefinitionEvent(function, rank, lambda));
-            EndOfEvent();
+            if (_flags.FunctionEvents)
+            {
+                _serializer.Serialize (_writer, new FunctionDefinitionEvent(function, rank, lambda));
+                EndOfEvent();
+            }
+            else if (!_printedFunctionEventsWarning)
+            {
+                Console.Error.WriteLine("warning: function events are disabled. Some problems may be incomplete.");
+                _printedFunctionEventsWarning = true;
+            }
         }
     }
 }
