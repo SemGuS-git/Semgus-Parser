@@ -22,6 +22,8 @@ To convert a problem file to JSON, run:
 semgus-parser --format json --mode batch --output <output.json> -- <input.sem>
 ```
 
+Some examples of SemGuS files can be found in the [IntegrationTests/data](IntegrationTests/data) directory.
+
 ### Caveats and Considerations
 This project is under active development and does not yet support all SMT-LIB2 features. The following theories are currently supported:
 * Core
