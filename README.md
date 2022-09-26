@@ -27,21 +27,27 @@ This project is under active development and does not yet support all SMT-LIB2 f
 * Core
 * Ints
 * Strings (except regular expressions)
-* Bit vectors
-
-New additions:
-* Indexed identifiers, e.g. `(_ move up)`
 * Bit vectors (partial support; only theory functions supported for now)
+* Datatypes (non-parametric only)
+
+Other features:
 * Converting SyGuS problems to CHCs on the fly (beta)
 * Declarative S-expression output format (beta). Use `--format sexpr`
 
+New additions:
+* Datatypes (non-parametric only)
+* Auxiliary functions
+* Arbitrary `match` expressions
+
 Unsupported SMT-LIB2 features include:
 * Parametric sorts
-* Theory functions annotated with `:left-assoc`, `:right-assoc`, `:chainable`, and `:pairwise`. Certain Core functions currently have hard-coded versions of various arities.
-* Some terms, including `let` and arbitrary `match` expressions (other than those used to define semantics in SemGuS)
+* Theory functions annotated with `:left-assoc`, `:right-assoc`, `:chainable`, and `:pairwise`. Certain Core functions are implemented, so post an issue if others are needed.
+* Some terms, including `let`
+* Uninterpreted sorts (`declare-sort`) and sort aliases (`define-sort`)
 
 The roadmap for next-up features includes:
-* Arbitrary `let` and `match` terms
+* Arbitrary `let` terms
+* Parameteric sorts
 
 If there is an unsupported feature that you would like added, drop us a line by submitting an issue (or commenting on an existing one).
 This will help us prioritize what to put on our roadmap.
@@ -222,3 +228,33 @@ Each production object is:
 { "instance": "<nt-name>", "operator": "<op-name>", "occurrences": ["<nt-name>"] }
 ```
 Note that an occurrence will be `null` if it is not a non-terminal in the operator constructor, i.e. a discovered constant.
+
+### `smt` events
+#### `declare-function`
+A function declaration, including a name and signature.
+The following declares a function `foo` with no arguments that returns a string:
+```
+{"$event":"declare-function","$type":"smt","name":"foo","rank":{"argumentSorts":[],"returnSort":"String"}}
+```
+
+#### `define-function`
+A function definition, including a name, signature, and lambda term implementing the function body.
+Note that a `declare-function` event will always precede the `define-function` event (but not necessarily immediately).
+The following defines the `foo` function to return a constant string `"Foo"`:
+```
+{"$event":"define-function","$type":"smt","name":"foo","rank":{"argumentSorts":[],"returnSort":"String"},"definition":{"arguments":[],"body":"Foo","$termType":"lambda"}}
+```
+
+#### `declare-datatype`
+A datatype declaration, including a type name and arity (currently always zero). Constructors are not included.
+The following declares a datatype `Pair`:
+```
+{"$event":"declare-datatype","$type":"smt","name":"Pair","arity":0}
+```
+
+#### `define-datatype`
+A datatype definition, that is, the constructors associated with the datatype.
+The following defines two constructors for `Pair`, a `pair` constructor and a `leaf` constructor:
+```
+{"$event":"define-datatype","$type":"smt","name":"Pair","constructors":[{"name":"pair","children":["Pair","Pair"]},{"name":"leaf","children":["String"]}]}
+```
