@@ -197,6 +197,11 @@ namespace Semgus.Parser
             }
             else
             {
+                var dirName = Path.GetDirectoryName(output);
+                if (dirName is not null) // This can happen under _very_ specific circumstances
+                {
+                    Directory.CreateDirectory(dirName);
+                }
                 writer = File.CreateText(output);
             }
             return writer as IDisposable;
