@@ -286,7 +286,9 @@ namespace Semgus.Model.Smt
                     argHelp.Add("???");
                 }
             }
-            return $"({string.Join(' ', argHelp)}) -> TBD"; // {_return.Name}";
+            string msg = $"\n  Available signatures: \n";
+            msg += $"    - ({string.Join(' ', argHelp)}) -> TBD";
+            return msg;
         }
 
         /// <summary>

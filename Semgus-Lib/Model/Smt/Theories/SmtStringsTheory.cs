@@ -14,11 +14,24 @@ namespace Semgus.Model.Smt.Theories
     {
         public static SmtStringsTheory Instance { get; } = new(SmtCoreTheory.Instance, SmtIntsTheory.Instance);
 
+        /// <summary>
+        /// Sort of strings
+        /// </summary>
         private class StringSort : SmtSort
         {
             private StringSort() : base(StringSortId) { }
             public static StringSort Instance { get; } = new();
         }
+
+        /// <summary>
+        /// Sort of regular languages, i.e., regular expressions
+        /// </summary>
+        private class RegLanSort : SmtSort
+        {
+            private RegLanSort() : base(RegLanSortId) { }
+            public static RegLanSort Instance { get; } = new();
+        }
+
         public SmtIdentifier Name { get; } = StringsTheoryId;
         public IReadOnlyDictionary<SmtIdentifier, IApplicable> Functions { get; }
         public IReadOnlyDictionary<SmtIdentifier, SmtSort> Sorts { get; }
@@ -26,16 +39,21 @@ namespace Semgus.Model.Smt.Theories
         public IReadOnlySet<SmtIdentifier> PrimaryFunctionSymbols { get; }
 
         /// <summary>
-        /// Gets the requested sort (for the String sort)
+        /// Gets the requested sort (for the String or RegLan sorts)
         /// </summary>
         /// <param name="ssi">Sort identifier</param>
-        /// <param name="sort">The String sort</param>
-        /// <returns>True if requesting the String sort, false if not</returns>
+        /// <param name="sort">The String or RegLan sort</param>
+        /// <returns>True if requesting the String or RegLan sort, false if not</returns>
         public bool TryGetSort(SmtSortIdentifier ssi, [NotNullWhen(true)] out SmtSort? sort)
         {
             if (ssi == StringSortId)
             {
                 sort = StringSort.Instance;
+                return true;
+            }
+            else if (ssi == RegLanSortId)
+            {
+                sort = RegLanSort.Instance;
                 return true;
             }
             else
@@ -57,13 +75,15 @@ namespace Semgus.Model.Smt.Theories
         private SmtStringsTheory(SmtCoreTheory core, SmtIntsTheory ints)
         {
             SmtSort s = StringSort.Instance;
+            SmtSort r = RegLanSort.Instance;
             SmtSort i = ints.Sorts[IntSortId.Name];
             SmtSort b = core.Sorts[BoolSortId.Name];
 
             SmtSourceBuilder sb = new(this);
             sb.AddSort(s);
+            sb.AddSort(r);
 
-            // TODO: regular expression functions
+            // TODO: the rest of the regular expression functions
             sb.AddFn("str.++", s, s, s);
             sb.AddFn("str.len", i, s);
             sb.AddFn("str.<", b, s, s);
@@ -81,6 +101,21 @@ namespace Semgus.Model.Smt.Theories
             sb.AddFn("str.from_code", s, i);
             sb.AddFn("str.to_int", i, s);
             sb.AddFn("str.from_int", s, i);
+
+            sb.AddFn("str.to_re", r, s);
+            sb.AddFn("str.in_re", b, s, r);
+            sb.AddFn("re.none", r);
+            sb.AddFn("re.all", r);
+            sb.AddFn("re.allchar", r);
+            sb.AddFn("re.++", r, r, r);
+            sb.AddFn("re.union", r, r, r);
+            sb.AddFn("re.inter", r, r, r);
+            sb.AddFn("re.*", r, r);
+            sb.AddFn("re.comp", r, r);
+            sb.AddFn("re.diff", r, r, r);
+            sb.AddFn("re.+", r, r);
+            sb.AddFn("re.opt", r, r);
+            sb.AddFn("re.range", r, s, s);
 
             Functions = sb.Functions;
             PrimaryFunctionSymbols = sb.PrimaryFunctionSymbols;
