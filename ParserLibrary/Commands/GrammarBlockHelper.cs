@@ -238,8 +238,8 @@ namespace Semgus.Parser.Commands
                             SmtVariableBinding termBinding = new(termId, cDatum.TermType, SmtVariableBindingType.Universal, bodyScope);
                             SmtVariable termVar = new(termId, termBinding);
                             SmtIdentifier outId = GensymUtils.Gensym("_SyOut", $"{occIx}");
-                            SmtVariableBinding outBinding = new(outId, cDatum.Sort, SmtVariableBindingType.Universal, bodyScope);
-                            SmtVariable outVar = new(outId, outBinding);
+                            bodyScope.TryAddVariableBinding(outId, cDatum.Sort, SmtVariableBindingType.Universal, ctx, out var outBinding, out _);
+                            SmtVariable outVar = new(outId, outBinding!);
                             tts.Add(cDatum.TermType);
                             nts.Add(cDatum.NonTerminal);
                             outVars.Add(outVar);

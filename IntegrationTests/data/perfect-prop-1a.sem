@@ -1,0 +1,75 @@
+;;;; -*- mode: lisp -*-
+;;;;
+;;;; Perfect Propagation 1a
+;;;;
+
+;;;
+;;; String constants for names
+;;;
+(define-fun name1 () String "Maria")
+(define-fun name2 () String "Kaoruko")
+(define-fun name3 () String "Sena")
+(define-fun name4 () String "Etna")
+(define-fun name5 () String "Bill")
+(define-fun name6 () String "Ted")
+(define-fun name7 () String "Frank")
+(define-fun name8 () String "Boris")
+
+;;;
+;;; Term grammar
+;;;
+(declare-term-types
+ ((PairTT 0) (NameTT 0))
+
+ ((($pair PairTT PairTT) ($leaf NameTT))
+  (($name1) ($name2) ($name3) ($name4) ($name5) ($name6) ($name7) ($name8))))
+
+;;;
+;;; Datatype used for pairing
+;;;
+(declare-datatypes
+ ((Pair 0))
+ (((pair (pair1 Pair) (pair2 Pair))
+   (leaf (leafname String)))))
+
+;;;
+;;; Semantics for constructing pairs and getting constants
+;;;
+(define-funs-rec
+    ((Pair.Sem ((term PairTT) (output Pair)) Bool)
+     (Name.Sem ((term NameTT) (output String)) Bool))
+    
+    ((! (match term
+	       ((($pair p1 p2)
+                 (exists ((o1 Pair) (o2 Pair))
+                         (and (Pair.Sem p1 o1)
+                              (Pair.Sem p2 o2)
+                              (= output (pair o1 o2)))))
+                (($leaf n1)
+                 (exists ((o1 String))
+                         (and (Name.Sem n1 o1)
+                              (= output (leaf o1)))))))
+        :output (output))
+     (! (match term
+               (($name1 (= output name1))
+                ($name2 (= output name2))
+                ($name3 (= output name3))
+                ($name4 (= output name4))
+                ($name5 (= output name5))
+                ($name6 (= output name6))
+                ($name7 (= output name7))
+                ($name8 (= output name8))))
+        :output (output))))
+                
+;;;
+;;; We want a term for making a tree
+;;;
+(synth-fun make-tree () PairTT)
+
+;;;
+;;; Desired tree
+;;;
+(constraint (Pair.Sem make-tree (pair (leaf name5)
+                                      (leaf name6))))
+
+(check-synth)
