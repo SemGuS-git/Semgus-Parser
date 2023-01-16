@@ -20,6 +20,7 @@ namespace Semgus.Model.Smt
         public static SmtSortIdentifier BoolSortId { get; } = new("Bool");
         public static SmtSortIdentifier IntSortId { get; } = new("Int");
         public static SmtSortIdentifier StringSortId { get; } = new("String");
+        public static SmtSortIdentifier RegLanSortId { get; } = new("RegLan");
         public static SmtSortIdentifier RealSortId { get; } = new("Real");
         public static SmtIdentifier BitVectorSortPrimaryId { get; } = new("BitVec");
         public static BitVectorSortIndexer BitVectorSortId { get; } = new BitVectorSortIndexer();
