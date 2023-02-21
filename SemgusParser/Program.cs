@@ -198,7 +198,7 @@ namespace Semgus.Parser
             else
             {
                 var dirName = Path.GetDirectoryName(output);
-                if (dirName is not null) // This can happen under _very_ specific circumstances
+                if (!string.IsNullOrEmpty(dirName)) // This can happen under _very_ specific circumstances
                 {
                     Directory.CreateDirectory(dirName);
                 }
