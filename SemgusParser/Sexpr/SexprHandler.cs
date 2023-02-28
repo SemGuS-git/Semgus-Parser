@@ -26,6 +26,8 @@ namespace Semgus.Parser.Sexpr
         {
             foreach (var chc in semgusCtx.Chcs)
             {
+                ChcSymbolTable symbolTable = new(chc);
+
                 _sw.WriteList(() =>
                 {
                     _sw.WriteSymbol("chc");
@@ -45,6 +47,8 @@ namespace Semgus.Parser.Sexpr
                     }
                     _sw.WriteKeyword("variables");
                     _sw.WriteList(chc.VariableBindings, vb => _sw.Write(vb.Id));
+                    _sw.WriteKeyword("symbols");
+                    symbolTable.Write(_sw);
                     _sw.WriteKeyword("constraint");
                     _sw.Write(chc.Constraint);
                     _sw.WriteKeyword("constructor");
