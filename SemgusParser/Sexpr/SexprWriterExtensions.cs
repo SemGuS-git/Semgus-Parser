@@ -172,6 +172,7 @@ namespace Semgus.Parser.Sexpr
         /// Writes a symbol table entry
         /// </summary>
         /// <param name="sw">ISexprWriter to write to</param>
+        /// <param name="se">Symbol entry to write</param>
         public static void Write(this ISexprWriter sw, SemgusChc.SymbolEntry se)
         {
             sw.WriteList(() =>
@@ -188,6 +189,11 @@ namespace Semgus.Parser.Sexpr
             });
         }
 
+        /// <summary>
+        /// Writes a symbol table
+        /// </summary>
+        /// <param name="sw">ISexprWriter to write to</param>
+        /// <param name="st">Symbol table to write</param>
         public static void Write(this ISexprWriter sw, SemgusChc.SymbolTable st)
         {
             sw.WriteList(() =>
