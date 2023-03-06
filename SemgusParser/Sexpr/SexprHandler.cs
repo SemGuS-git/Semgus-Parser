@@ -45,6 +45,8 @@ namespace Semgus.Parser.Sexpr
                     }
                     _sw.WriteKeyword("variables");
                     _sw.WriteList(chc.VariableBindings, vb => _sw.Write(vb.Id));
+                    _sw.WriteKeyword("symbols");
+                    _sw.Write(chc.Symbols);
                     _sw.WriteKeyword("constraint");
                     _sw.Write(chc.Constraint);
                     _sw.WriteKeyword("constructor");

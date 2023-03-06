@@ -230,13 +230,13 @@ namespace Semgus.Parser.Commands
             }
             
             // Rule: top-level is a match statement with a single variable term
-            if (defn.Child is not SmtMatchGrouper grouper || grouper.Term is not SmtVariable variable)
+            if (defn.Child is not SmtMatchGrouper grouper || grouper.Term is not SmtVariable termVariable)
             {
                 return; // Not a top-level match statement
             }
 
             // Rule: term must be the left-most argument
-            if (variable.Binding.DeclaringScope != defn.NewScope)
+            if (termVariable.Binding.DeclaringScope != defn.NewScope)
             {
                 return; // Actually check if it's in the right place: TODO
             }
@@ -407,7 +407,9 @@ namespace Semgus.Parser.Commands
                 // Only the constraint needs to be macroexpanded
                 constraint = SmtMacroExpander.Expand(_smtCtxProvider.Context, constraint);
 
-                _semgusCtxProvider.Context.AddChc(new SemgusChc(head, relList, constraint, binder, headBindings.Concat(bodyBindings), inputs, outputs));
+                _semgusCtxProvider.Context.AddChc(new SemgusChc(head, relList, constraint, binder, headBindings.Concat(bodyBindings),
+                    term: termVariable, auxiliaries: bodyBindings,
+                    inputs: inputs, outputs: outputs));
             }
 
             foreach (var pat in grouper.Binders)

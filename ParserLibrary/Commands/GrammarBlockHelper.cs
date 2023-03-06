@@ -58,6 +58,7 @@ namespace Semgus.Parser.Commands
                                             SmtScope HeadScope,
                                             SmtIdentifier TermVariableId,
                                             SmtIdentifier OutputVariableId,
+                                            SmtVariable TermVariable,
                                             IList<SmtVariable> InputVariables,
                                             IList<SmtVariable> OutputVariables,
                                             SemgusChc.SemanticRelation Relation,
@@ -113,7 +114,9 @@ namespace Semgus.Parser.Commands
                 SmtFunction semFunc = new(GensymUtils.Gensym("_SySem", name.Symbol), sourceContextProvider.CurrentSmtSource, semRank);
 
                 SemgusChc.SemanticRelation semRel = new(semFunc, semRank, argVars);
-                semRelInfo.Add(name, new(name, headScope, termVarId, outputVarId, inputVars, new List<SmtVariable>() { argVars[^1] }, semRel, semFunc, semRank));
+                semRelInfo.Add(name, new(name, headScope, termVarId, outputVarId,
+                                         TermVariable: argVars[0], inputVars, new List<SmtVariable>() { argVars[^1] },
+                                         semRel, semFunc, semRank));
             }
 
             IList<(SmtIdentifier, SmtSortIdentifier, IList<SemgusToken>)> newProdSet = new List<(SmtIdentifier, SmtSortIdentifier, IList<SemgusToken>)>();
@@ -135,6 +138,7 @@ namespace Semgus.Parser.Commands
                 foreach (var production in productions)
                 {
                     SmtScope bodyScope = new(semDatum.HeadScope);
+                    SmtScope auxScope = new(semDatum.HeadScope);
                     SmtVariable outputVar = new(semDatum.OutputVariableId, new(semDatum.OutputVariableId, ttDatum.Sort, SmtVariableBindingType.Universal, bodyScope));
                     SemgusTermType.Constructor constructor;
                     SmtTerm constraint;
@@ -239,6 +243,7 @@ namespace Semgus.Parser.Commands
                             SmtVariable termVar = new(termId, termBinding);
                             SmtIdentifier outId = GensymUtils.Gensym("_SyOut", $"{occIx}");
                             bodyScope.TryAddVariableBinding(outId, cDatum.Sort, SmtVariableBindingType.Universal, ctx, out var outBinding, out _);
+                            auxScope.TryAddVariableBinding(outId, cDatum.Sort, SmtVariableBindingType.Universal, ctx, out _, out _);
                             SmtVariable outVar = new(outId, outBinding!);
                             tts.Add(cDatum.TermType);
                             nts.Add(cDatum.NonTerminal);
@@ -300,13 +305,13 @@ namespace Semgus.Parser.Commands
                     }
 
                     ttDatum.TermType.AddConstructor(constructor);
-                    chcs.Add(GenerateChc(constructor, bodyRels, constraint, matchBindings, bodyScope, ttDatum, semDatum));
+                    chcs.Add(GenerateChc(constructor, bodyRels, constraint, matchBindings, bodyScope, auxScope, ttDatum, semDatum));
                 }
             }
             return (new SemgusGrammar(data.Values.Select(d => d.NonTerminal), newProds), data.Values.Select(d => d.TermType).ToList(), data[grammar.ntDecls[0].Name].TermType, semRelInfo[grammar.ntDecls[0].Name].Function, chcs);
         }
 
-        private static SemgusChc GenerateChc(SemgusTermType.Constructor constructor, IList<SemgusChc.SemanticRelation> bodyRels, SmtTerm constraint, IList<SmtMatchVariableBinding> matchBindings, SmtScope bodyScope, TermTypeData ttDatum, SemanticRelationData semDatum)
+        private static SemgusChc GenerateChc(SemgusTermType.Constructor constructor, IList<SemgusChc.SemanticRelation> bodyRels, SmtTerm constraint, IList<SmtMatchVariableBinding> matchBindings, SmtScope bodyScope, SmtScope auxScope, TermTypeData ttDatum, SemanticRelationData semDatum)
         {
             return new(semDatum.Relation,
                                          bodyRels,
@@ -317,6 +322,8 @@ namespace Semgus.Parser.Commands
                                                             constructor,
                                                             matchBindings),
                                          bodyScope.Bindings,
+                                         semDatum.TermVariable,
+                                         auxScope.Bindings,
                                          semDatum.InputVariables,
                                          semDatum.OutputVariables);
         }

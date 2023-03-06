@@ -24,6 +24,8 @@ namespace Semgus.Parser.Json
         public SmtTerm Constraint => _chc.Constraint;
         public ConstructorModel? Constructor { get; }
 
+        public SemgusChc.SymbolTable Symbols => _chc.Symbols;
+
         public ChcEvent(SemgusChc chc) : base("chc", "semgus")
         {
             _chc = chc;
