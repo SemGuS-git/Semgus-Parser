@@ -6,8 +6,6 @@ using Semgus.Sexpr.Writer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Semgus.Parser.Sexpr
 {
@@ -167,6 +165,50 @@ namespace Semgus.Parser.Sexpr
                 writer.WriteList(rank.ArgumentSorts, r => writer.Write(r.Name));
                 writer.WriteKeyword("return-sort");
                 writer.Write(rank.ReturnSort.Name);
+            });
+        }
+
+        /// <summary>
+        /// Writes a symbol table entry
+        /// </summary>
+        /// <param name="sw">ISexprWriter to write to</param>
+        public static void Write(this ISexprWriter sw, SemgusChc.SymbolEntry se)
+        {
+            sw.WriteList(() =>
+            {
+                sw.WriteSymbol("symbol-entry");
+                sw.Write(se.Id);
+                sw.WriteKeyword("sort");
+                sw.Write(se.Sort);
+                if (se.Index is not null)
+                {
+                    sw.WriteKeyword("index");
+                    sw.WriteNumeral(se.Index.Value);
+                }
+            });
+        }
+
+        public static void Write(this ISexprWriter sw, SemgusChc.SymbolTable st)
+        {
+            sw.WriteList(() =>
+            {
+                sw.WriteSymbol("symbol-table");
+                sw.WriteKeyword("term");
+                sw.Write(st.Term);
+                if (st.Inputs is not null)
+                {
+                    sw.WriteKeyword("inputs");
+                    sw.WriteList(st.Inputs, se => sw.Write(se));
+                }
+                if (st.Outputs is not null)
+                {
+                    sw.WriteKeyword("outputs");
+                    sw.WriteList(st.Outputs, se => sw.Write(se));
+                }
+                sw.WriteKeyword("auxiliary");
+                sw.WriteList(st.Auxiliary, se => sw.Write(se));
+                sw.WriteKeyword("children");
+                sw.WriteList(st.Children, se => sw.Write(se));
             });
         }
     }
