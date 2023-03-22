@@ -80,12 +80,12 @@ namespace Semgus.Model
             /// <summary>
             /// Symbols known to be inputs
             /// </summary>
-            public IReadOnlyCollection<SymbolEntry>? Inputs { get; }
+            public IReadOnlyCollection<SymbolEntry> Inputs { get; }
 
             /// <summary>
             /// Symbols known to be outputs
             /// </summary>
-            public IReadOnlyCollection<SymbolEntry>? Outputs { get; }
+            public IReadOnlyCollection<SymbolEntry> Outputs { get; }
 
             /// <summary>
             /// The term symbol
@@ -123,10 +123,20 @@ namespace Semgus.Model
                 {
                     Inputs = chc.InputVariables.Select(ConvertVariable).ToList();
                 }
+                else
+                {
+                    Inputs = new List<SymbolEntry>();
+                }
+
                 if (chc.OutputVariables is not null)
                 {
                     Outputs = chc.OutputVariables.Select(ConvertVariable).ToList();
                 }
+                else
+                {
+                    Outputs = new List<SymbolEntry>();
+                }
+
                 Term = ConvertVariable(_chc.TermVariable);
                 Auxiliary = chc.AuxiliaryVariables.Select(ConvertBinding).ToList();
                 Children = chc.Binder.Bindings.Select(ConvertMatchBinding).ToList();
@@ -143,13 +153,8 @@ namespace Semgus.Model
 
                 // Checks if a collection of symbol entries has an entry for the given variable
                 // We do this manually to avoid pre-emptively converting between SymbolEntry and SmtVariable.
-                static bool ContainsVar(IReadOnlyCollection<SymbolEntry>? coll, SmtVariable var)
+                static bool ContainsVar(IReadOnlyCollection<SymbolEntry> coll, SmtVariable var)
                 {
-                    if (coll is null)
-                    {
-                        return false;
-                    }
-
                     foreach (var se in coll)
                     {
                         if (se.Id == var.Name)

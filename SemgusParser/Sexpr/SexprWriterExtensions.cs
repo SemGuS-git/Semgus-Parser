@@ -255,16 +255,10 @@ namespace Semgus.Parser.Sexpr
                 sw.WriteSymbol("symbol-table");
                 sw.WriteKeyword("term");
                 sw.Write(st.Term);
-                if (st.Inputs is not null)
-                {
-                    sw.WriteKeyword("inputs");
-                    sw.WriteList(st.Inputs, se => sw.Write(se));
-                }
-                if (st.Outputs is not null)
-                {
-                    sw.WriteKeyword("outputs");
-                    sw.WriteList(st.Outputs, se => sw.Write(se));
-                }
+                sw.WriteKeyword("inputs");
+                sw.WriteList(st.Inputs, se => sw.Write(se));
+                sw.WriteKeyword("outputs");
+                sw.WriteList(st.Outputs, se => sw.Write(se));
                 sw.WriteKeyword("auxiliary");
                 sw.WriteList(st.Auxiliary, se => sw.Write(se));
                 sw.WriteKeyword("children");
