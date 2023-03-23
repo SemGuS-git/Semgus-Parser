@@ -77,11 +77,39 @@ namespace Semgus.Model
         /// </summary>
         public class SymbolTable
         {
-            public IReadOnlyCollection<SymbolEntry>? Inputs { get; }
-            public IReadOnlyCollection<SymbolEntry>? Outputs { get; }
+            /// <summary>
+            /// Symbols known to be inputs
+            /// </summary>
+            public IReadOnlyCollection<SymbolEntry> Inputs { get; }
+
+            /// <summary>
+            /// Symbols known to be outputs
+            /// </summary>
+            public IReadOnlyCollection<SymbolEntry> Outputs { get; }
+
+            /// <summary>
+            /// The term symbol
+            /// </summary>
             public SymbolEntry Term { get; }
+
+            /// <summary>
+            /// Symbols that we don't know if are inputs, outputs, or the term
+            /// </summary>
+            public IReadOnlyCollection<SymbolEntry> Unclassified { get; }
+
+            /// <summary>
+            /// Symbols bound only in the CHC body
+            /// </summary>
             public IReadOnlyCollection<SymbolEntry> Auxiliary { get; }
+
+            /// <summary>
+            /// Symbols for child terms
+            /// </summary>
             public IReadOnlyCollection<SymbolEntry> Children { get; }
+
+            /// <summary>
+            /// The CHC associated with this table
+            /// </summary>
             private readonly SemgusChc _chc;
 
             /// <summary>
@@ -95,13 +123,47 @@ namespace Semgus.Model
                 {
                     Inputs = chc.InputVariables.Select(ConvertVariable).ToList();
                 }
+                else
+                {
+                    Inputs = new List<SymbolEntry>();
+                }
+
                 if (chc.OutputVariables is not null)
                 {
                     Outputs = chc.OutputVariables.Select(ConvertVariable).ToList();
                 }
+                else
+                {
+                    Outputs = new List<SymbolEntry>();
+                }
+
                 Term = ConvertVariable(_chc.TermVariable);
                 Auxiliary = chc.AuxiliaryVariables.Select(ConvertBinding).ToList();
                 Children = chc.Binder.Bindings.Select(ConvertMatchBinding).ToList();
+
+                List<SymbolEntry> unclassified = new();
+                foreach (var arg in chc.Head.Arguments)
+                {
+                    if (arg.Name != Term.Id && !ContainsVar(Inputs, arg) && !ContainsVar(Outputs, arg))
+                    {
+                        unclassified.Add(ConvertVariable(arg));
+                    }
+                }
+                Unclassified = unclassified;
+
+                // Checks if a collection of symbol entries has an entry for the given variable
+                // We do this manually to avoid pre-emptively converting between SymbolEntry and SmtVariable.
+                static bool ContainsVar(IReadOnlyCollection<SymbolEntry> coll, SmtVariable var)
+                {
+                    foreach (var se in coll)
+                    {
+                        if (se.Id == var.Name)
+                        {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
             }
 
             /// <summary>

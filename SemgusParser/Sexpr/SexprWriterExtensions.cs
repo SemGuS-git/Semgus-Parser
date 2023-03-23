@@ -9,8 +9,19 @@ using System.Linq;
 
 namespace Semgus.Parser.Sexpr
 {
+    /// <summary>
+    /// Extensions for writing various types as S-expressions
+    /// </summary>
     internal static class SexprWriterExtensions
     {
+        /// <summary>
+        /// Writes an IEnumerable as a list by calling an action.
+        /// (list [`action-result`...])
+        /// </summary>
+        /// <typeparam name="T">Type to enumerate over</typeparam>
+        /// <param name="writer">Writer to write to</param>
+        /// <param name="list">List to enumerate over</param>
+        /// <param name="action">Action to call on each element</param>
         public static void WriteList<T>(this ISexprWriter writer, IEnumerable<T> list, Action<T> action)
         {
             writer.WriteList(() =>
@@ -24,6 +35,12 @@ namespace Semgus.Parser.Sexpr
             });
         }
 
+        /// <summary>
+        /// Writes an SMT sort identifier
+        /// (sort `name` [`parameters`...])
+        /// </summary>
+        /// <param name="writer">Writer to write to</param>
+        /// <param name="sortId">Sort ID to write</param>
         public static void Write(this ISexprWriter writer, SmtSortIdentifier sortId)
         {
             writer.WriteList(() =>
@@ -37,6 +54,12 @@ namespace Semgus.Parser.Sexpr
             });
         }
 
+        /// <summary>
+        /// Writes an SMT identifier
+        /// (identifier `symbol` [`indices`...])
+        /// </summary>
+        /// <param name="writer">Writer to write to</param>
+        /// <param name="id">Identifier to write</param>
         public static void Write(this ISexprWriter writer, SmtIdentifier id)
         {
             writer.WriteList(() =>
@@ -57,6 +80,12 @@ namespace Semgus.Parser.Sexpr
             });
         }
 
+        /// <summary>
+        /// Writes a semantic relation
+        /// (relation `name` :signature `signature` :arguments `arguments`)
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="rel"></param>
         public static void Write(this ISexprWriter writer, SemgusChc.SemanticRelation rel)
         {
             writer.WriteList(() =>
@@ -70,6 +99,11 @@ namespace Semgus.Parser.Sexpr
             });
         }
 
+        /// <summary>
+        /// Writes a match binder
+        /// </summary>
+        /// <param name="writer">Writer to write to</param>
+        /// <param name="binder">Binder to write</param>
         public static void WriteConstructor(this ISexprWriter writer, SmtMatchBinder binder)
         {
             if (binder.Constructor is null)
@@ -91,6 +125,11 @@ namespace Semgus.Parser.Sexpr
             });
         }
 
+        /// <summary>
+        /// Writes an SMT term
+        /// </summary>
+        /// <param name="writer">Writer to write to</param>
+        /// <param name="term">Term to write</param>
         public static void Write(this ISexprWriter writer, SmtTerm term)
         {
             writer.WriteList(() =>
@@ -100,6 +139,11 @@ namespace Semgus.Parser.Sexpr
             });
         }
 
+        /// <summary>
+        /// Writes a synth-fun statement
+        /// </summary>
+        /// <param name="writer">Writer to write to</param>
+        /// <param name="ssf">Synthfun to write</param>
         public static void Write(this ISexprWriter writer, SemgusSynthFun ssf)
         {
             writer.WriteList(() =>
@@ -113,6 +157,11 @@ namespace Semgus.Parser.Sexpr
             });
         }
 
+        /// <summary>
+        /// Writes a grammar
+        /// </summary>
+        /// <param name="writer">Writer to write to</param>
+        /// <param name="grammar">Grammar to write</param>
         public static void Write(this ISexprWriter writer, SemgusGrammar grammar)
         {
             writer.WriteList(() =>
@@ -156,6 +205,11 @@ namespace Semgus.Parser.Sexpr
             });
         }
 
+        /// <summary>
+        /// Writes a function rank
+        /// </summary>
+        /// <param name="writer">Writer to write to</param>
+        /// <param name="rank">Rank to write</param>
         public static void Write(this ISexprWriter writer, SmtFunctionRank rank)
         {
             writer.WriteList(() =>
@@ -201,20 +255,16 @@ namespace Semgus.Parser.Sexpr
                 sw.WriteSymbol("symbol-table");
                 sw.WriteKeyword("term");
                 sw.Write(st.Term);
-                if (st.Inputs is not null)
-                {
-                    sw.WriteKeyword("inputs");
-                    sw.WriteList(st.Inputs, se => sw.Write(se));
-                }
-                if (st.Outputs is not null)
-                {
-                    sw.WriteKeyword("outputs");
-                    sw.WriteList(st.Outputs, se => sw.Write(se));
-                }
+                sw.WriteKeyword("inputs");
+                sw.WriteList(st.Inputs, se => sw.Write(se));
+                sw.WriteKeyword("outputs");
+                sw.WriteList(st.Outputs, se => sw.Write(se));
                 sw.WriteKeyword("auxiliary");
                 sw.WriteList(st.Auxiliary, se => sw.Write(se));
                 sw.WriteKeyword("children");
                 sw.WriteList(st.Children, se => sw.Write(se));
+                sw.WriteKeyword("unclassified");
+                sw.WriteList(st.Unclassified, se => sw.Write(se));
             });
         }
     }
