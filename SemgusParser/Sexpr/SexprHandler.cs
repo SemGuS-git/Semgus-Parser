@@ -84,6 +84,7 @@ namespace Semgus.Parser.Sexpr
             {
                 _sw.WriteSymbol("set-info");
                 _sw.WriteKeyword(attr.Keyword.Name);
+                _sw.Write(attr.Value);
             });
         }
 

@@ -1,0 +1,9 @@
+{"keyword":"nothing","value":null,"$event":"set-info","$type":"meta"}
+{"keyword":"string","value":"test string","$event":"set-info","$type":"meta"}
+{"keyword":"numeral","value":555,"$event":"set-info","$type":"meta"}
+{"keyword":"keyword1","value":null,"$event":"set-info","$type":"meta"}
+{"keyword":"keyword2","value":null,"$event":"set-info","$type":"meta"}
+{"keyword":"identifier","value":"foo-bar","$event":"set-info","$type":"meta"}
+{"keyword":"list1","value":["list","of","strings"],"$event":"set-info","$type":"meta"}
+{"keyword":"list2","value":["$1",["$2","3"],[["4",5,6],7],"-8-",[]],"$event":"set-info","$type":"meta"}
+{"$type":"meta","$event":"end-of-stream"}

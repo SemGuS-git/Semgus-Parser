@@ -1,0 +1,11 @@
+;;;;
+;;;; Checks that set-info commands are handled properly
+;;;;
+(set-info :nothing)
+(set-info :string "test string")
+(set-info :numeral 555)
+;;; (set-info :decimal 5.5) <-- add when the Real sort is supported
+(set-info :keyword1 :keyword2) ; <-- parses as two (empty) attributes named :keyword1 and :keyword2
+(set-info :identifier foo-bar)
+(set-info :list1 ("list" "of" "strings"))
+(set-info :list2 ($1 ($2 "3") (("4" 5 6) 7) :-8- ()))

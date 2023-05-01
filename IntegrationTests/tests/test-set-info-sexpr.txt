@@ -1,0 +1,9 @@
+ 
+(set-info :nothing nil) 
+(set-info :string (term "test string")) 
+(set-info :numeral (term 555)) 
+(set-info :keyword1 nil) 
+(set-info :keyword2 nil) 
+(set-info :identifier (identifier "foo-bar")) 
+(set-info :list1 (list (term "list") (term "of") (term "strings"))) 
+(set-info :list2 (list (identifier "$1") (list (identifier "$2") (term "3")) (list (list (term "4") (term 5) (term 6)) (term 7)) :-8- (list)))
