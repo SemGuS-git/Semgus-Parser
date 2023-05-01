@@ -267,5 +267,32 @@ namespace Semgus.Parser.Sexpr
                 sw.WriteList(st.Unclassified, se => sw.Write(se));
             });
         }
+
+        /// <summary>
+        /// Writes an attribute value
+        /// </summary>
+        /// <param name="sw">ISexprWriter to write to</param>
+        /// <param name="attrval">Attribute value to write</param>
+        public static void Write(this ISexprWriter sw, SmtAttributeValue attrval)
+        {
+            switch (attrval.Type)
+            {
+                case SmtAttributeValue.AttributeType.Identifier:
+                    sw.Write(attrval.IdentifierValue!);
+                    break;
+                case SmtAttributeValue.AttributeType.Keyword:
+                    sw.WriteKeyword(attrval.KeywordValue!.Name);
+                    break;
+                case SmtAttributeValue.AttributeType.Literal:
+                    sw.Write(attrval.LiteralValue!);
+                    break;
+                case SmtAttributeValue.AttributeType.List:
+                    sw.WriteList(attrval.ListValue!, se => sw.Write(se));
+                    break;
+                case SmtAttributeValue.AttributeType.None:
+                    sw.WriteNil();
+                    break;
+            }
+        }
     }
 }
