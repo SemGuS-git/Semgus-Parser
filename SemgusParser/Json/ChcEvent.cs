@@ -14,6 +14,7 @@ namespace Semgus.Parser.Json
     {
         private readonly SemgusChc _chc;
 
+        public SmtIdentifier? Id => _chc.Id;
         public SemgusChc.SemanticRelation Head => _chc.Head;
 
         public IReadOnlyList<SemgusChc.SemanticRelation> BodyRelations => _chc.BodyRelations;
