@@ -313,6 +313,7 @@ namespace Semgus.Parser.Commands
 
         private static SemgusChc GenerateChc(SemgusTermType.Constructor constructor, IList<SemgusChc.SemanticRelation> bodyRels, SmtTerm constraint, IList<SmtMatchVariableBinding> matchBindings, SmtScope bodyScope, SmtScope auxScope, TermTypeData ttDatum, SemanticRelationData semDatum)
         {
+            SmtIdentifier chcId = GensymUtils.Gensym("_CHC", constructor.Operator.Symbol, indexed: false);
             return new(semDatum.Relation,
                                          bodyRels,
                                          constraint,
@@ -325,7 +326,10 @@ namespace Semgus.Parser.Commands
                                          semDatum.TermVariable,
                                          auxScope.Bindings,
                                          semDatum.InputVariables,
-                                         semDatum.OutputVariables);
+                                         semDatum.OutputVariables)
+            {
+                Id = chcId
+            };
         }
     }
 }

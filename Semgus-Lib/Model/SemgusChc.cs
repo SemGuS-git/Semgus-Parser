@@ -15,7 +15,7 @@ namespace Semgus.Model
 
         /// A unique identifier for this CHC
         /// </summary>
-        public string? Id { get; init; }
+        public SmtIdentifier? Id { get; init; }
 
         /// <summary>
         /// Auxiliary variables bound in this CHC
