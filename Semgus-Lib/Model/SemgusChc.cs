@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace Semgus.Model
 {
+    /// <summary>
+    /// A CHC.
+    /// </summary>
     public class SemgusChc
     {
         /// <summary>
@@ -15,8 +18,18 @@ namespace Semgus.Model
         /// </summary>
         public SymbolTable Symbols { get; }
 
+        /// A unique identifier for this CHC
+        /// </summary>
+        public string? Id { get; init; }
+
+        /// <summary>
+        /// Auxiliary variables bound in this CHC
+        /// </summary>
         public IReadOnlyList<SmtVariableBinding> VariableBindings { get; }
 
+        /// <summary>
+        /// The CHC head relation
+        /// </summary>
         public SemanticRelation Head { get; }
 
         /// <summary>
@@ -42,10 +55,18 @@ namespace Semgus.Model
         /// </summary>
         public SmtVariable TermVariable { get; }
 
+        /// Body relations in this CHC
+        /// </summary>
         public IReadOnlyList<SemanticRelation> BodyRelations { get; }
 
+        /// <summary>
+        /// The CHC constraint, as an SMT expression
+        /// </summary>
         public SmtTerm Constraint { get; }
 
+        /// <summary>
+        /// The CHC operator binder
+        /// </summary>
         public SmtMatchBinder Binder { get; }
 
         public SemgusChc(SemanticRelation head, IEnumerable<SemanticRelation> childRels, SmtTerm constraint, SmtMatchBinder binder, IEnumerable<SmtVariableBinding> bindings,
