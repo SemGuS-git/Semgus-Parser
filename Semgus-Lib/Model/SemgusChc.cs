@@ -1,13 +1,11 @@
 ﻿using Semgus.Model.Smt;
 using Semgus.Model.Smt.Terms;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Semgus.Model
 {
+    /// <summary>
+    /// A CHC.
+    /// </summary>
     public class SemgusChc
     {
         /// <summary>
@@ -15,8 +13,18 @@ namespace Semgus.Model
         /// </summary>
         public SymbolTable Symbols { get; }
 
+        /// A unique identifier for this CHC
+        /// </summary>
+        public SmtIdentifier? Id { get; init; }
+
+        /// <summary>
+        /// Auxiliary variables bound in this CHC
+        /// </summary>
         public IReadOnlyList<SmtVariableBinding> VariableBindings { get; }
 
+        /// <summary>
+        /// The CHC head relation
+        /// </summary>
         public SemanticRelation Head { get; }
 
         /// <summary>
@@ -42,12 +50,30 @@ namespace Semgus.Model
         /// </summary>
         public SmtVariable TermVariable { get; }
 
+        /// Body relations in this CHC
+        /// </summary>
         public IReadOnlyList<SemanticRelation> BodyRelations { get; }
 
+        /// <summary>
+        /// The CHC constraint, as an SMT expression
+        /// </summary>
         public SmtTerm Constraint { get; }
 
+        /// <summary>
+        /// The CHC operator binder
+        /// </summary>
         public SmtMatchBinder Binder { get; }
 
+        /// <summary>
+        /// Creates a CHC from the given components
+        /// </summary>
+        /// <param name="head">The CHC head</param>
+        /// <param name="childRels">Child relations in the CHC body</param>
+        /// <param name="constraint">The CHC constraint as an SMT term</param>
+        /// <param name="binder">The match binder for the operator and child terms</param>
+        /// <param name="bindings">Variable bindings</param>
+        /// <param name="inputs">Input variables</param>
+        /// <param name="outputs">Output variables</param>
         public SemgusChc(SemanticRelation head, IEnumerable<SemanticRelation> childRels, SmtTerm constraint, SmtMatchBinder binder, IEnumerable<SmtVariableBinding> bindings,
                          SmtVariable term, IEnumerable<SmtVariableBinding> auxiliaries,
                          IEnumerable<SmtVariable>? inputs = default, IEnumerable<SmtVariable>? outputs = default)
@@ -64,8 +90,18 @@ namespace Semgus.Model
             Symbols = new SymbolTable(this);
         }
 
+        /// <summary>
+        /// A semantic relation usage, consisting of a relation, its rank, and the actuals passed to it
+        /// </summary>
+        /// <param name="Relation">The relation</param>
+        /// <param name="Rank">The specific relation rank</param>
+        /// <param name="Arguments">The actuals passed to the relation</param>
         public record SemanticRelation(IApplicable Relation, SmtFunctionRank Rank, IReadOnlyList<SmtVariable> Arguments)
         {
+            /// <summary>
+            /// Gets this relation as a string
+            /// </summary>
+            /// <returns>The relation as a string</returns>
             public override string ToString()
             {
                 return $"({Relation.Name} {string.Join(' ', Arguments)})";

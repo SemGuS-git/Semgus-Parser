@@ -29,6 +29,11 @@ namespace Semgus.Parser.Sexpr
                 _sw.WriteList(() =>
                 {
                     _sw.WriteSymbol("chc");
+                    if (chc.Id is not null)
+                    {
+                        _sw.WriteKeyword("id");
+                        _sw.Write(chc.Id);
+                    }
                     _sw.WriteKeyword("head");
                     _sw.Write(chc.Head);
                     _sw.WriteKeyword("body");

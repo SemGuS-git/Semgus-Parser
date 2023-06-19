@@ -407,9 +407,13 @@ namespace Semgus.Parser.Commands
                 // Only the constraint needs to be macroexpanded
                 constraint = SmtMacroExpander.Expand(_smtCtxProvider.Context, constraint);
 
+                SmtIdentifier chcId = GensymUtils.Gensym("_CHC", binder.Constructor?.Name.Symbol, indexed: false);
                 _semgusCtxProvider.Context.AddChc(new SemgusChc(head, relList, constraint, binder, headBindings.Concat(bodyBindings),
                     term: termVariable, auxiliaries: bodyBindings,
-                    inputs: inputs, outputs: outputs));
+                    inputs: inputs, outputs: outputs)
+                {
+                    Id = chcId
+                });
             }
 
             foreach (var pat in grouper.Binders)
