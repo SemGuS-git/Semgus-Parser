@@ -1,6 +1,6 @@
 ﻿using Semgus.Model.Smt.Terms;
 using Semgus.Model.Smt.Theories;
-
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Semgus.Model.Smt.Extensions
@@ -91,6 +91,65 @@ namespace Semgus.Model.Smt.Extensions
                     return b.Lambda(scope,
                         b.Apply(bvor_id, b.Apply(bvand_id, a1, b.Apply(bvnot_id, a2)),
                                          b.Apply(bvand_id, b.Apply(bvnot_id, a1), a2)));
+
+                });
+
+            sb.AddFn(name: "bvugt",
+                     val: SmtSourceBuilder.CheckArgumentSortsEqual,
+                     valCmt: "Argument sorts must be of the same size",
+                     retCalc: SmtSourceBuilder.UseFirstArgumentSort,
+                     bv0,
+                     bv0,
+                     bv0)
+                .DefinitionMissing((ctx, fn, rank) =>
+                {
+                    SmtIdentifier bvult_id = new("bvult");
+
+                    var a1_id = new SmtIdentifier("a1");
+                    var a2_id = new SmtIdentifier("a2");
+
+                    SmtScope scope = new(default);
+                    scope.TryAddVariableBinding(a1_id, rank.ArgumentSorts[0], SmtVariableBindingType.Lambda, ctx, out var a1_binding, out _);
+                    scope.TryAddVariableBinding(a2_id, rank.ArgumentSorts[1], SmtVariableBindingType.Lambda, ctx, out var a2_binding, out _);
+
+                    var a1 = new SmtVariable(a1_id, a1_binding!);
+                    var a2 = new SmtVariable(a2_id, a2_binding!);
+
+                    var b = new SmtTermBuilder(ctx);
+                    return b.Lambda(scope,
+                        b.Apply(bvult_id, a2, a1));
+
+                });
+
+            sb.AddFn(name: "bvsub",
+                     val: SmtSourceBuilder.CheckArgumentSortsEqual,
+                     valCmt: "Argument sorts must be of the same size",
+                     retCalc: SmtSourceBuilder.UseFirstArgumentSort,
+                     bv0,
+                     bv0,
+                     bv0)
+                .DefinitionMissing((ctx, fn, rank) =>
+                {
+                    SmtIdentifier bvadd_id = new("bvadd");
+                    SmtIdentifier bvnot_id = new("bvnot");
+
+                    var a1_id = new SmtIdentifier("a1");
+                    var a2_id = new SmtIdentifier("a2");
+                    var c1_id = new SmtIdentifier("c1");
+
+                    SmtScope scope = new(default);
+                    scope.TryAddVariableBinding(a1_id, rank.ArgumentSorts[0], SmtVariableBindingType.Lambda, ctx, out var a1_binding, out _);
+                    scope.TryAddVariableBinding(a2_id, rank.ArgumentSorts[1], SmtVariableBindingType.Lambda, ctx, out var a2_binding, out _);
+
+                    var a1 = new SmtVariable(a1_id, a1_binding!);
+                    var a2 = new SmtVariable(a2_id, a2_binding!);
+                    var c1 = new SmtBitVectorLiteral(ctx, new BitArray(new int[] { 1 }));
+
+                    var b = new SmtTermBuilder(ctx);
+                    // 2's complement
+                    return b.Lambda(scope,
+                        b.Apply(bvadd_id, b.Apply(bvadd_id, a1, b.Apply(bvnot_id, a2)),
+                                          c1));
 
                 });
 
