@@ -63,6 +63,7 @@ namespace Semgus.Model.Smt.Extensions
         internal SmtBitVectorsExtension(SmtCoreTheory core, SmtBitVectorsTheory bv)
         {
             var bv0 = new SmtSort.WildcardSort(new(new SmtIdentifier("BitVec", "*")));
+            var bool0 = core.Sorts[SmtCommonIdentifiers.BoolSortId.Name];
             SmtSourceBuilder sb = new(this);
             sb.AddFn(name: "bvxor",
                      val: SmtSourceBuilder.CheckArgumentSortsEqual,
@@ -88,6 +89,7 @@ namespace Semgus.Model.Smt.Extensions
                     var a2 = new SmtVariable(a2_id, a2_binding!);
 
                     var b = new SmtTermBuilder(ctx);
+                    // (xor a1 a2) = (bvor (bvand a1 (bvnot a2)) (bvand (not a1) a2))
                     return b.Lambda(scope,
                         b.Apply(bvor_id, b.Apply(bvand_id, a1, b.Apply(bvnot_id, a2)),
                                          b.Apply(bvand_id, b.Apply(bvnot_id, a1), a2)));
@@ -96,9 +98,9 @@ namespace Semgus.Model.Smt.Extensions
 
             sb.AddFn(name: "bvugt",
                      val: SmtSourceBuilder.CheckArgumentSortsEqual,
-                     valCmt: "Argument sorts must be of the same size",
-                     retCalc: SmtSourceBuilder.UseFirstArgumentSort,
-                     bv0,
+                     valCmt: "Argument sorts must be the same",
+                     retCalc: SmtSourceBuilder.UseReturnSort,
+                     bool0,
                      bv0,
                      bv0)
                 .DefinitionMissing((ctx, fn, rank) =>
@@ -116,8 +118,100 @@ namespace Semgus.Model.Smt.Extensions
                     var a2 = new SmtVariable(a2_id, a2_binding!);
 
                     var b = new SmtTermBuilder(ctx);
+                    // (bvugt a1 a2) = (bvult a2 a1)
                     return b.Lambda(scope,
                         b.Apply(bvult_id, a2, a1));
+
+                });
+
+            sb.AddFn(name: "bvule",
+                     val: SmtSourceBuilder.CheckArgumentSortsEqual,
+                     valCmt: "Argument sorts must be the same",
+                     retCalc: SmtSourceBuilder.UseReturnSort,
+                     ret: bool0,
+                     bv0,
+                     bv0)
+                .DefinitionMissing((ctx, fn, rank) =>
+                {
+                    SmtIdentifier bvult_id = new("bvult");
+                    SmtIdentifier eq_id = new("=");
+                    SmtIdentifier or_id = new("or");
+
+                    var a1_id = new SmtIdentifier("a1");
+                    var a2_id = new SmtIdentifier("a2");
+
+                    SmtScope scope = new(default);
+                    scope.TryAddVariableBinding(a1_id, rank.ArgumentSorts[0], SmtVariableBindingType.Lambda, ctx, out var a1_binding, out _);
+                    scope.TryAddVariableBinding(a2_id, rank.ArgumentSorts[1], SmtVariableBindingType.Lambda, ctx, out var a2_binding, out _);
+
+                    var a1 = new SmtVariable(a1_id, a1_binding!);
+                    var a2 = new SmtVariable(a2_id, a2_binding!);
+
+                    var b = new SmtTermBuilder(ctx);
+                    // (bvule a1 a2) = (or (bvult a1 a2) (= a1 a2))
+                    return b.Lambda(scope,
+                        b.Apply(or_id,
+                            b.Apply(bvult_id, a1, a2),
+                            b.Apply(eq_id, a1, a2)));
+
+                });
+
+            sb.AddFn(name: "bvuge",
+                     val: SmtSourceBuilder.CheckArgumentSortsEqual,
+                     valCmt: "Argument sorts must be the same",
+                     retCalc: SmtSourceBuilder.UseReturnSort,
+                     bool0,
+                     bv0,
+                     bv0)
+                .DefinitionMissing((ctx, fn, rank) =>
+                {
+                    SmtIdentifier bvult_id = new("bvult");
+                    SmtIdentifier eq_id = new("=");
+                    SmtIdentifier or_id = new("or");
+
+                    var a1_id = new SmtIdentifier("a1");
+                    var a2_id = new SmtIdentifier("a2");
+
+                    SmtScope scope = new(default);
+                    scope.TryAddVariableBinding(a1_id, rank.ArgumentSorts[0], SmtVariableBindingType.Lambda, ctx, out var a1_binding, out _);
+                    scope.TryAddVariableBinding(a2_id, rank.ArgumentSorts[1], SmtVariableBindingType.Lambda, ctx, out var a2_binding, out _);
+
+                    var a1 = new SmtVariable(a1_id, a1_binding!);
+                    var a2 = new SmtVariable(a2_id, a2_binding!);
+
+                    var b = new SmtTermBuilder(ctx);
+                    // (bvuge a1 a2) = (or (bvult a2 a1) (= a1 a2))
+                    return b.Lambda(scope,
+                        b.Apply(or_id,
+                            b.Apply(bvult_id, a2, a1),
+                            b.Apply( eq_id, a1, a2)));
+
+                });
+
+            sb.AddFn(name: "bveq",
+                     val: SmtSourceBuilder.CheckArgumentSortsEqual,
+                     valCmt: "Argument sorts must be the same",
+                     retCalc: SmtSourceBuilder.UseReturnSort,
+                     bool0,
+                     bv0,
+                     bv0)
+                .DefinitionMissing((ctx, fn, rank) =>
+                {
+                    SmtIdentifier bveq_id = new("=");
+
+                    var a1_id = new SmtIdentifier("a1");
+                    var a2_id = new SmtIdentifier("a2");
+
+                    SmtScope scope = new(default);
+                    scope.TryAddVariableBinding(a1_id, rank.ArgumentSorts[0], SmtVariableBindingType.Lambda, ctx, out var a1_binding, out _);
+                    scope.TryAddVariableBinding(a2_id, rank.ArgumentSorts[1], SmtVariableBindingType.Lambda, ctx, out var a2_binding, out _);
+
+                    var a1 = new SmtVariable(a1_id, a1_binding!);
+                    var a2 = new SmtVariable(a2_id, a2_binding!);
+
+                    var b = new SmtTermBuilder(ctx);
+                    // (bvueq a1 a2) = (= a1 a2)
+                    return b.Lambda(scope, b.Apply(bveq_id, a1, a2));
 
                 });
 
