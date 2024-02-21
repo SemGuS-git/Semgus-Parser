@@ -31,6 +31,7 @@ This project is under active development and does not yet support all SMT-LIB2 f
 * Strings (with partial support for regular expressions)
 * Bit vectors (partial support; only theory functions supported for now)
 * Datatypes (non-parametric only)
+* Arrays (partial support)
 
 Other features:
 * Converting SyGuS problems to CHCs on the fly (beta)
@@ -42,14 +43,12 @@ New additions:
 * Arbitrary `match` expressions
 
 Unsupported SMT-LIB2 features include:
-* Parametric sorts
 * Theory functions annotated with `:left-assoc`, `:right-assoc`, `:chainable`, and `:pairwise`. Certain Core functions are implemented, so post an issue if others are needed.
 * Some terms, including `let`
 * Uninterpreted sorts (`declare-sort`) and sort aliases (`define-sort`)
 
 The roadmap for next-up features includes:
 * Arbitrary `let` terms
-* Parameteric sorts
 
 If there is an unsupported feature that you would like added, drop us a line by submitting an issue (or commenting on an existing one).
 This will help us prioritize what to put on our roadmap.
