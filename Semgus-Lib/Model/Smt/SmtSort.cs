@@ -27,7 +27,7 @@ namespace Semgus.Model.Smt
         public SmtSortIdentifier Name { get; }
 
         /// <summary>
-        /// Does this sort have parameters?
+        /// Does this sort have parameters that need to be resolved?
         /// </summary>
         public bool IsParametric { get; protected set; } = false;
 
@@ -42,6 +42,12 @@ namespace Semgus.Model.Smt
         public int Arity { get; protected set; } = 0;
 
         /// <summary>
+        /// Updates this sort for resolved parameters
+        /// </summary>
+        /// <param name="resolved">Resolved parameters. Should have same length as arity</param>
+        public virtual void UpdateForResolvedParameters(IList<SmtSort> resolved) { }
+
+        /// <summary>
         /// An arbitrary generic sort
         /// </summary>
         internal class GenericSort : SmtSort
@@ -52,6 +58,28 @@ namespace Semgus.Model.Smt
             /// <param name="name">The sort name</param>
             public GenericSort(SmtSortIdentifier name) : base(name)
             { }
+        }
+
+        /// <summary>
+        /// A sort parameter that needs to be resolved to a real sort
+        /// </summary>
+        internal class UnresolvedParameterSort : SmtSort
+        {
+            /// <summary>
+            /// Identifier that needs to be resolved
+            /// </summary>
+            public SmtSortIdentifier Identifier { get; }
+
+            /// <summary>
+            /// Creates a new unresolved sort. This is a placeholder for sort parameters to be resolved.
+            /// </summary>
+            /// <param name="identifier">Sort identifier to resolve</param>
+            public UnresolvedParameterSort(SmtSortIdentifier identifier) : base(identifier)
+            {
+                Identifier = identifier;
+                IsSortParameter = true;
+                Arity = identifier.Arity;
+            }
         }
 
         /// <summary>
