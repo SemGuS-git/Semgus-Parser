@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 
 using Semgus.Parser.Json;
+using Semgus.Parser.Semgus;
 using Semgus.Parser.Sexpr;
 using Semgus.Parser.Verifier;
 
@@ -23,7 +24,8 @@ namespace Semgus.Parser
         {
             Json,
             Sexpr,
-            Verify
+            Verify,
+            Semgus
         }
 
         /// <summary>
@@ -224,6 +226,10 @@ namespace Semgus.Parser
 
                 case OutputFormat.Sexpr:
                     handler = new SexprHandler(writer);
+                    break;
+
+                case OutputFormat.Semgus:
+                    handler = new SemgusHandler(writer);
                     break;
 
                 default:

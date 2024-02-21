@@ -9,10 +9,6 @@ namespace Semgus.Sexpr.Writer
 {
     public interface ISexprWriter
     {
-        public void WriteListStart();
-
-        public void WriteListEnd();
-
         public void WriteList(Action contents);
 
 
@@ -29,5 +25,38 @@ namespace Semgus.Sexpr.Writer
         public void WriteDecimal(double value);
 
         public void WriteBitVector(BitArray value);
+
+        public void WithinLogicalBlock(string prefix,
+                                          string suffix,
+                                          bool perLinePrefix,
+                                          Action body);
+
+        public enum ConditionalNewlineKind
+        {
+            Linear,
+            Fill,
+            Miser,
+            Mandatory
+        }
+
+        public void AddConditionalNewline(ConditionalNewlineKind kind = ConditionalNewlineKind.Linear, bool skipAtBlockStart = true);
+
+        public enum LogicalBlockRelativeTo
+        {
+            Block,
+            Current
+        }
+
+        public void LogicalBlockIndent(LogicalBlockRelativeTo relativeTo, int n);
+    }
+
+    public static class PrettyPrinterExtensions
+    {
+        public static void LogicalBlockIndent(this ISexprWriter me, int n = 0)
+            => me.LogicalBlockIndent(ISexprWriter.LogicalBlockRelativeTo.Block, n);
+
+        public static void LogicalBlockCurrentIndent(this ISexprWriter me, int n = 0)
+            => me.LogicalBlockIndent(ISexprWriter.LogicalBlockRelativeTo.Current, n);
+
     }
 }
