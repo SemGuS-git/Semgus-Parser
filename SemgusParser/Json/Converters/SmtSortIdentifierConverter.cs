@@ -29,20 +29,24 @@ namespace Semgus.Parser.Json.Converters
                 throw new InvalidOperationException("Attepted to serialize the wrong thing.");
             }
 
-            // if (id.Parameters.Length > 0)
+            if (id.Parameters.Length > 0)
             {
-                writer.WriteStartArray();
+                writer.WriteStartObject();
+                writer.WritePropertyName("sortKind");
                 serializer.Serialize(writer, id.Name);
+                writer.WritePropertyName("sortParams");
+                writer.WriteStartArray();
                 foreach (var sort in id.Parameters)
                 {
                     serializer.Serialize(writer, sort);
                 }
                 writer.WriteEndArray();
+                writer.WriteEndObject();
             }
-            // else
-            // {
-            //     serializer.Serialize(writer, id.Name);
-            // }            
+            else
+            {
+                serializer.Serialize(writer, id.Name);
+            }            
         }
     }
 }

@@ -41,8 +41,7 @@ namespace Semgus.Parser.Json.Converters
                     }
                     else
                     {
-                        throw new InvalidOperationException("Indexes cannot be strings; they must be integers.");
-                        // writer.WriteValue(index.StringValue);
+                        writer.WriteValue(index.StringValue);
                     }
                 }
                 writer.WriteEndArray();
