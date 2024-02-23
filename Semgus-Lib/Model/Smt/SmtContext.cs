@@ -64,7 +64,8 @@ namespace Semgus.Model.Smt
                 SmtCoreTheory.Instance,
                 SmtIntsTheory.Instance,
                 SmtStringsTheory.Instance,
-                SmtBitVectorsTheory.Instance
+                SmtBitVectorsTheory.Instance,
+                SmtArraysExTheory.Instance
             };
 
             _extensions = new HashSet<ISmtExtension>()
@@ -249,7 +250,7 @@ namespace Semgus.Model.Smt
                 return false;
             }
 
-            if (candidate.Arity == 0)
+            if (candidate.Arity == 0 || !candidate.IsParametric)
             {
                 resolved = candidate;
                 error = default;
@@ -266,13 +267,16 @@ namespace Semgus.Model.Smt
                 else
                 {
                     resolved = default;
+                    error = $"Unable to resolve sort parameter {child.Name} in parametric sort {id.Name}: {error}";
                     return false;
                 }
             }
 
-            resolved = default;
-            error = "Not finished being implemented";
-            return false;
+            candidate.UpdateForResolvedParameters(resolvedSubsorts);
+
+            resolved = candidate;
+            error = "";
+            return true;
         }
 
         public void Push()

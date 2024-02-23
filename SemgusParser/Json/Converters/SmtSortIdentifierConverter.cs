@@ -31,7 +31,17 @@ namespace Semgus.Parser.Json.Converters
 
             if (id.Parameters.Length > 0)
             {
-                throw new InvalidOperationException("Parameterized sorts not yet supported by the JSON serializer.");
+                writer.WriteStartObject();
+                writer.WritePropertyName("kind");
+                serializer.Serialize(writer, id.Name);
+                writer.WritePropertyName("params");
+                writer.WriteStartArray();
+                foreach (var sort in id.Parameters)
+                {
+                    serializer.Serialize(writer, sort);
+                }
+                writer.WriteEndArray();
+                writer.WriteEndObject();
             }
             else
             {

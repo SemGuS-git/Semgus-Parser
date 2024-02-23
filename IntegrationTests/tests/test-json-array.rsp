@@ -1,0 +1,6 @@
+--format
+json
+--mode
+batch
+--
+data/array.sem

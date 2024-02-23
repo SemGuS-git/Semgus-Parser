@@ -1,0 +1,37 @@
+(declare-term-types
+((E 0) (Start 0))
+((($IBVVary )
+($bvsub E E)
+($bvadd E E)
+($IBVVarx ))
+(($bv=x E))))
+
+
+
+(define-funs-rec
+((E.Sem ((E_term_0 E) (r__0 (_ BitVec 32)) (rv (Array Int Int)) (x (_ BitVec 32)) (y (_ BitVec 32))) Bool)
+(Start.Sem ((Start_term_0 Start) (x_r0 (_ BitVec 32)) (y_r0 (_ BitVec 32)) (rq (Array Int Int)) (x (_ BitVec 32)) (y (_ BitVec 32))) Bool))
+
+((match E_term_0
+  (($IBVVary (exists ((r__1 (_ BitVec 32))) (and (= r__0 r__1)
+  (= r__1 y))))
+(($bvsub E_term_1 E_term_2) (exists ((r__1 (_ BitVec 32)) (r__2 (_ BitVec 32)) (rb (Array Int Int))) (and (= r__0 (bvadd r__1 (bvneg r__2)))
+  (E.Sem E_term_1 r__1 rb x y)
+  (E.Sem E_term_2 r__2 rb x y))))
+(($bvadd E_term_1 E_term_2) (exists ((r__1 (_ BitVec 32)) (r__2 (_ BitVec 32)) (rb (Array Int Int))) (and (= r__0 (bvadd r__1 r__2))
+  (E.Sem E_term_1 r__1 rb x y)
+  (E.Sem E_term_2 r__2 rb x y))))
+($IBVVarx (exists ((r__1 (_ BitVec 32))) (and (= r__0 r__1)
+  (= r__1 x))))))
+(match Start_term_0
+  ((($bv=x E_term_1) (exists ((r__1 (_ BitVec 32)) (rb (Array Int Int))) (and (and (= x_r0 r__1)
+  (and (= rb rb) (= y y_r0)))
+  (E.Sem E_term_1 r__1 rb x y))))))))
+
+
+(synth-fun BVtest_ADD_01() Start)
+
+
+(constraint (exists ((rq (Array Int Int)) (y (_ BitVec 32))) (Start.Sem BVtest_ADD_01 #x00000004 #x00000004 rq #x00000003 y)))
+
+(check-synth)

@@ -16,6 +16,7 @@ namespace Semgus.Model.Smt
         public static SmtIdentifier StringsTheoryId { get; } = new("Strings");
         public static SmtIdentifier BitVectorsTheoryId { get; } = new("BitVectors");
         public static SmtIdentifier BitVectorsExtensionId { get; } = new("BitVectors", "extension");
+        public static SmtIdentifier ArraysExTheoryId { get; } = new("ArraysEx");
 
         public static SmtSortIdentifier BoolSortId { get; } = new("Bool");
         public static SmtSortIdentifier IntSortId { get; } = new("Int");
@@ -32,6 +33,7 @@ namespace Semgus.Model.Smt
                                              new SmtIdentifier.Index(size)));
             }
         }
+        public static SmtIdentifier ArraySortPrimaryId { get; } = new("Array");
 
         public static SmtIdentifier AndFunctionId { get; } = new("and");
         public static SmtIdentifier OrFunctionId { get; } = new("or");
