@@ -32,9 +32,9 @@ namespace Semgus.Parser.Json.Converters
             if (id.Parameters.Length > 0)
             {
                 writer.WriteStartObject();
-                writer.WritePropertyName("sortKind");
+                writer.WritePropertyName("kind");
                 serializer.Serialize(writer, id.Name);
-                writer.WritePropertyName("sortParams");
+                writer.WritePropertyName("params");
                 writer.WriteStartArray();
                 foreach (var sort in id.Parameters)
                 {
