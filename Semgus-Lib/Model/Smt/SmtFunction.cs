@@ -153,7 +153,22 @@ namespace Semgus.Model.Smt
                     }
                     else
                     {
-                        resolvedParameters.Add(templateSort, concreteSort);
+                        // Template sorts (that are a parameter) are allowed to have arity 0.
+                        // The whole template will just be matched with the concrete sort.
+                        // Otherwise, we want to make sure the arities match.
+                        if (!(templateSort.IsSortParameter && templateSort.Arity == 0)
+                            && templateSort.Arity != concreteSort.Arity)
+                        {
+                            rank = default;
+                            return false;
+                        }
+
+                        // Recursively match the template and match parameter sorts
+                        if (!TraverseAndMatchTemplate(templateSort, concreteSort, resolvedParameters))
+                        {
+                            rank = default;
+                            return false;
+                        }
                         templateSort = concreteSort;
                     }
                 }
@@ -210,6 +225,62 @@ namespace Semgus.Model.Smt
                 rank = new SmtFunctionRank(returnSort, argumentSorts);
             }
             return template.Validator(rank);
+        }
+
+        /// <summary>
+        /// Match a template sort and parameters against a concrete sort
+        /// </summary>
+        /// <param name="template">Template sort to match</param>
+        /// <param name="concrete">Concrete sort to match against</param>
+        /// <param name="resolvedParameters">Dictionary of resolved parameters</param>
+        /// <returns>True if successfully resolves, false if not</returns>
+        internal static bool TraverseAndMatchTemplate(SmtSort template, SmtSort concrete, IDictionary<SmtSort, SmtSort> resolvedParameters)
+        {
+            // Template can be a parameter, and concrete can be whatever
+            if (template.IsSortParameter)
+            {
+                if (resolvedParameters.TryGetValue(template, out var resolved))
+                {
+                    if (resolved != concrete)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    resolvedParameters.Add(template, concrete);
+                }
+
+                if (template.Arity == 0 && concrete.Arity > 0)
+                {
+                    return true;
+                }
+            }
+
+            // Otherwise, arities must match, so we can traverse
+            if (template.Arity != concrete.Arity)
+            {
+                return false;
+            }
+
+            if (template.IsSortParameter)
+            {
+                foreach (var (tempParam, concParam) in template.Parameters.Zip(concrete.Parameters))
+                {
+                    if (!TraverseAndMatchTemplate(tempParam, concParam, resolvedParameters))
+                    {
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                if (template != concrete)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>

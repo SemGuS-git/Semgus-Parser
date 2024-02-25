@@ -48,6 +48,11 @@ namespace Semgus.Model.Smt
         public virtual void UpdateForResolvedParameters(IList<SmtSort> resolved) { }
 
         /// <summary>
+        /// This sort's parameters
+        /// </summary>
+        public virtual IEnumerable<SmtSort> Parameters { get; } = Enumerable.Empty<SmtSort>();
+
+        /// <summary>
         /// An arbitrary generic sort
         /// </summary>
         internal class GenericSort : SmtSort

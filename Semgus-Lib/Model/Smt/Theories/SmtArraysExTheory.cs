@@ -43,6 +43,14 @@ namespace Semgus.Model.Smt.Theories
             public SmtSort ValueSort { get; private set; }
 
             /// <summary>
+            /// This sort's parameters
+            /// </summary>
+            public override IEnumerable<SmtSort> Parameters
+            {
+                get => new SmtSort[] { IndexSort, ValueSort };
+            }
+
+            /// <summary>
             /// Constructs a new array sort with the given parameters
             /// </summary>
             /// <param name="size">Size of bit vectors in this sort</param>
@@ -52,6 +60,20 @@ namespace Semgus.Model.Smt.Theories
                 IndexSort = new UnresolvedParameterSort(indexSort);
                 ValueSort = new UnresolvedParameterSort(valueSort);
                 IsParametric = true;
+                Arity = 2;
+            }
+
+            /// <summary>
+            /// Constructs an array sort with specific sort objects
+            /// </summary>
+            /// <param name="indexSort">The sort for the index</param>
+            /// <param name="valueSort">The sort for the value</param>
+            internal ArraySort(SmtSort indexSort, SmtSort valueSort)
+                : base(new(ArraySortPrimaryId, indexSort.Name, valueSort.Name))
+            {
+                IndexSort = indexSort;
+                ValueSort = valueSort;
+                IsSortParameter = indexSort.IsSortParameter || valueSort.IsSortParameter;
                 Arity = 2;
             }
 
@@ -117,8 +139,12 @@ namespace Semgus.Model.Smt.Theories
         private SmtArraysExTheory()
         {
             SmtSourceBuilder sb = new(this);
-            sb.AddOnTheFlyFn("select");
-            sb.AddOnTheFlyFn("store");
+            var usf = new SmtSort.UniqueSortFactory();
+            var valueSort = usf.Next();
+            var indexSort = usf.Next();
+            var arraySort = new ArraySort(indexSort, valueSort);
+            sb.AddFn("select", valueSort, arraySort, indexSort);
+            sb.AddFn("store", arraySort, arraySort, indexSort, valueSort);
 
             Functions = sb.Functions;
             PrimaryFunctionSymbols = sb.PrimaryFunctionSymbols;
