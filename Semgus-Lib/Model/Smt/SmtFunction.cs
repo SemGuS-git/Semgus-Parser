@@ -234,7 +234,7 @@ namespace Semgus.Model.Smt
         /// <param name="concrete">Concrete sort to match against</param>
         /// <param name="resolvedParameters">Dictionary of resolved parameters</param>
         /// <returns>True if successfully resolves, false if not</returns>
-        private static bool TraverseAndMatchTemplate(SmtSort template, SmtSort concrete, IDictionary<SmtSort, SmtSort> resolvedParameters)
+        internal static bool TraverseAndMatchTemplate(SmtSort template, SmtSort concrete, IDictionary<SmtSort, SmtSort> resolvedParameters)
         {
             // Template can be a parameter, and concrete can be whatever
             if (template.IsSortParameter)
