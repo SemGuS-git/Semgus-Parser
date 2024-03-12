@@ -117,6 +117,9 @@ namespace Semgus.Parser
             procClass(typeof(SetLogicCommand));
             procClass(typeof(DeclareVarCommand));
 
+            // Parser extensions
+            procClass(typeof(IntrinsicCommands));
+
             ServiceCollection services = new ServiceCollection();
             services.AddSingleton<ISmtConverter, Reader.Converters.SmtConverter>();
             services.AddSingleton<DestructuringHelper>();

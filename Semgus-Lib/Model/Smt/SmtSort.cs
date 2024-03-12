@@ -55,7 +55,7 @@ namespace Semgus.Model.Smt
         /// <summary>
         /// An arbitrary generic sort
         /// </summary>
-        internal class GenericSort : SmtSort
+        public class GenericSort : SmtSort
         {
             /// <summary>
             /// Constructs a new generic sort
