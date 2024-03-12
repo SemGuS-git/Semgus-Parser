@@ -1,0 +1,14 @@
+;;;;
+;;;; Checks that intrinsics commands are handled properly
+;;;;
+(declare-intrinsic-sort Real2)
+(declare-intrinsic-const real2.tau Real2)
+(declare-intrinsic-fun real2.sin (Real2) Real2)
+(declare-intrinsic-fun real2.atan2 (Real2 Real2) Real2)
+(declare-intrinsic-fun real2.+ (Int Real2) Real2)
+
+(constraint (forall ((x Real2) (y Real2))
+              (exists ((z Int))
+                (= (real2.sin (real2.+ z real2.tau)) (real2.atan2 x y)))))
+
+(check-synth)
