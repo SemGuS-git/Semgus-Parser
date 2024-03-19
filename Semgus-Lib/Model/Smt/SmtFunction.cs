@@ -192,6 +192,8 @@ namespace Semgus.Model.Smt
                 var retSort = template.ReturnSort;
                 if (retSort.IsSortParameter)
                 {
+                    TraverseAndResolveTemplate(ctx, retSort, resolvedParameters, out _);
+
                     if (resolvedParameters.TryGetValue(retSort, out SmtSort? resRetSort))
                     {
                         // Case: the return value is a parameter we know about
@@ -227,6 +229,54 @@ namespace Semgus.Model.Smt
                 rank = new SmtFunctionRank(returnSort, argumentSorts);
             }
             return template.Validator(rank);
+        }
+
+        /// <summary>
+        /// Traverses the template and resolves parameters inside it, from already resolved pieces
+        /// </summary>
+        /// <param name="ctx">The SMT context</param>
+        /// <param name="template">The template to match</param>
+        /// <param name="resolvedParameters">Dictionary of templates to resolved parameters</param>
+        /// <param name="resolved">The resolved sort</param>
+        /// <returns>True if successfully resolved</returns>
+        internal static bool TraverseAndResolveTemplate(SmtContext ctx, SmtSort template, IDictionary<SmtSort, SmtSort> resolvedParameters, [NotNullWhen(true)] out SmtSort? resolved)
+        {
+            if (!template.IsSortParameter)
+            {
+                resolved = template;
+                return true;
+            }
+            else if (resolvedParameters.TryGetValue(template, out resolved))
+            {
+                return true;
+            }
+            else if (template.Arity == 0)
+            {
+                // An unresolved parameter! Resolution failed.
+                resolved = default;
+                return false;
+            }
+            else
+            {
+                List<SmtSortIdentifier> paramIds = new();
+                foreach (var parameter in template.Parameters)
+                {
+                    if (!TraverseAndResolveTemplate(ctx, parameter, resolvedParameters, out resolved))
+                    {
+                        resolved = default;
+                        return false;
+                    }
+                    paramIds.Add(resolved.Name);
+                }
+                if (!ctx.TryGetSortDeclaration(new(template.Name.Name, paramIds.ToArray()), out var sort, out string? _))
+                {
+                    resolved = default;
+                    return false;
+                }
+                resolvedParameters.Add(template, sort);
+                resolved = sort;
+                return true;
+            }
         }
 
         /// <summary>
