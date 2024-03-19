@@ -68,7 +68,7 @@ namespace Semgus.Parser.Json
         {
             foreach (var chc in semgusCtx.Chcs)
             {
-                _serializer.Serialize(_writer, new ChcEvent(chc));
+                _serializer.Serialize(_writer, new ChcEvent(chc, includeLegacySymbols: _flags.LegacySymbols));
                 EndOfEvent();
             }
 
