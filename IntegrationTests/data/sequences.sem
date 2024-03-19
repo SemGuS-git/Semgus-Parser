@@ -1,0 +1,22 @@
+(declare-term-types
+ ((Start 0))
+ ((($main))))
+
+(define-funs-rec
+    ((Start.Sem ((Start_term_0 Start) (rq (Seq Int)) (x (_ BitVec 32))) Bool))
+
+    ((match Start_term_0
+            ((($main)
+              (exists ((rb (Seq String)) (ra (Seq String)))
+                      (and (= "Test" (seq.nth rb 7))
+                           (= rb (seq.++ ra (seq.unit "a")))
+                           (= rb (as seq.empty (Seq String)))
+                           (= rq (seq.rev rq)))))))))
+
+
+(synth-fun MyFunc () Start)
+
+
+(constraint (exists ((rq (Seq Int)) (y (_ BitVec 32))) (Start.Sem MyFunc rq y)))
+
+(check-synth)

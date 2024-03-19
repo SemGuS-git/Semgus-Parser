@@ -20,7 +20,7 @@ namespace Semgus.Model.Smt.Theories
         /// <summary>
         /// A singleton theory instance
         /// </summary>
-        public static SmtSequencesTheory Instance { get; } = new();
+        public static SmtSequencesTheory Instance { get; } = new(SmtCoreTheory.Instance, SmtIntsTheory.Instance);
 
         /// <summary>
         /// Underlying sequence sort
@@ -127,12 +127,30 @@ namespace Semgus.Model.Smt.Theories
         /// Constructs an instance of the theory of sequences
         /// </summary>
         /// <param name="core">Reference to the core theory</param>
-        private SmtSequencesTheory()
+        private SmtSequencesTheory(SmtCoreTheory core, SmtIntsTheory ints)
         {
+            SmtSort b = core.Sorts[BoolSortId.Name];
+            SmtSort i = ints.Sorts[IntSortId.Name];
+
             SmtSourceBuilder sb = new(this);
             var usf = new SmtSort.UniqueSortFactory();
             var elementSort = usf.Next();
             var seqSort = new SeqSort(elementSort);
+            sb.AddFn("seq.empty", seqSort);
+            sb.AddFn("seq.unit", seqSort, elementSort);
+            sb.AddFn("seq.len", i, seqSort);
+            sb.AddFn("seq.nth", elementSort, seqSort, i);
+            sb.AddFn("seq.update", seqSort, seqSort, i, seqSort);
+            sb.AddFn("seq.extract", seqSort, seqSort, i, i);
+            sb.AddFn("seq.++", seqSort, seqSort, seqSort);
+            sb.AddFn("seq.at", seqSort, seqSort, i);
+            sb.AddFn("seq.contains", b, seqSort, seqSort);
+            sb.AddFn("seq.indexof", i, seqSort, seqSort, i);
+            sb.AddFn("seq.replace", seqSort, seqSort, seqSort, seqSort);
+            sb.AddFn("seq.replace_all", seqSort, seqSort, seqSort, seqSort);
+            sb.AddFn("seq.rev", seqSort, seqSort);
+            sb.AddFn("seq.prefixof", b, seqSort, seqSort);
+            sb.AddFn("seq.suffixof", b, seqSort, seqSort);
 
             Functions = sb.Functions;
             PrimaryFunctionSymbols = sb.PrimaryFunctionSymbols;
