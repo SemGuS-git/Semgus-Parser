@@ -1,0 +1,6 @@
+--test
+--format
+json
+--mode
+batch
+--no-legacy-symbols

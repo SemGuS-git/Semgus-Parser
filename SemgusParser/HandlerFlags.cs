@@ -40,6 +40,11 @@ namespace Semgus.Parser
         public bool FunctionEvents => _fac.FunctionEvents.GetFlag(_ctx);
 
         /// <summary>
+        /// Whether or not to hide the legacy input/output/variables properties in CHCs in JSON
+        /// </summary>
+        public bool LegacySymbols => _fac.LegacySymbols.GetFlag(_ctx);
+
+        /// <summary>
         /// Class for configuring and creating handler flags
         /// </summary>
         public class HandlerFlagsFactory
@@ -50,12 +55,18 @@ namespace Semgus.Parser
             public readonly CommandFlag FunctionEvents = new("function-events", isHidden: true);
 
             /// <summary>
+            /// Whether or not to hide the legacy input/output/variables properties in CHCs in JSON
+            /// </summary>
+            public readonly CommandFlag LegacySymbols = new("legacy-symbols", defaultValue: true, isHidden: true);
+
+            /// <summary>
             /// Creates a new HandlerFlagsFactory and configures it for the given command
             /// </summary>
             /// <param name="command">Command to configure flags for</param>
             public HandlerFlagsFactory(Command command)
             {
                 command.AddFlag(FunctionEvents);
+                command.AddFlag(LegacySymbols);
             }
 
             /// <summary>
