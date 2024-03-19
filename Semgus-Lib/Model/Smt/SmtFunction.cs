@@ -96,18 +96,19 @@ namespace Semgus.Model.Smt
         /// <summary>
         /// Attempts to resolve a concrete rank for the given function signature
         /// </summary>
+        /// <param name="ctx">The SMT context</param>
         /// <param name="rank">The resolved rank</param>
         /// <param name="returnSort">Return sort of function call, if known</param>
         /// <param name="argumentSorts">Function call argument sorts</param>
         /// <returns>True if successfully resolved a concrete rank</returns>
-        public bool TryResolveRank([NotNullWhen(true)] out SmtFunctionRank? rank, SmtSort? returnSort, params SmtSort[] argumentSorts)
+        public bool TryResolveRank(SmtContext ctx, [NotNullWhen(true)] out SmtFunctionRank? rank, SmtSort? returnSort, params SmtSort[] argumentSorts)
         {
             var sameArity = _rankTemplates
                 .Where(r => r.Arity == argumentSorts.Length);
             
             foreach (var template in sameArity)
             {
-                if (TryResolveRank(out rank, template, returnSort, argumentSorts))
+                if (TryResolveRank(ctx, out rank, template, returnSort, argumentSorts))
                 {
                     return true; // We just pick the first one...maybe we need to check all templates and report ambiguities. TODO.
                 }
@@ -119,12 +120,13 @@ namespace Semgus.Model.Smt
         /// <summary>
         /// Attempts to resolve a concrete rank for the given function signature, from a single rank template
         /// </summary>
+        /// <param name="ctx">The SMT context</param>
         /// <param name="rank">The resolved rank</param>
         /// <param name="template">The rank template to try</param>
         /// <param name="returnSort">Return sort of function call, if known</param>
         /// <param name="argumentSorts">Function call argument sorts</param>
         /// <returns>True if successfully resolved a concrete rank</returns>
-        private bool TryResolveRank([NotNullWhen(true)] out SmtFunctionRank? rank, SmtFunctionRank template, SmtSort? returnSort, params SmtSort[] argumentSorts)
+        private bool TryResolveRank(SmtContext ctx, [NotNullWhen(true)] out SmtFunctionRank? rank, SmtFunctionRank template, SmtSort? returnSort, params SmtSort[] argumentSorts)
         {
             Dictionary<SmtSort, SmtSort> resolvedParameters = new();
 

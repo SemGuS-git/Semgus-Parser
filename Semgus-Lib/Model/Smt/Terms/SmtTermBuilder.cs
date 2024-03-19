@@ -74,7 +74,7 @@ namespace Semgus.Model.Smt.Terms
                 throw new InvalidOperationException();
             }
 
-            if (!function.TryResolveRank(out SmtFunctionRank? rank, default, args.Select(a => a.Sort).ToArray()))
+            if (!function.TryResolveRank(ctx, out SmtFunctionRank? rank, default, args.Select(a => a.Sort).ToArray()))
             {
                 onError(id, $"Unable to resolve function rank: {id}, with arg sorts {args.Select(a => a.Sort).ToArray()}");
                 throw new InvalidOperationException();

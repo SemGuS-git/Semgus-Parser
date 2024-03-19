@@ -25,11 +25,12 @@ namespace Semgus.Model.Smt
         /// <summary>
         /// Tries to get an appropriate rank for the given parameter and return sorts
         /// </summary>
+        /// <param name="ctx">The SMT context</param>
         /// <param name="rank">The resolved rank</param>
         /// <param name="returnSort">The return sort, if known</param>
         /// <param name="argumentSorts">The argument sorts</param>
         /// <returns>True if successfully resolved the rank</returns>
-        public bool TryResolveRank([NotNullWhen(true)] out SmtFunctionRank? rank, SmtSort? returnSort, params SmtSort[] argumentSorts);
+        public bool TryResolveRank(SmtContext ctx, [NotNullWhen(true)] out SmtFunctionRank? rank, SmtSort? returnSort, params SmtSort[] argumentSorts);
 
         /// <summary>
         /// Gets an informative string about available ranks

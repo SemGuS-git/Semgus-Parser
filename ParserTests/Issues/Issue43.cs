@@ -74,7 +74,7 @@ namespace Semgus.Parser.Tests.Issues
         {
             SmtContext ctx = new();
             Assert.True(ctx.TryGetFunctionDeclaration(new("true"), out var truefn));
-            Assert.True(truefn!.TryResolveRank(out var rank, default));
+            Assert.True(truefn!.TryResolveRank(ctx, out var rank, default));
 
             SemgusToken testToken = new SymbolToken("test", default);
             SmtTerm testTerm = new SmtFunctionApplication(truefn, rank!, new List<SmtTerm>());
