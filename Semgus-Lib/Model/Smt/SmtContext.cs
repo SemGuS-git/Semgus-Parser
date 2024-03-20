@@ -65,7 +65,8 @@ namespace Semgus.Model.Smt
                 SmtIntsTheory.Instance,
                 SmtStringsTheory.Instance,
                 SmtBitVectorsTheory.Instance,
-                SmtArraysExTheory.Instance
+                SmtArraysExTheory.Instance,
+                SmtSequencesTheory.Instance
             };
 
             _extensions = new HashSet<ISmtExtension>()

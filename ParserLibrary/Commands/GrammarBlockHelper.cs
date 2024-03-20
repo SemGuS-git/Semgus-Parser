@@ -192,7 +192,7 @@ namespace Semgus.Parser.Commands
                                                               semDatum.InputVariables.Where(v => v.Name == identifier).First());
                         }
                         else if (ctx.TryGetFunctionDeclaration(identifier, out var constant)
-                              && constant.TryResolveRank(out var rank, default))
+                              && constant.TryResolveRank(ctx, out var rank, default))
                         {
                             constructor = new(GensymUtils.Gensym("_SyProd", identifier.Symbol));
                             newProds.Add(new(ttDatum.NonTerminal, constructor, Enumerable.Empty<SemgusGrammar.NonTerminal>()));

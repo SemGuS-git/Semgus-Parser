@@ -90,13 +90,13 @@ namespace Semgus.Parser.Tests.BitVectors
             var retSort = SmtBitVectorsTheory.BitVectorsSort.GetSort(n);
 
             // First, try without specifying the return sort
-            AssertTrue(function.TryResolveRank(out var rank, default, argSort));
+            AssertTrue(function.TryResolveRank(ctx, out var rank, default, argSort));
             Assert.Single(rank.ArgumentSorts);
             Assert.Equal(argSort, rank.ArgumentSorts[0]);
             Assert.Equal(retSort, rank.ReturnSort);
 
             // Then, with specifying the return sort
-            AssertTrue(function.TryResolveRank(out rank, retSort, argSort));
+            AssertTrue(function.TryResolveRank(ctx, out rank, retSort, argSort));
             Assert.Single(rank.ArgumentSorts);
             Assert.Equal(argSort, rank.ArgumentSorts[0]);
             Assert.Equal(retSort, rank.ReturnSort);
@@ -119,10 +119,10 @@ namespace Semgus.Parser.Tests.BitVectors
             var retSort = SmtBitVectorsTheory.BitVectorsSort.GetSort(n);
 
             // First, try without specifying the return sort
-            AssertFalse(function.TryResolveRank(out var _, default, argSort));
+            AssertFalse(function.TryResolveRank(ctx, out var _, default, argSort));
 
             // Then, with specifying the return sort
-            AssertFalse(function.TryResolveRank(out _, retSort, argSort));
+            AssertFalse(function.TryResolveRank(ctx, out _, retSort, argSort));
         }
     }
 }

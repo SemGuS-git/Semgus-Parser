@@ -362,11 +362,12 @@ namespace Semgus.Model.Smt
         /// <summary>
         /// Tries to resolve a rank for this macro
         /// </summary>
+        /// <param name="ctx">The SMT context</param>
         /// <param name="rank">The resolved rank</param>
         /// <param name="returnSort">The return sort of the expression, if known</param>
         /// <param name="argumentSorts">Sorts of arguments</param>
         /// <returns>True if successfully resolved</returns>
-        public bool TryResolveRank([NotNullWhen(true)] out SmtFunctionRank? rank, SmtSort? returnSort, params SmtSort[] argumentSorts)
+        public bool TryResolveRank(SmtContext ctx, [NotNullWhen(true)] out SmtFunctionRank? rank, SmtSort? returnSort, params SmtSort[] argumentSorts)
         {
             var paramQueue = new Queue<MacroParameter>(_lambdaList);
             MacroParameter? formal = default;

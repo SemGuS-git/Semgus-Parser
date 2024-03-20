@@ -76,7 +76,7 @@ namespace Semgus.Parser.Reader.Converters
                 }
                 else if (_contextProvider.Context.TryGetFunctionDeclaration(qid.Id, out var defn))
                 {
-                    if (defn.TryResolveRank(out var rank, GetSortOrDie(qid.Sort) /* No arguments */))
+                    if (defn.TryResolveRank(_contextProvider.Context, out var rank, GetSortOrDie(qid.Sort) /* No arguments */))
                     {
                         to = new SmtFunctionApplication(defn, rank, new List<SmtTerm>());
                     }
@@ -362,7 +362,7 @@ namespace Semgus.Parser.Reader.Converters
                                                 return true;
                                             }
 
-                                            if (!orf!.TryResolveRank(out var rank, boolsort, Enumerable.Repeat(boolsort, convTerms.Count).ToArray()))
+                                            if (!orf!.TryResolveRank(_contextProvider.Context, out var rank, boolsort, Enumerable.Repeat(boolsort, convTerms.Count).ToArray()))
                                             {
                                                 throw new InvalidOperationException("Too many terms to match pattern.");
                                             }
@@ -434,7 +434,7 @@ namespace Semgus.Parser.Reader.Converters
                                 return true;
                             }
 
-                            if (defn.TryResolveRank(out var rank, GetSortOrDie(af.Id.Sort), argSorts))
+                            if (defn.TryResolveRank(_contextProvider.Context, out var rank, GetSortOrDie(af.Id.Sort), argSorts))
                             {
                                 to = new SmtFunctionApplication(defn, rank, args);
                             }
