@@ -130,12 +130,12 @@ namespace Semgus.Parser.Sexpr
         /// </summary>
         /// <param name="writer">Writer to write to</param>
         /// <param name="term">Term to write</param>
-        public static void Write(this ISexprWriter writer, SmtTerm term)
+        public static void Write(this ISexprWriter writer, SmtTerm term, bool includeTermAnnotations)
         {
             writer.WriteList(() =>
             {
                 writer.WriteSymbol("term");
-                term.Accept(new SmtTermWriter(writer));
+                term.Accept(new SmtTermWriter(writer, includeTermAnnotations));
             });
         }
 
@@ -284,7 +284,7 @@ namespace Semgus.Parser.Sexpr
                     sw.WriteKeyword(attrval.KeywordValue!.Name);
                     break;
                 case SmtAttributeValue.AttributeType.Literal:
-                    sw.Write(attrval.LiteralValue!);
+                    sw.Write(attrval.LiteralValue!, includeTermAnnotations: false);
                     break;
                 case SmtAttributeValue.AttributeType.List:
                     sw.WriteList(attrval.ListValue!, se => sw.Write(se));

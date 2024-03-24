@@ -1,0 +1,5 @@
+--format
+sexpr
+--term-annotations
+--
+data/perfect-prop-3a.sem
