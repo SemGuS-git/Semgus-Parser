@@ -11,11 +11,25 @@ namespace Semgus.Parser.Sexpr
 {
     internal class SmtTermWriter : ISmtTermVisitor<ISexprWriter>
     {
+        /// <summary>
+        /// The writer to write with
+        /// </summary>
         private readonly ISexprWriter _sw;
 
-        public SmtTermWriter(ISexprWriter sw)
+        /// <summary>
+        /// Whether or not to include term annotations
+        /// </summary>
+        private readonly bool _includeTermAnnotations;
+
+        /// <summary>
+        /// Creates a new SmtTermWriter
+        /// </summary>
+        /// <param name="sw">The underlying S-expression writer</param>
+        /// <param name="includeTermAnnotations">Whether or not annotations should be included on terms</param>
+        public SmtTermWriter(ISexprWriter sw, bool includeTermAnnotations)
         {
             _sw = sw;
+            _includeTermAnnotations = includeTermAnnotations;
         }
 
         /// <summary>
@@ -25,7 +39,7 @@ namespace Semgus.Parser.Sexpr
         /// <param name="inner">Action to call for writing the term</param>
         private void MaybeWriteAnnotations(SmtTerm term, Action inner)
         {
-            if (term.Annotations != null && term.Annotations.Count > 0)
+            if (_includeTermAnnotations && term.Annotations != null && term.Annotations.Count > 0)
             {
                 _sw.WriteList(() =>
                 {

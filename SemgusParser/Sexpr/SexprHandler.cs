@@ -17,9 +17,20 @@ namespace Semgus.Parser.Sexpr
     {
         private readonly ISexprWriter _sw;
 
-        public SexprHandler(TextWriter writer)
+        /// <summary>
+        /// Flags for the processing
+        /// </summary>
+        private readonly HandlerFlags _flags;
+
+        /// <summary>
+        /// Creates a new S-expression handler for the given writer and options
+        /// </summary>
+        /// <param name="writer">Underlying s-expression writer</param>
+        /// <param name="flags">Processing flags</param>
+        public SexprHandler(TextWriter writer, HandlerFlags flags)
         {
             _sw = new SexprWriter(writer);
+            _flags = flags;
         }
 
         public void OnCheckSynth(SmtContext smtCtx, SemgusContext semgusCtx)
@@ -53,7 +64,7 @@ namespace Semgus.Parser.Sexpr
                     _sw.WriteKeyword("symbols");
                     _sw.Write(chc.Symbols);
                     _sw.WriteKeyword("constraint");
-                    _sw.Write(chc.Constraint);
+                    _sw.Write(chc.Constraint, _flags.TermAnnotations);
                     _sw.WriteKeyword("constructor");
                     _sw.WriteConstructor(chc.Binder);
                 });
@@ -69,7 +80,7 @@ namespace Semgus.Parser.Sexpr
                 _sw.WriteList(() =>
                 {
                     _sw.WriteSymbol("constraint");
-                    _sw.Write(constraint);
+                    _sw.Write(constraint, _flags.TermAnnotations);
                 });
             }
 
@@ -145,7 +156,7 @@ namespace Semgus.Parser.Sexpr
                 _sw.WriteKeyword("rank");
                 _sw.Write(rank);
                 _sw.WriteKeyword("definition");
-                _sw.Write(lambda);
+                _sw.Write(lambda, _flags.TermAnnotations);
             });
         }
 

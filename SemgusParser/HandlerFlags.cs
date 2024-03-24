@@ -45,6 +45,11 @@ namespace Semgus.Parser
         public bool LegacySymbols => _fac.LegacySymbols.GetFlag(_ctx);
 
         /// <summary>
+        /// Whether or not the S-expression format should include term annotations
+        /// </summary>
+        public bool TermAnnotations => _fac.TermAnnotations.GetFlag(_ctx);
+
+        /// <summary>
         /// Class for configuring and creating handler flags
         /// </summary>
         public class HandlerFlagsFactory
@@ -60,6 +65,11 @@ namespace Semgus.Parser
             public readonly CommandFlag LegacySymbols = new("legacy-symbols", defaultValue: true, isHidden: true);
 
             /// <summary>
+            /// Whether or not to output term annotations for the S-expression output
+            /// </summary>
+            public readonly CommandFlag TermAnnotations = new("term-annotations", defaultValue: false, isHidden: true);
+
+            /// <summary>
             /// Creates a new HandlerFlagsFactory and configures it for the given command
             /// </summary>
             /// <param name="command">Command to configure flags for</param>
@@ -67,6 +77,7 @@ namespace Semgus.Parser
             {
                 command.AddFlag(FunctionEvents);
                 command.AddFlag(LegacySymbols);
+                command.AddFlag(TermAnnotations);
             }
 
             /// <summary>

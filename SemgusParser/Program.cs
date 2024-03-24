@@ -228,7 +228,7 @@ namespace Semgus.Parser
                     break;
 
                 case OutputFormat.Sexpr:
-                    handler = new SexprHandler(writer);
+                    handler = new SexprHandler(writer, hf);
                     break;
 
                 default:
